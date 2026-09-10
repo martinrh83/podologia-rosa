@@ -67,8 +67,6 @@ export type GenerateSlotsInput = {
    * from the admin while the public form stays capped.
    */
   horizonDays?: number | null;
-  /** Refuse slots starting sooner than this many minutes from `now`. */
-  minLeadMinutes?: number;
 };
 
 /** Parse "HH:MM" / "HH:MM:SS" into hours and minutes. */
@@ -149,14 +147,17 @@ export function generateSlots({
   slotMinutes,
   now,
   horizonDays = null,
-  minLeadMinutes = 0,
 }: GenerateSlotsInput): Slot[] {
   if (slotMinutes <= 0) {
     throw new Error("slotMinutes must be positive");
   }
 
   const slotMs = slotMinutes * MINUTE_MS;
-  const earliest = now.getTime() + minLeadMinutes * MINUTE_MS;
+  // Sólo se descartan los horarios que ya pasaron. No hay anticipación mínima:
+  // Rosa está en el consultorio durante esas horas, así que un turno tomado diez
+  // minutos antes es un turno lleno que si no quedaba vacío. Si alguna vez la
+  // sorprende, el problema es que no le avisan, no que falte un margen.
+  const earliest = now.getTime();
   const cutoff = horizonDays === null ? Infinity : horizonCutoff(now, horizonDays).getTime();
 
   // Closures and existing turnos are the same thing here: time that is spoken

@@ -83,8 +83,6 @@ export async function getAvailability({
     slotMinutes: settings.slot_minutes,
     now,
     horizonDays: audience === "admin" ? null : settings.horizon_days,
-    // Half an hour of lead time: a turno starting in five minutes helps nobody.
-    minLeadMinutes: audience === "admin" ? 0 : 30,
   });
 
   return { slots, settings };

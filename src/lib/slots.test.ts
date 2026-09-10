@@ -200,17 +200,6 @@ describe("generateSlots", () => {
     expect(slots).toContain("2026-09-10T14:15:00.000Z"); // 11:15, still bookable
   });
 
-  it("honours a minimum lead time", () => {
-    const slots = iso(
-      run({
-        now: new Date("2026-09-10T14:00:00.000Z"), // 11:00 local
-        minLeadMinutes: 120, // nothing before 13:00 local
-      }),
-    );
-
-    expect(slots).not.toContain("2026-09-10T14:15:00.000Z"); // 11:15, too soon
-    expect(slots).toContain("2026-09-10T19:00:00.000Z"); // 16:00, far enough out
-  });
 });
 
 describe("booking horizon", () => {
