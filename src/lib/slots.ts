@@ -171,6 +171,12 @@ export function generateSlots({
       const shiftStart = atLocalTime(day, open.hours, open.minutes).getTime();
       const shiftEnd = atLocalTime(day, close.hours, close.minutes).getTime();
 
+      // Slots run back to back, with no gap between them. This is deliberate and
+      // confirmed with Rosa: the appointment length already includes sterilising
+      // the instruments and preparing the box, so a separate buffer would double
+      // count it and shrink her day. Do not "fix" this by adding a gap without
+      // asking her first.
+      //
       // A slot must fit entirely inside the shift; no stub at the end of the day.
       for (let start = shiftStart; start + slotMs <= shiftEnd; start += slotMs) {
         const end = start + slotMs;

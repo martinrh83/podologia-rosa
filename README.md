@@ -65,8 +65,9 @@ supabase/migrations       Esquema y datos iniciales.
 
 ## Pendiente antes de publicar
 
-- [ ] Confirmar con Rosa la duración real del turno (`clinic_settings.slot_minutes`).
-      Todo el motor asume una sola duración.
+- [x] ~~Confirmar la duración del turno.~~ Rosa confirmó **60 minutos**, iguales para
+      todos los tratamientos y con la limpieza ya incluida. La duración única se
+      sostiene y los turnos van pegados a propósito.
 - [ ] Cargar horarios, servicios y precios reales.
 - [ ] Reemplazar el texto de `/sobre-mi` y agregar matrícula.
 - [ ] Verificar el dominio en Resend, o los mails caen en spam.
