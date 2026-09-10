@@ -70,9 +70,13 @@ export async function createBooking(
     audience,
   });
 
-  // Cap active future turnos per contact. Applies to the public form only —
+  // Cap on active future turnos per contact. Applies to the public form only —
   // Rosa is not rate-limited against her own calendar.
-  if (audience === "public") {
+  //
+  // Disabled by default: max_active_per_contact is 0, which means no limit. The
+  // check is kept because turning it back on is then a value in the database
+  // rather than a deploy. At 0 the count query never runs.
+  if (audience === "public" && settings.max_active_per_contact > 0) {
     const { count, error: countError } = await supabase
       .from("appointments")
       .select("id", { count: "exact", head: true })

@@ -3,7 +3,7 @@
 
 insert into clinic_settings (id, slot_minutes, horizon_days, max_active_per_contact,
                              clinic_name, address, phone, whatsapp, map_url)
-values (true, 60, 15, 2,
+values (true, 60, 15, 0,
         'Podología Rosa',
         'Av. Siempreviva 742, Buenos Aires',
         '+54 11 5555-4444',

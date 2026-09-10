@@ -8,7 +8,7 @@ import { CLINIC_TZ, generateSlots, type Slot } from "@/lib/slots";
 const DEFAULT_SETTINGS = {
   slot_minutes: 60,
   horizon_days: 15,
-  max_active_per_contact: 2,
+  max_active_per_contact: 0,
 } satisfies Pick<ClinicSettings, "slot_minutes" | "horizon_days" | "max_active_per_contact">;
 
 export async function getClinicSettings(): Promise<ClinicSettings> {
