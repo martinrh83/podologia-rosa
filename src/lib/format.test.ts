@@ -36,10 +36,22 @@ describe("formatPrice", () => {
 });
 
 describe("whatsappLink", () => {
-  it("strips formatting from the number and encodes the message", () => {
-    const link = whatsappLink("+54 9 11 5555-4444", "Hola Ana, te recordamos tu turno");
+  it("restores the country code that normalizePhone strips", () => {
+    // Numbers are stored canonically as 10 national digits, but wa.me needs the
+    // full international form or the link opens an empty chat.
+    const link = whatsappLink("1155554444", "Hola Ana, te recordamos tu turno");
 
     expect(link).toContain("https://wa.me/5491155554444");
     expect(link).toContain("Hola%20Ana");
+  });
+
+  it("works for 3- and 4-digit area codes too", () => {
+    expect(whatsappLink("3515554444", "hola")).toContain("wa.me/5493515554444");
+    expect(whatsappLink("2954554444", "hola")).toContain("wa.me/5492954554444");
+  });
+
+  it("leaves a number that already has a country code alone", () => {
+    // Not 10 digits, so it is assumed to carry its own prefix already.
+    expect(whatsappLink("14155552671", "hola")).toContain("wa.me/14155552671");
   });
 });

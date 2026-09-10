@@ -3,24 +3,47 @@ import { describe, expect, it } from "vitest";
 import { bookingSchema, normalizePhone } from "./booking-schema";
 
 describe("normalizePhone", () => {
-  it("collapses the ways an Argentine number gets typed into one value", () => {
-    // These are all the same person. If they normalised differently, the
-    // per-contact cap would count them as different patients.
-    const variants = ["+54 9 11 5555-4444", "+54-9-11-5555 4444", "+5491155554444"];
+  it("collapses every way one Argentine number gets typed into a single value", () => {
+    // All the same Buenos Aires line. If any of these normalised differently the
+    // per-contact cap would count one person as several and stop working --
+    // which is exactly the bug this replaced.
+    const variants = [
+      "11 5555-4444",
+      "1155554444",
+      "+54 9 11 5555-4444",
+      "+5491155554444",
+      "54 9 11 5555 4444",
+      "(011) 15 5555 4444",
+      "011 15 5555-4444",
+      "0111555554444",
+    ];
 
-    expect(new Set(variants.map(normalizePhone)).size).toBe(1);
-    expect(normalizePhone(variants[0])).toBe("+5491155554444");
+    const normalised = new Set(variants.map(normalizePhone));
+
+    expect(normalised).toEqual(new Set(["1155554444"]));
   });
 
-  it("keeps local formats without a country code distinct but stable", () => {
-    // 011 + 15 + 5555 + 4444 = 13 digits, no country code, no leading plus.
-    expect(normalizePhone("(011) 15 5555 4444")).toBe("0111555554444");
-    expect(normalizePhone("11 5555-4444")).toBe("1155554444");
+  it("handles 3- and 4-digit area codes, not just Buenos Aires", () => {
+    // Cordoba (351) and a smaller locality (2954); both are 10 digits national.
+    expect(normalizePhone("+54 9 351 555-4444")).toBe("3515554444");
+    expect(normalizePhone("0351 15 555-4444")).toBe("3515554444");
+    expect(normalizePhone("+54 9 2954 55-4444")).toBe("2954554444");
+    expect(normalizePhone("02954 15 55-4444")).toBe("2954554444");
   });
 
-  it("preserves a leading plus but strips everything else", () => {
-    expect(normalizePhone("  +54 (9) 11·5555·4444  ")).toBe("+5491155554444");
-    expect(normalizePhone("11.5555.4444")).toBe("1155554444");
+  it("leaves a landline without a mobile prefix alone", () => {
+    expect(normalizePhone("011 4555-4444")).toBe("1145554444");
+    expect(normalizePhone("+54 11 4555 4444")).toBe("1145554444");
+  });
+
+  it("strips punctuation and whitespace of every kind", () => {
+    expect(normalizePhone("  11.5555.4444  ")).toBe("1155554444");
+    expect(normalizePhone("11\u00b75555\u00b74444")).toBe("1155554444");
+  });
+
+  it("returns bare digits for anything that is not an AR number", () => {
+    // A foreign number still normalises consistently, just not canonically.
+    expect(normalizePhone("+1 (415) 555-2671")).toBe("14155552671");
   });
 });
 
@@ -37,7 +60,7 @@ describe("bookingSchema", () => {
   it("accepts a well-formed booking and normalises the phone", () => {
     const parsed = bookingSchema.parse(valid);
 
-    expect(parsed.patientPhone).toBe("+5491155554444");
+    expect(parsed.patientPhone).toBe("1155554444");
     expect(parsed.patientName).toBe("Rosa Gómez");
   });
 

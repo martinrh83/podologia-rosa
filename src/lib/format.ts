@@ -88,8 +88,15 @@ export function formatPrice(value: number | null): string | null {
  * This is the reminder channel that actually gets read in Argentina: Rosa taps
  * through tomorrow's list once a day and the message arrives from her own number,
  * with no WhatsApp Business API, no template approval and no per-message fee.
+ *
+ * Numbers are stored in canonical 10-digit national form (see `normalizePhone`),
+ * but wa.me requires a full international number — so an AR number gets the
+ * `549` mobile prefix put back. Anything that is not 10 digits is assumed to
+ * already carry its own country code and is passed through untouched.
  */
 export function whatsappLink(phone: string, message: string): string {
   const digits = phone.replace(/\D/g, "");
-  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+  const international = digits.length === 10 ? `549${digits}` : digits;
+
+  return `https://wa.me/${international}?text=${encodeURIComponent(message)}`;
 }

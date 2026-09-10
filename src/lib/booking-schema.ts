@@ -7,16 +7,43 @@ import { z } from "zod";
  */
 
 /**
- * Normalise an Argentine phone number to digits, keeping a leading `+`.
+ * Reduce an Argentine phone number to its canonical 10-digit national form:
+ * area code + subscriber number, e.g. "1155554444".
  *
- * Patients type "11 5555-4444", "(011) 15 5555 4444", "+54 9 11 5555 4444".
- * This matters beyond tidiness: the per-contact cap counts by phone, so without
- * normalising, the same person could bypass the limit just by reformatting.
+ * Patients type the same number many ways — "11 5555-4444",
+ * "(011) 15 5555 4444", "+54 9 11 5555 4444" — and all of them must collapse to
+ * one value. This is load-bearing, not cosmetic: the per-contact cap counts by
+ * phone, so any format that normalises differently is a way to bypass the limit.
+ *
+ * The Argentine rules applied here:
+ *  - `54` is the country code.
+ *  - A `9` after the country code marks a mobile line.
+ *  - A leading `0` is the long-distance trunk prefix.
+ *  - `15` sits between the area code and the subscriber number when dialling a
+ *    mobile locally. Area codes are 2, 3 or 4 digits, so the `15` is located by
+ *    trying each width and taking the one that yields 10 digits.
+ *
+ * Anything that does not look like an AR number is returned as bare digits, so
+ * foreign numbers still normalise consistently even if not canonically.
  */
 export function normalizePhone(input: string): string {
-  const trimmed = input.trim();
-  const digits = trimmed.replace(/\D/g, "");
-  return trimmed.startsWith("+") ? `+${digits}` : digits;
+  let digits = input.replace(/\D/g, "");
+
+  if (digits.startsWith("54")) digits = digits.slice(2);
+  if (digits.startsWith("9") && digits.length > 10) digits = digits.slice(1);
+  if (digits.startsWith("0")) digits = digits.slice(1);
+
+  // A local mobile format still carries the "15" between area and subscriber.
+  if (digits.length === 12) {
+    for (const areaLength of [2, 3, 4]) {
+      if (digits.slice(areaLength, areaLength + 2) === "15") {
+        const candidate = digits.slice(0, areaLength) + digits.slice(areaLength + 2);
+        if (candidate.length === 10) return candidate;
+      }
+    }
+  }
+
+  return digits;
 }
 
 export const bookingSchema = z.object({
