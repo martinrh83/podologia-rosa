@@ -330,6 +330,62 @@
   @media (prefers-reduced-motion: reduce) {
     * { transition-duration: 0.01ms !important; }
   }
+
+  /* ---------- impresión / PDF ---------- */
+
+  @page {
+    /* A4: el estándar en Argentina, no Carta. */
+    size: A4;
+    margin: 16mm 14mm;
+  }
+
+  @media print {
+    /* El PDF se imprime en papel: paleta clara siempre, sin importar el tema. */
+    :root {
+      --paper:        #ffffff;
+      --surface:      #ffffff;
+      --surface-sunk: #f0f2ef;
+      --ink:          #14201c;
+      --muted:        #5c6a64;
+      --rule:         #c9d1cb;
+      --accent:       #0f5651;
+      --accent-soft:  #e6f0ef;
+      --flag:         #8f3625;
+      --flag-soft:    #f9ece8;
+    }
+
+    body { background: #ffffff; }
+
+    .wrap { padding: 0; max-width: none; }
+
+    /* Sólo sirven en pantalla. */
+    .save-state,
+    .notice,
+    .meter-note { display: none !important; }
+
+    /* Que no se parta una pregunta entre dos hojas. */
+    .q { break-inside: avoid; page-break-inside: avoid; }
+    .sec-head { break-after: avoid; page-break-after: avoid; }
+    section { break-before: auto; }
+
+    /* Espacio real para escribir a mano. */
+    textarea {
+      height: 3.4rem;
+      background: #ffffff;
+      border: 1px solid var(--rule);
+      /* Renglones, para que se escriba derecho. */
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 1.45rem,
+        var(--rule) 1.45rem,
+        var(--rule) calc(1.45rem + 1px)
+      );
+      background-position: 0 0.35rem;
+    }
+
+    a { text-decoration: none; color: inherit; }
+  }
 </style>
 
 <div class="wrap">
