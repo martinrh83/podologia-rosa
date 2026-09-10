@@ -16,6 +16,7 @@ import { TZDate } from "@date-fns/tz";
 export const CLINIC_TZ = "America/Argentina/Salta";
 
 const MINUTE_MS = 60_000;
+const DAY_MS = 86_400_000;
 
 /** A recurring working block, e.g. Monday 09:00-13:00. `weekday` is 0 = Sunday. */
 export type ScheduleRow = {
@@ -167,27 +168,28 @@ export function generateSlots({
     end: new Date(range.ends_at).getTime(),
   }));
 
-  // Index the schedule by weekday so each day is a lookup rather than a scan.
-  const byWeekday = new Map<number, ScheduleRow[]>();
-  for (const row of weeklySchedule) {
-    const rows = byWeekday.get(row.weekday) ?? [];
-    rows.push(row);
-    byWeekday.set(row.weekday, rows);
-  }
-
   const slots: Slot[] = [];
   const windowStart = from.getTime();
   const windowEnd = to.getTime();
 
-  // Walk clinic-local calendar days. Starting one day early and ending one day
-  // late costs nothing and guards against a shift that straddles the window edge
-  // once converted from local time to an absolute instant.
-  let day = addLocalDays(toLocalDay(from), -1);
-  const lastDay = addLocalDays(toLocalDay(to), 1);
-  const lastDayKey = lastDay.year * 10_000 + lastDay.month * 100 + lastDay.day;
+  // Recorre los días del calendario en Salta, con un día de margen a cada lado.
+  //
+  // Hoy ese margen es seguro de más: el esquema exige end_time > start_time, así
+  // que ninguna franja cruza la medianoche y el día anterior no puede aportar un
+  // horario dentro de la ventana. Ningún test nota si se saca — se comprobó
+  // mutando esta línea.
+  //
+  // Se mantiene porque deja de ser código muerto en cuanto alguien agregue una
+  // franja nocturna, y una iteración de más no cuesta nada. Los días que sobran
+  // los descarta el filtro de ventana igual.
+  const firstDay = addLocalDays(toLocalDay(from), -1);
+  const dayCount = Math.ceil((windowEnd - windowStart) / DAY_MS) + 3;
 
-  while (day.year * 10_000 + day.month * 100 + day.day <= lastDayKey) {
-    for (const shift of byWeekday.get(weekdayOf(day)) ?? []) {
+  for (let offset = 0; offset < dayCount; offset += 1) {
+    const day = addLocalDays(firstDay, offset);
+    const weekday = weekdayOf(day);
+
+    for (const shift of weeklySchedule.filter((row) => row.weekday === weekday)) {
       const open = parseTime(shift.start_time);
       const close = parseTime(shift.end_time);
       const shiftStart = atLocalTime(day, open.hours, open.minutes).getTime();
@@ -216,8 +218,6 @@ export function generateSlots({
         slots.push({ start: new Date(start), end: new Date(end) });
       }
     }
-
-    day = addLocalDays(day, 1);
   }
 
   slots.sort((a, b) => a.start.getTime() - b.start.getTime());
