@@ -10,7 +10,7 @@ create extension if not exists pgcrypto;
 -- ---------------------------------------------------------------------------
 create table clinic_settings (
   id                     boolean primary key default true,
-  slot_minutes           integer not null default 45,
+  slot_minutes           integer not null default 60,
   horizon_days           integer not null default 15,
   max_active_per_contact integer not null default 2,
   clinic_name            text    not null default 'Podología Rosa',

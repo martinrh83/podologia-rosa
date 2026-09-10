@@ -6,7 +6,7 @@ import { CLINIC_TZ, generateSlots, type Slot } from "@/lib/slots";
 
 /** Fallbacks so the site still renders before Rosa has configured anything. */
 const DEFAULT_SETTINGS = {
-  slot_minutes: 45,
+  slot_minutes: 60,
   horizon_days: 15,
   max_active_per_contact: 2,
 } satisfies Pick<ClinicSettings, "slot_minutes" | "horizon_days" | "max_active_per_contact">;
