@@ -2,9 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getClinicSettings } from "@/lib/availability";
 import { cancelByToken } from "@/lib/booking";
-import { sendStaffCancellation } from "@/lib/email";
 
 export type CancelState = { status: "idle" | "cancelled" | "error"; message?: string };
 
@@ -12,8 +10,11 @@ export type CancelState = { status: "idle" | "cancelled" | "error"; message?: st
  * Release a turno.
  *
  * Deliberately a POST-only action rather than something that runs on page load:
- * email clients and link previewers routinely prefetch URLs, and a GET-triggered
- * cancellation would quietly destroy turnos nobody meant to cancel.
+ * link previewers routinely prefetch URLs, and a GET-triggered cancellation
+ * would quietly destroy turnos nobody meant to cancel.
+ *
+ * Rosa is not notified — there is no email. She sees the freed slot in the
+ * admin, which for a clinic this size is soon enough.
  */
 export async function cancelTurno(
   _previous: CancelState,
@@ -28,10 +29,8 @@ export async function cancelTurno(
     return { status: "error", message: "No encontramos ese turno." };
   }
 
-  const settings = await getClinicSettings();
-  await sendStaffCancellation({ appointment: result.appointment, settings });
-
   revalidatePath("/turnos");
+  revalidatePath("/admin");
 
   return { status: "cancelled" };
 }

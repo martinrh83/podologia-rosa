@@ -60,27 +60,12 @@ export function supabaseServiceEnv() {
   return { url, serviceRoleKey };
 }
 
-const emailSchema = z.object({
-  apiKey: z.string().min(1),
-  from: z.email(),
-  adminEmail: z.email(),
-});
-
-export function emailEnv() {
-  return emailSchema.parse({
-    apiKey: process.env.RESEND_API_KEY,
-    from: process.env.EMAIL_FROM,
-    adminEmail: process.env.ADMIN_EMAIL,
-  });
-}
-
 export function cronSecret(): string {
   return z.string().min(16).parse(process.env.CRON_SECRET);
 }
 
 /**
- * Absolute base URL. Used to build cancel links, which live in a patient's inbox
- * for weeks — so this must be a *stable* domain, not a per-deploy one.
+ * Absolute base URL, used by the sitemap and robots.txt.
  *
  * Order matters:
  *  1. `NEXT_PUBLIC_SITE_URL` — set this once a custom domain exists.

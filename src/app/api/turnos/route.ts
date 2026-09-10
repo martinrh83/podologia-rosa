@@ -1,9 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { getClinicSettings } from "@/lib/availability";
 import { createBooking } from "@/lib/booking";
 import { bookingSchema } from "@/lib/booking-schema";
-import { sendPatientConfirmation, sendStaffNotification } from "@/lib/email";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 
 /**
@@ -14,6 +12,9 @@ import { checkRateLimit, clientIp } from "@/lib/rate-limit";
  * re-validates everything: the payload shape, the request rate, the slot's
  * availability, the booking horizon and the per-contact cap. Nothing the client
  * sends is taken on trust.
+ *
+ * Sends no email: the clinic has no verified domain, so the confirmation lives
+ * on screen and the cancel link is handed to the patient there.
  */
 export async function POST(request: NextRequest) {
   let payload: unknown;
@@ -53,18 +54,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: result.message, reason: result.reason }, { status });
   }
 
-  // The turno is committed. Email is best-effort from here on: a mail failure
-  // must not turn a real booking into an error the patient sees.
-  const settings = await getClinicSettings();
-  await Promise.allSettled([
-    sendPatientConfirmation({ appointment: result.appointment, settings }),
-    sendStaffNotification({ appointment: result.appointment, settings }),
-  ]);
-
   return NextResponse.json(
     {
       id: result.appointment.id,
       startsAt: result.appointment.starts_at,
+      // The patient's only route back to this turno. With no email to carry it,
+      // the confirmation screen shows it and tells them to keep it.
       cancelToken: result.appointment.cancel_token,
     },
     { status: 201 },

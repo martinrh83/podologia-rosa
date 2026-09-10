@@ -21,7 +21,7 @@ type Status =
   | { kind: "idle" }
   | { kind: "submitting" }
   | { kind: "error"; message: string; slotTaken: boolean }
-  | { kind: "done"; slotLabel: string; dayLabel: string; hasEmail: boolean };
+  | { kind: "done"; slotLabel: string; dayLabel: string; cancelUrl: string };
 
 export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
   const [selectedDayKey, setSelectedDayKey] = useState(days[0]?.key ?? null);
@@ -60,7 +60,6 @@ export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
           startsAt: selectedSlot.startsAt,
           patientName: String(formData.get("patientName") ?? ""),
           patientPhone: String(formData.get("patientPhone") ?? ""),
-          patientEmail: String(formData.get("patientEmail") ?? ""),
           motivo: String(formData.get("motivo") ?? ""),
           consent: formData.get("consent") === "on",
         }),
@@ -79,11 +78,14 @@ export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
         return;
       }
 
+      const body = (await response.json().catch(() => ({}))) as { cancelToken?: string };
+
       setStatus({
         kind: "done",
         slotLabel: selectedSlot.label,
         dayLabel: selectedDay?.label ?? "",
-        hasEmail: Boolean(formData.get("patientEmail")),
+        // With no email to carry it, this link is shown once and never again.
+        cancelUrl: body.cancelToken ? `/turnos/cancelar/${body.cancelToken}` : "",
       });
     } catch {
       setStatus({
@@ -184,14 +186,6 @@ export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
               autoComplete="tel"
               hint="Para avisarte si surge algún cambio."
             />
-            <Field
-              label="Email"
-              name="patientEmail"
-              type="email"
-              autoComplete="email"
-              hint="Te mandamos la confirmación y el enlace para cancelar."
-            />
-
             <div>
               <label htmlFor="motivo" className="block text-[0.95rem] font-medium">
                 Motivo de la consulta <span className="font-normal text-muted">(opcional)</span>
@@ -328,12 +322,26 @@ function Confirmation({
       <p className="text-[1.05rem] text-foreground">
         <span className="capitalize">{status.dayLabel}</span> a las {status.slotLabel}.
       </p>
-      <p className="mt-3">
-        {status.hasEmail
-          ? "Te mandamos un mail con los detalles y un enlace por si necesitás cancelar. Guardalo."
-          : "No dejaste un email, así que no vas a recibir confirmación escrita."}
-        {clinicPhone ? ` Si no podés venir, avisanos al ${clinicPhone}.` : ""}
-      </p>
+
+      {status.cancelUrl ? (
+        <div className="mt-4 rounded-lg border border-border bg-surface p-4">
+          <p className="font-medium text-foreground">Guardá este enlace</p>
+          <p className="mt-1">
+            Es la única forma de cancelar el turno vos mismo. Sacale una captura o agregalo a
+            favoritos: no te lo vamos a poder mandar por otro lado.
+          </p>
+          <a
+            href={status.cancelUrl}
+            className="mt-2 block break-all text-[0.95rem] text-accent underline"
+          >
+            {status.cancelUrl}
+          </a>
+        </div>
+      ) : null}
+
+      {clinicPhone && (
+        <p className="mt-3">Si preferís, llamanos al {clinicPhone} y lo cancelamos nosotros.</p>
+      )}
     </Notice>
   );
 }

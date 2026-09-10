@@ -29,8 +29,8 @@ export default async function PrivacidadPage() {
         <section>
           <h2 className="text-xl font-semibold">Qué guardamos</h2>
           <p className="mt-2">
-            Cuando sacás un turno guardamos tu nombre, tu teléfono y, si lo dejás, tu email. Si
-            completás el campo <em>motivo de la consulta</em>, guardamos también ese texto.
+            Cuando sacás un turno guardamos tu nombre y tu teléfono. Si completás el campo
+            <em> motivo de la consulta</em>, guardamos también ese texto. No pedimos email.
           </p>
           <p className="mt-2">
             El motivo de la consulta es un <strong>dato sensible</strong> según el artículo 2 de la
@@ -42,8 +42,8 @@ export default async function PrivacidadPage() {
         <section>
           <h2 className="text-xl font-semibold">Para qué los usamos</h2>
           <p className="mt-2">
-            Únicamente para gestionar tu turno: confirmarlo, recordártelo el día anterior y poder
-            avisarte si surge algún cambio. No los usamos para publicidad, no los vendemos y no los
+            Únicamente para gestionar tu turno y poder avisarte por teléfono si surge algún cambio.
+            No enviamos correos, no los usamos para publicidad, no los vendemos y no los
             compartimos con terceros.
           </p>
         </section>
@@ -83,8 +83,9 @@ export default async function PrivacidadPage() {
         <section>
           <h2 className="text-xl font-semibold">Cancelar un turno</h2>
           <p className="mt-2">
-            El mail de confirmación incluye un enlace propio para cancelar. Ese enlace es privado:
-            cualquiera que lo tenga puede cancelar ese turno, así que no lo compartas.
+            Al terminar de reservar te mostramos un enlace propio para cancelar. Ese enlace es
+            privado: cualquiera que lo tenga puede cancelar ese turno, así que guardalo y no lo
+            compartas. Si lo perdés, llamanos y lo cancelamos nosotros.
           </p>
         </section>
       </div>

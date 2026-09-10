@@ -136,21 +136,6 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
           </div>
 
           <div>
-            <label htmlFor="patientEmail" className="block text-[0.95rem] font-medium">
-              Email <span className="font-normal text-muted">(opcional)</span>
-            </label>
-            <input
-              id="patientEmail"
-              name="patientEmail"
-              type="email"
-              className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-            />
-            <p className="mt-1 text-sm text-muted">
-              Si lo cargás, recibe confirmación y recordatorio automáticos.
-            </p>
-          </div>
-
-          <div>
             <label htmlFor="motivo" className="block text-[0.95rem] font-medium">
               Motivo <span className="font-normal text-muted">(opcional)</span>
             </label>

@@ -5,6 +5,11 @@ Sitio del consultorio con turnos online. Next.js (App Router) + Supabase.
 Los pacientes sacan turno sin crear cuenta; Rosa administra la agenda desde el
 panel. No hay backend aparte: los route handlers de Next son el servidor.
 
+**No hay envío de mails.** El consultorio no tiene dominio propio, así que no hay
+confirmaciones ni recordatorios por correo. El link para cancelar se le muestra al
+paciente en pantalla al terminar de reservar, y los recordatorios los manda Rosa
+por WhatsApp desde `/admin/manana`.
+
 ## Puesta en marcha
 
 ```bash
@@ -32,7 +37,7 @@ src/lib/slots.ts          El motor de disponibilidad. Función pura, sin I/O.
 src/lib/availability.ts   El I/O alrededor de slots.ts.
 src/lib/booking.ts        Crear y cancelar turnos. Lo usan el form y el admin.
 src/app/api/turnos        Endpoint público de reserva.
-src/app/api/cron          Recordatorios y retención de datos.
+src/app/api/cron          Retención de datos (borrado de motivo, anonimizado).
 src/app/admin             Panel de Rosa (hoy, mañana, nuevo turno).
 supabase/migrations       Esquema y datos iniciales.
 ```
@@ -70,5 +75,4 @@ supabase/migrations       Esquema y datos iniciales.
       sostiene y los turnos van pegados a propósito.
 - [ ] Cargar horarios, servicios y precios reales.
 - [ ] Reemplazar el texto de `/sobre-mi` y agregar matrícula.
-- [ ] Verificar el dominio en Resend, o los mails caen en spam.
 - [ ] Crear el usuario de Rosa y desactivar sign-ups en Supabase.
