@@ -78,12 +78,26 @@ export function cronSecret(): string {
   return z.string().min(16).parse(process.env.CRON_SECRET);
 }
 
-/** Absolute base URL, used to build cancel links that must survive email clients. */
+/**
+ * Absolute base URL. Used to build cancel links, which live in a patient's inbox
+ * for weeks — so this must be a *stable* domain, not a per-deploy one.
+ *
+ * Order matters:
+ *  1. `NEXT_PUBLIC_SITE_URL` — set this once a custom domain exists.
+ *  2. `VERCEL_PROJECT_PRODUCTION_URL` — the project's stable production domain
+ *     (`podologia-rosa.vercel.app`). Correct default before a custom domain.
+ *  3. `VERCEL_URL` — the URL of *this specific deployment*, which changes on
+ *     every push. Only a last resort for previews; a cancel link built from it
+ *     would pin the patient to a stale deployment.
+ */
 export function siteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
   if (fromEnv) return fromEnv.replace(/\/$/, "");
 
-  // Vercel injects this for preview deployments, where no stable URL exists.
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
 
   return "http://localhost:3000";
