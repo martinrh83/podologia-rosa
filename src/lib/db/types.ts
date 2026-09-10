@@ -8,6 +8,7 @@
 
 export type AppointmentStatus = "booked" | "cancelled" | "completed" | "no_show";
 export type AppointmentSource = "online" | "admin";
+export type PatientCoverage = "ips" | "osunsa" | "particular";
 
 export type ClinicSettings = {
   id: boolean;
@@ -54,7 +55,11 @@ export type Appointment = {
   ends_at: string;
   status: AppointmentStatus;
   source: AppointmentSource;
-  patient_name: string;
+  patient_first_name: string;
+  patient_last_name: string;
+  /** Sólo dígitos. Identificador nacional fuerte: nunca sale a anon. */
+  patient_dni: string;
+  patient_coverage: PatientCoverage;
   patient_phone: string;
   patient_email: string | null;
   /** Dato sensible (Ley 25.326 art. 2). Staff-only, purged 30 days after the turno. */
@@ -71,7 +76,7 @@ export type Appointment = {
  * Columns that are safe to surface on a public page — deliberately excludes
  * `motivo`, and anything identifying another patient.
  */
-export const PUBLIC_APPOINTMENT_COLUMNS = "id, starts_at, ends_at, status, patient_name" as const;
+export const PUBLIC_APPOINTMENT_COLUMNS = "id, starts_at, ends_at, status" as const;
 
 /** Statuses that still occupy a slot. Mirrors the partial unique index. */
 export const ACTIVE_STATUSES: AppointmentStatus[] = ["booked", "completed", "no_show"];

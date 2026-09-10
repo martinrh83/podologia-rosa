@@ -53,7 +53,7 @@ export default async function AdminTomorrowPage() {
             appointment={appointment}
             siteUrl={base}
             reminderMessage={
-              `Hola ${appointment.patient_name}! Te recordamos tu turno de mañana ` +
+              `Hola ${appointment.patient_first_name}! Te recordamos tu turno de mañana ` +
               `a las ${formatTime(appointment.starts_at)} en ${settings.clinic_name}. ` +
               `Si no podés venir, avisanos así lo liberamos. ¡Gracias!`
             }

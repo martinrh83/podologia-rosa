@@ -46,9 +46,38 @@ export function normalizePhone(input: string): string {
   return digits;
 }
 
+/**
+ * Las tres coberturas que acepta el consultorio. `particular` es sin obra social.
+ */
+export const COVERAGES = [
+  { value: "ips", label: "IPS" },
+  { value: "osunsa", label: "OSUNSa" },
+  { value: "particular", label: "Particular" },
+] as const;
+
+export type Coverage = (typeof COVERAGES)[number]["value"];
+
+/**
+ * DNI a dígitos: "20.123.456" y "20123456" son la misma persona.
+ *
+ * Se guarda normalizado para que buscar por DNI encuentre al paciente sin
+ * importar cómo lo tipeó quien cargó el turno.
+ */
+export function normalizeDni(input: string): string {
+  return input.replace(/\D/g, "");
+}
+
 export const bookingSchema = z.object({
   startsAt: z.iso.datetime({ offset: true }),
-  patientName: z.string().trim().min(2, "Ingresá tu nombre").max(120),
+  patientFirstName: z.string().trim().min(2, "Ingresá tu nombre").max(80),
+  patientLastName: z.string().trim().min(2, "Ingresá tu apellido").max(80),
+  patientDni: z
+    .string()
+    .trim()
+    .transform(normalizeDni)
+    // Los DNI argentinos vigentes tienen 7 u 8 dígitos.
+    .refine((value) => value.length >= 7 && value.length <= 8, "Ingresá un DNI válido"),
+  patientCoverage: z.enum(["ips", "osunsa", "particular"]),
   patientPhone: z
     .string()
     .trim()
@@ -56,7 +85,6 @@ export const bookingSchema = z.object({
     .max(30)
     .transform(normalizePhone)
     .refine((value) => value.replace(/\D/g, "").length >= 8, "Ingresá un teléfono válido"),
-  patientEmail: z.email("Ingresá un email válido").max(200).optional().or(z.literal("")),
   // Optional, and a DATO SENSIBLE under Ley 25.326 art. 2.
   motivo: z.string().trim().max(500).optional().or(z.literal("")),
   /** Must be explicitly true for an online booking; recorded as consent_at. */

@@ -36,7 +36,10 @@ export async function GET(request: NextRequest) {
   const { data: anonymised, error: anonymiseError } = await supabase
     .from("appointments")
     .update({
-      patient_name: "Paciente anonimizado",
+      patient_first_name: "Paciente",
+      patient_last_name: "anonimizado",
+      // El DNI es lo más sensible que guardamos: se va con el resto.
+      patient_dni: "",
       patient_phone: "",
       patient_email: null,
       motivo: null,

@@ -1,5 +1,6 @@
 import { updateStatus } from "@/app/actions/appointments";
 import { CopyLink } from "@/components/copy-link";
+import { COVERAGES } from "@/lib/booking-schema";
 import type { Appointment } from "@/lib/db/types";
 import { formatTime, whatsappLink } from "@/lib/format";
 
@@ -21,6 +22,8 @@ type Props = {
 export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props) {
   const isCancelled = appointment.status === "cancelled";
   const cancelUrl = `${siteUrl}/turnos/cancelar/${appointment.cancel_token}`;
+  const fullName = `${appointment.patient_last_name}, ${appointment.patient_first_name}`;
+  const coverage = COVERAGES.find((item) => item.value === appointment.patient_coverage)?.label;
 
   return (
     <li
@@ -34,7 +37,12 @@ export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props
         </span>
       </div>
 
-      <p className="mt-1 text-[1.05rem]">{appointment.patient_name}</p>
+      {/* Apellido primero: es como se busca una ficha. */}
+      <p className="mt-1 text-[1.05rem]">{fullName}</p>
+
+      <p className="mt-0.5 text-[0.95rem] text-muted">
+        DNI {appointment.patient_dni || "—"} · {coverage}
+      </p>
 
       <p className="mt-0.5 text-[0.95rem] text-muted">
         <a href={`tel:${appointment.patient_phone}`} className="hover:text-foreground">
@@ -76,7 +84,7 @@ export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props
             <a
               href={whatsappLink(
                 appointment.patient_phone,
-                `Hola ${appointment.patient_name}! Si necesitás cancelar tu turno del ` +
+                `Hola ${appointment.patient_first_name}! Si necesitás cancelar tu turno del ` +
                   `${formatTime(appointment.starts_at)}, entrá acá: ${cancelUrl}`,
               )}
               target="_blank"

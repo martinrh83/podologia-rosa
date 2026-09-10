@@ -59,7 +59,7 @@ export default async function CancelarPage({ params }: PageProps<"/turnos/cancel
 
       <div className="mt-6 rounded-xl border border-border bg-surface p-5">
         <p className="text-lg capitalize">{formatFull(appointment.starts_at)}</p>
-        <p className="mt-1 text-muted">A nombre de {appointment.patient_name}</p>
+        <p className="mt-1 text-muted">A nombre de {appointment.patient_first_name} {appointment.patient_last_name}</p>
         {settings.address && <p className="mt-3 text-[0.95rem] text-muted">{settings.address}</p>}
       </div>
 

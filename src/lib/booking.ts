@@ -102,9 +102,11 @@ export async function createBooking(
       ends_at: endsAt.toISOString(),
       status: "booked",
       source: audience === "admin" ? "admin" : "online",
-      patient_name: input.patientName,
+      patient_first_name: input.patientFirstName,
+      patient_last_name: input.patientLastName,
+      patient_dni: input.patientDni,
+      patient_coverage: input.patientCoverage,
       patient_phone: input.patientPhone,
-      patient_email: input.patientEmail || null,
       motivo: input.motivo || null,
       consent_at: audience === "public" ? new Date().toISOString() : null,
     })

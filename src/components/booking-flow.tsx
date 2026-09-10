@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { CopyLink } from "@/components/copy-link";
+import { COVERAGES } from "@/lib/booking-schema";
 
 export type BookingSlot = { startsAt: string; label: string };
 
@@ -60,7 +61,10 @@ export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           startsAt: selectedSlot.startsAt,
-          patientName: String(formData.get("patientName") ?? ""),
+          patientFirstName: String(formData.get("patientFirstName") ?? ""),
+          patientLastName: String(formData.get("patientLastName") ?? ""),
+          patientDni: String(formData.get("patientDni") ?? ""),
+          patientCoverage: String(formData.get("patientCoverage") ?? ""),
           patientPhone: String(formData.get("patientPhone") ?? ""),
           motivo: String(formData.get("motivo") ?? ""),
           consent: formData.get("consent") === "on",
@@ -179,7 +183,40 @@ export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-border bg-surface p-5">
-            <Field label="Nombre y apellido" name="patientName" required autoComplete="name" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Nombre" name="patientFirstName" required autoComplete="given-name" />
+              <Field label="Apellido" name="patientLastName" required autoComplete="family-name" />
+            </div>
+
+            <Field
+              label="DNI"
+              name="patientDni"
+              required
+              inputMode="numeric"
+              hint="Sin puntos ni espacios."
+            />
+
+            <fieldset>
+              <legend className="text-[0.95rem] font-medium">Obra social</legend>
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                {COVERAGES.map((coverage) => (
+                  <label
+                    key={coverage.value}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-background px-3 py-3 text-[1rem] hover:border-accent"
+                  >
+                    <input
+                      type="radio"
+                      name="patientCoverage"
+                      value={coverage.value}
+                      required
+                      className="h-4 w-4 accent-[var(--accent)]"
+                    />
+                    {coverage.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
             <Field
               label="Teléfono"
               name="patientPhone"
@@ -255,6 +292,7 @@ function Field({
   type = "text",
   required = false,
   autoComplete,
+  inputMode,
 }: {
   label: string;
   name: string;
@@ -262,6 +300,7 @@ function Field({
   type?: string;
   required?: boolean;
   autoComplete?: string;
+  inputMode?: "numeric" | "tel" | "text";
 }) {
   const hintId = hint ? `${name}-hint` : undefined;
 
@@ -277,6 +316,7 @@ function Field({
         type={type}
         required={required}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         aria-describedby={hintId}
         className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-[1rem]"
       />

@@ -29,13 +29,18 @@ export default async function PrivacidadPage() {
         <section>
           <h2 className="text-xl font-semibold">Qué guardamos</h2>
           <p className="mt-2">
-            Cuando sacás un turno guardamos tu nombre y tu teléfono. Si completás el campo
-            <em> motivo de la consulta</em>, guardamos también ese texto. No pedimos email.
+            Cuando sacás un turno guardamos tu nombre y apellido, tu DNI, tu obra social y tu
+            teléfono. Si completás el campo <em>motivo de la consulta</em>, guardamos también ese
+            texto. No pedimos email.
           </p>
           <p className="mt-2">
             El motivo de la consulta es un <strong>dato sensible</strong> según el artículo 2 de la
             Ley 25.326. Por eso el campo es opcional, te pedimos autorización expresa antes de
             guardarlo, y solo puede verlo {settings.clinic_name}.
+          </p>
+          <p className="mt-2">
+            El DNI lo usamos únicamente para identificarte en la ficha y para facturar según tu
+            obra social. Nunca sale de acá.
           </p>
         </section>
 
@@ -53,8 +58,8 @@ export default async function PrivacidadPage() {
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>El motivo de la consulta se borra automáticamente 30 días después del turno.</li>
             <li>
-              Tus datos de contacto se anonimizan automáticamente a los 12 meses: queda el registro
-              del turno, sin tu nombre ni tu teléfono.
+              Tus datos se anonimizan automáticamente a los 12 meses: queda el registro del turno,
+              sin tu nombre, sin tu DNI y sin tu teléfono.
             </li>
           </ul>
         </section>

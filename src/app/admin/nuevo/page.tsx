@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { createAdminBooking } from "@/app/actions/appointments";
 import { getAvailability } from "@/lib/availability";
+import { COVERAGES } from "@/lib/booking-schema";
 import { requireStaff } from "@/lib/auth";
 import { formatTime, toLocalDateKey } from "@/lib/format";
 import { localDayRangeFromKey } from "@/lib/slots";
@@ -109,16 +110,62 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
             </select>
           </div>
 
-          <div>
-            <label htmlFor="patientName" className="block text-[0.95rem] font-medium">
-              Nombre y apellido
-            </label>
-            <input
-              id="patientName"
-              name="patientName"
-              required
-              className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="patientFirstName" className="block text-[0.95rem] font-medium">
+                Nombre
+              </label>
+              <input
+                id="patientFirstName"
+                name="patientFirstName"
+                required
+                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
+              />
+            </div>
+            <div>
+              <label htmlFor="patientLastName" className="block text-[0.95rem] font-medium">
+                Apellido
+              </label>
+              <input
+                id="patientLastName"
+                name="patientLastName"
+                required
+                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="patientDni" className="block text-[0.95rem] font-medium">
+                DNI
+              </label>
+              <input
+                id="patientDni"
+                name="patientDni"
+                required
+                inputMode="numeric"
+                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
+              />
+            </div>
+            <div>
+              <label htmlFor="patientCoverage" className="block text-[0.95rem] font-medium">
+                Obra social
+              </label>
+              <select
+                id="patientCoverage"
+                name="patientCoverage"
+                required
+                defaultValue="particular"
+                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
+              >
+                {COVERAGES.map((coverage) => (
+                  <option key={coverage.value} value={coverage.value}>
+                    {coverage.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>

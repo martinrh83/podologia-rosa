@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { bookingSchema, normalizePhone } from "./booking-schema";
+import { bookingSchema, normalizeDni, normalizePhone } from "./booking-schema";
 
 describe("normalizePhone", () => {
   it("collapses every way one Argentine number gets typed into a single value", () => {
@@ -47,12 +47,23 @@ describe("normalizePhone", () => {
   });
 });
 
+describe("normalizeDni", () => {
+  it("collapses the ways a DNI gets typed", () => {
+    // El mismo documento escrito de cuatro formas.
+    const variants = ["20123456", "20.123.456", "20 123 456", " 20-123-456 "];
+
+    expect(new Set(variants.map(normalizeDni))).toEqual(new Set(["20123456"]));
+  });
+});
+
 describe("bookingSchema", () => {
   const valid = {
     startsAt: "2026-09-10T12:00:00.000Z",
-    patientName: "Rosa Gómez",
+    patientFirstName: "Rosa",
+    patientLastName: "Gómez",
+    patientDni: "20.123.456",
+    patientCoverage: "osunsa" as const,
     patientPhone: "+54 9 11 5555-4444",
-    patientEmail: "rosa@example.com",
     motivo: "",
     consent: true,
   };
@@ -61,26 +72,38 @@ describe("bookingSchema", () => {
     const parsed = bookingSchema.parse(valid);
 
     expect(parsed.patientPhone).toBe("1155554444");
-    expect(parsed.patientName).toBe("Rosa Gómez");
-  });
-
-  it("treats the email as optional, since not every patient has one", () => {
-    expect(bookingSchema.parse({ ...valid, patientEmail: "" }).patientEmail).toBe("");
-    expect(bookingSchema.parse({ ...valid, patientEmail: undefined }).patientEmail).toBeUndefined();
-  });
-
-  it("rejects a malformed email rather than silently dropping it", () => {
-    // Silently discarding it would mean no confirmation and no cancel link.
-    expect(bookingSchema.safeParse({ ...valid, patientEmail: "rosa@" }).success).toBe(false);
+    expect(parsed.patientFirstName).toBe("Rosa");
+    expect(parsed.patientLastName).toBe("Gómez");
+    expect(parsed.patientDni).toBe("20123456");
   });
 
   it("rejects a phone too short to be real", () => {
     expect(bookingSchema.safeParse({ ...valid, patientPhone: "1234" }).success).toBe(false);
   });
 
-  it("rejects a name that is blank or a single character", () => {
-    expect(bookingSchema.safeParse({ ...valid, patientName: "   " }).success).toBe(false);
-    expect(bookingSchema.safeParse({ ...valid, patientName: "R" }).success).toBe(false);
+  it("rejects a name or surname that is blank or a single character", () => {
+    expect(bookingSchema.safeParse({ ...valid, patientFirstName: "   " }).success).toBe(false);
+    expect(bookingSchema.safeParse({ ...valid, patientLastName: "G" }).success).toBe(false);
+  });
+
+  it("accepts the three coverages and nothing else", () => {
+    for (const coverage of ["ips", "osunsa", "particular"]) {
+      expect(bookingSchema.safeParse({ ...valid, patientCoverage: coverage }).success).toBe(true);
+    }
+
+    // Una obra social que el consultorio no acepta no puede entrar por la API,
+    // aunque el formulario sólo ofrezca tres opciones.
+    expect(bookingSchema.safeParse({ ...valid, patientCoverage: "osde" }).success).toBe(false);
+    expect(bookingSchema.safeParse({ ...valid, patientCoverage: "" }).success).toBe(false);
+  });
+
+  it("normalises the DNI and rejects one of the wrong length", () => {
+    expect(bookingSchema.parse({ ...valid, patientDni: "20.123.456" }).patientDni).toBe("20123456");
+    expect(bookingSchema.parse({ ...valid, patientDni: "9 876 543" }).patientDni).toBe("9876543");
+
+    expect(bookingSchema.safeParse({ ...valid, patientDni: "123456" }).success).toBe(false);
+    expect(bookingSchema.safeParse({ ...valid, patientDni: "123456789" }).success).toBe(false);
+    expect(bookingSchema.safeParse({ ...valid, patientDni: "" }).success).toBe(false);
   });
 
   it("requires a timestamp with an explicit offset", () => {

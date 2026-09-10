@@ -43,9 +43,11 @@ export async function createAdminBooking(formData: FormData): Promise<void> {
 
   const parsed = bookingSchema.safeParse({
     startsAt: String(formData.get("startsAt") ?? ""),
-    patientName: String(formData.get("patientName") ?? ""),
+    patientFirstName: String(formData.get("patientFirstName") ?? ""),
+    patientLastName: String(formData.get("patientLastName") ?? ""),
+    patientDni: String(formData.get("patientDni") ?? ""),
+    patientCoverage: String(formData.get("patientCoverage") ?? "particular"),
     patientPhone: String(formData.get("patientPhone") ?? ""),
-    patientEmail: String(formData.get("patientEmail") ?? ""),
     motivo: String(formData.get("motivo") ?? ""),
     consent: true,
   });
