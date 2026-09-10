@@ -58,6 +58,8 @@ export default async function TurnosPage() {
         days={[...byDay.values()]}
         horizonDays={settings.horizon_days}
         clinicPhone={settings.phone}
+        clinicWhatsapp={settings.whatsapp}
+        clinicName={settings.clinic_name}
       />
     </div>
   );

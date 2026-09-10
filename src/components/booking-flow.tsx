@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
+import { whatsappLink } from "@/lib/format";
 
 export type BookingSlot = { startsAt: string; label: string };
 
@@ -18,6 +19,8 @@ type Props = {
   days: BookingDay[];
   horizonDays: number;
   clinicPhone: string | null;
+  clinicWhatsapp: string | null;
+  clinicName: string;
 };
 
 type Status =
@@ -26,7 +29,7 @@ type Status =
   | { kind: "error"; message: string; slotTaken: boolean }
   | { kind: "done"; slotLabel: string; dayLabel: string; cancelUrl: string };
 
-export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
+export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, clinicName }: Props) {
   const [selectedDayKey, setSelectedDayKey] = useState(days[0]?.key ?? null);
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -34,7 +37,14 @@ export function BookingFlow({ days, horizonDays, clinicPhone }: Props) {
   const selectedDay = days.find((day) => day.key === selectedDayKey) ?? null;
 
   if (status.kind === "done") {
-    return <Confirmation status={status} clinicPhone={clinicPhone} />;
+    return (
+      <Confirmation
+        status={status}
+        clinicPhone={clinicPhone}
+        clinicWhatsapp={clinicWhatsapp}
+        clinicName={clinicName}
+      />
+    );
   }
 
   if (days.length === 0) {
@@ -355,10 +365,32 @@ function Notice({
 function Confirmation({
   status,
   clinicPhone,
+  clinicWhatsapp,
+  clinicName,
 }: {
   status: Extract<Status, { kind: "done" }>;
   clinicPhone: string | null;
+  clinicWhatsapp: string | null;
+  clinicName: string;
 }) {
+  /*
+    No hay canal automático para mandar una confirmación: sin dominio propio no
+    hay mail, y automatizar WhatsApp exige la API de Business.
+
+    Así que el mensaje lo manda el paciente. Resuelve dos cosas de una: le queda
+    el turno y el enlace guardados en su propio WhatsApp, que es donde los va a
+    buscar, y a Rosa le llega el aviso del turno nuevo sin mirar el panel.
+  */
+  const absoluteCancelUrl =
+    status.cancelUrl && typeof window !== "undefined"
+      ? new URL(status.cancelUrl, window.location.origin).toString()
+      : status.cancelUrl;
+
+  const confirmationMessage =
+    `Hola! Saqué un turno en ${clinicName} para el ${status.dayLabel} a las ` +
+    `${status.slotLabel}.` +
+    (absoluteCancelUrl ? ` Este es mi enlace por si necesito cancelar: ${absoluteCancelUrl}` : "");
+
   return (
     <Notice tone="success" title="¡Listo! Tu turno quedó confirmado">
       <p className="text-[1.05rem] text-foreground">
@@ -377,6 +409,23 @@ function Confirmation({
           </div>
         </div>
       ) : null}
+
+      {clinicWhatsapp && (
+        <div className="mt-4">
+          <a
+            href={whatsappLink(clinicWhatsapp, confirmationMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block rounded-lg bg-accent px-5 py-3 text-[1.05rem] font-medium text-white hover:bg-accent-hover"
+          >
+            Guardármelo en WhatsApp
+          </a>
+          <p className="mt-2 text-[0.95rem]">
+            Te abre un mensaje con los datos del turno para mandarnos. Así te queda guardado en tu
+            teléfono y nosotros nos enteramos.
+          </p>
+        </div>
+      )}
 
       {clinicPhone && (
         <p className="mt-3">Si preferís, llamanos al {clinicPhone} y lo cancelamos nosotros.</p>

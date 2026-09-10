@@ -2,7 +2,7 @@ import { updateStatus } from "@/app/actions/appointments";
 import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
 import type { Appointment } from "@/lib/db/types";
-import { formatTime, whatsappLink } from "@/lib/format";
+import { formatDay, formatTime, whatsappLink } from "@/lib/format";
 
 const STATUS_LABEL: Record<Appointment["status"], string> = {
   booked: "Reservado",
@@ -54,6 +54,27 @@ export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props
         <p className="mt-2 rounded-lg bg-surface-muted px-3 py-2 text-[0.95rem]">
           {appointment.motivo}
         </p>
+      )}
+
+      {/*
+        Turnos sacados por la web: Rosa le confirma al paciente por WhatsApp.
+        No hay confirmación automática, así que este botón es el único aviso que
+        el paciente recibe de parte del consultorio.
+      */}
+      {!isCancelled && appointment.source === "online" && (
+        <a
+          href={whatsappLink(
+            appointment.patient_phone,
+            `Hola ${appointment.patient_first_name}! Te confirmamos tu turno del ` +
+              `${formatDay(appointment.starts_at)} a las ${formatTime(appointment.starts_at)}. ` +
+              `¡Te esperamos!`,
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block rounded-lg border border-accent px-4 py-2.5 text-[0.95rem] font-medium text-accent hover:bg-accent hover:text-white"
+        >
+          Confirmar por WhatsApp
+        </a>
       )}
 
       {reminderMessage && !isCancelled && (
