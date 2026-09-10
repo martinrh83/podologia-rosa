@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AppointmentCard } from "@/components/appointment-card";
 import { requireStaff } from "@/lib/auth";
+import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
 import { formatDay } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
@@ -17,6 +18,7 @@ export default async function AdminTodayPage() {
   await requireStaff();
 
   const appointments = await getAppointmentsForLocalDay(0);
+  const base = siteUrl();
   const today = localDayRange(new Date()).start;
 
   return (
@@ -32,7 +34,11 @@ export default async function AdminTodayPage() {
 
       <ul className="space-y-3">
         {appointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} />
+          <AppointmentCard
+            key={appointment.id}
+            appointment={appointment}
+            siteUrl={base}
+          />
         ))}
       </ul>
     </div>

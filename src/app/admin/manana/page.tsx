@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { AppointmentCard } from "@/components/appointment-card";
 import { getClinicSettings } from "@/lib/availability";
 import { requireStaff } from "@/lib/auth";
+import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
 import { formatDay, formatTime } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
@@ -32,6 +33,7 @@ export default async function AdminTomorrowPage() {
   ]);
 
   const tomorrow = localDayRange(new Date(), 1).start;
+  const base = siteUrl();
 
   return (
     <div>
@@ -49,6 +51,7 @@ export default async function AdminTomorrowPage() {
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
+            siteUrl={base}
             reminderMessage={
               `Hola ${appointment.patient_name}! Te recordamos tu turno de mañana ` +
               `a las ${formatTime(appointment.starts_at)} en ${settings.clinic_name}. ` +

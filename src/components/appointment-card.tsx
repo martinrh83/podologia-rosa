@@ -1,4 +1,5 @@
 import { updateStatus } from "@/app/actions/appointments";
+import { CopyLink } from "@/components/copy-link";
 import type { Appointment } from "@/lib/db/types";
 import { formatTime, whatsappLink } from "@/lib/format";
 
@@ -13,10 +14,13 @@ type Props = {
   appointment: Appointment;
   /** Renders the tap-to-send WhatsApp reminder — used on the "Mañana" screen. */
   reminderMessage?: string;
+  /** Absolute base URL, so the cancel link Rosa sends works outside localhost. */
+  siteUrl: string;
 };
 
-export function AppointmentCard({ appointment, reminderMessage }: Props) {
+export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props) {
   const isCancelled = appointment.status === "cancelled";
+  const cancelUrl = `${siteUrl}/turnos/cancelar/${appointment.cancel_token}`;
 
   return (
     <li
@@ -53,6 +57,36 @@ export function AppointmentCard({ appointment, reminderMessage }: Props) {
         >
           Recordar por WhatsApp
         </a>
+      )}
+
+      {/*
+        The patient sees this link once, on the confirmation screen, and there is
+        no email to re-send it. When they lose it they call — so Rosa needs to be
+        able to hand it back without asking anyone for help.
+      */}
+      {!isCancelled && (
+        <details className="mt-3 border-t border-border pt-3">
+          <summary className="cursor-pointer text-sm text-muted hover:text-foreground">
+            Enlace para que cancele
+          </summary>
+
+          <div className="mt-2 space-y-2">
+            <CopyLink href={cancelUrl} label="Copiar el enlace de este turno" />
+
+            <a
+              href={whatsappLink(
+                appointment.patient_phone,
+                `Hola ${appointment.patient_name}! Si necesitás cancelar tu turno del ` +
+                  `${formatTime(appointment.starts_at)}, entrá acá: ${cancelUrl}`,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-lg border border-border px-3 py-2 text-sm hover:border-accent"
+            >
+              Mandarlo por WhatsApp
+            </a>
+          </div>
+        </details>
       )}
 
       {!isCancelled && (

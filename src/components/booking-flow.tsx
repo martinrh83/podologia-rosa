@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { CopyLink } from "@/components/copy-link";
+
 export type BookingSlot = { startsAt: string; label: string };
 
 export type BookingDay = {
@@ -330,12 +332,9 @@ function Confirmation({
             Es la única forma de cancelar el turno vos mismo. Sacale una captura o agregalo a
             favoritos: no te lo vamos a poder mandar por otro lado.
           </p>
-          <a
-            href={status.cancelUrl}
-            className="mt-2 block break-all text-[0.95rem] text-accent underline"
-          >
-            {status.cancelUrl}
-          </a>
+          <div className="mt-3">
+            <CopyLink href={status.cancelUrl} />
+          </div>
         </div>
       ) : null}
 
