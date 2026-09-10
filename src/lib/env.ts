@@ -1,0 +1,90 @@
+import "server-only";
+
+import { z } from "zod";
+
+/**
+ * Server-side environment.
+ *
+ * Parsed lazily rather than at module load: `next build` imports modules without
+ * the runtime secrets present, and failing the build over a missing RESEND_API_KEY
+ * is not the behaviour we want. Each accessor validates only what it needs, at the
+ * moment it needs it, so a misconfigured deploy fails loudly on the affected
+ * request instead of silently sending nothing.
+ */
+
+/** Turn a zod failure into something a human can act on. */
+function explain(missing: string[]): never {
+  throw new Error(
+    `Faltan variables de entorno: ${missing.join(", ")}. ` +
+      `Copiá .env.example a .env.local y completá los valores del proyecto de Supabase. ` +
+      `Ver supabase/README.md.`,
+  );
+}
+
+const publicSchema = z.object({
+  url: z.url(),
+  publishableKey: z.string().min(1),
+});
+
+/**
+ * Credentials for the cookie-scoped client used by /admin.
+ *
+ * Deliberately does *not* require the service-role key: that client never uses
+ * it, and demanding it here would make admin sign-in fail over an unrelated
+ * missing secret.
+ */
+export function supabasePublicEnv() {
+  const parsed = publicSchema.safeParse({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY,
+  });
+
+  if (!parsed.success) {
+    explain(
+      parsed.error.issues.map((issue) =>
+        issue.path[0] === "url" ? "NEXT_PUBLIC_SUPABASE_URL" : "SUPABASE_PUBLISHABLE_KEY",
+      ),
+    );
+  }
+
+  return parsed.data;
+}
+
+/** Credentials for the service-role client, which bypasses RLS. */
+export function supabaseServiceEnv() {
+  const { url } = supabasePublicEnv();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) explain(["SUPABASE_SERVICE_ROLE_KEY"]);
+
+  return { url, serviceRoleKey };
+}
+
+const emailSchema = z.object({
+  apiKey: z.string().min(1),
+  from: z.email(),
+  adminEmail: z.email(),
+});
+
+export function emailEnv() {
+  return emailSchema.parse({
+    apiKey: process.env.RESEND_API_KEY,
+    from: process.env.EMAIL_FROM,
+    adminEmail: process.env.ADMIN_EMAIL,
+  });
+}
+
+export function cronSecret(): string {
+  return z.string().min(16).parse(process.env.CRON_SECRET);
+}
+
+/** Absolute base URL, used to build cancel links that must survive email clients. */
+export function siteUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL;
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+
+  // Vercel injects this for preview deployments, where no stable URL exists.
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+
+  return "http://localhost:3000";
+}

@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/**
+ * Calm clinical palette: warm neutrals rather than the cold blue-grey of most
+ * medical sites, with a single muted teal accent.
+ *
+ * Committed to a light theme on purpose. A clinic site is read in daylight, often
+ * outdoors, frequently by older patients — a half-tuned dark mode would be worse
+ * than none, so the palette is defined once and painted explicitly.
+ */
+:root {
+  --background: #faf9f7;
+  --surface: #ffffff;
+  --surface-muted: #f2f0ec;
+  --foreground: #1c1917;
+  --muted: #6b625b;
+  --border: #e3ded7;
+
+  --accent: #16706b;
+  --accent-hover: #0f5754;
+  --accent-soft: #e3f0ef;
+
+  --danger: #9f3a38;
+  --success: #1f6b46;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --font-sans: var(--font-sans-stack);
+}
+
+html {
+  /* 17px base: a deliberate step up from the usual 16 for legibility. */
+  font-size: 106.25%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Visible focus everywhere — keyboard and screen-reader users included. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
