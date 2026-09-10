@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { getClinicSettings } from "@/lib/availability";
+import { whatsappLink } from "@/lib/format";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { WeeklyScheduleRow } from "@/lib/db/types";
 
@@ -45,6 +46,22 @@ export default async function ComoLlegarPage() {
           </p>
         )}
       </div>
+
+      {settings.whatsapp && (
+        <p className="mt-2 text-[1.05rem]">
+          <a
+            href={whatsappLink(
+              settings.whatsapp,
+              `Hola! Quería consultar por un turno en ${settings.clinic_name}.`,
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent underline"
+          >
+            Escribinos por WhatsApp
+          </a>
+        </p>
+      )}
 
       {settings.map_url && (
         <a

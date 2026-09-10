@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { getClinicSettings } from "@/lib/availability";
 import { getActiveServices } from "@/lib/db/services";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, whatsappLink } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +54,19 @@ export default async function HomePage() {
               className="rounded-lg border border-border bg-surface px-6 py-3.5 text-[1.05rem] hover:border-accent"
             >
               Llamar al consultorio
+            </a>
+          )}
+          {settings.whatsapp && (
+            <a
+              href={whatsappLink(
+                settings.whatsapp,
+                `Hola! Quería consultar por un turno en ${settings.clinic_name}.`,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-border bg-surface px-6 py-3.5 text-[1.05rem] hover:border-accent"
+            >
+              WhatsApp
             </a>
           )}
         </div>

@@ -38,7 +38,8 @@ src/lib/availability.ts   El I/O alrededor de slots.ts.
 src/lib/booking.ts        Crear y cancelar turnos. Lo usan el form y el admin.
 src/app/api/turnos        Endpoint público de reserva.
 src/app/api/cron          Retención de datos (borrado de motivo, anonimizado).
-src/app/admin             Panel de Rosa (hoy, mañana, nuevo turno).
+src/app/admin             Panel de Rosa (hoy, mañana, nuevo turno, agenda,
+                          precios, datos del consultorio).
 supabase/migrations       Esquema y datos iniciales.
 ```
 

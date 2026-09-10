@@ -9,6 +9,7 @@ const TABS = [
   { href: "/admin/nuevo", label: "Nuevo turno" },
   { href: "/admin/agenda", label: "Agenda" },
   { href: "/admin/servicios", label: "Precios" },
+  { href: "/admin/consultorio", label: "Consultorio" },
 ];
 
 /**
