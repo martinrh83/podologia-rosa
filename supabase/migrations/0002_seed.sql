@@ -11,16 +11,22 @@ values (true, 60, 15, 0,
         null)
 on conflict (id) do nothing;
 
--- Monday to Friday, split shift: mornings 09:00-13:00, afternoons 16:00-20:00.
--- Two rows per day is what expresses the midday break.
+-- Horarios reales del consultorio.
+--
+--   Lunes y miércoles   08:00-12:00  y  16:00-20:00
+--   Martes, jueves y viernes         16:00-20:00
+--
+-- Dos filas para un mismo día es lo que expresa el corte del mediodía. Los días
+-- que sólo tienen tarde llevan una sola fila: sin fila no hay turnos, que es
+-- exactamente lo que queremos para las mañanas de martes, jueves y viernes.
 insert into weekly_schedule (weekday, start_time, end_time)
 select weekday, start_time, end_time
 from (values
-  (1, '09:00'::time, '13:00'::time), (1, '16:00'::time, '20:00'::time),
-  (2, '09:00'::time, '13:00'::time), (2, '16:00'::time, '20:00'::time),
-  (3, '09:00'::time, '13:00'::time), (3, '16:00'::time, '20:00'::time),
-  (4, '09:00'::time, '13:00'::time), (4, '16:00'::time, '20:00'::time),
-  (5, '09:00'::time, '13:00'::time), (5, '16:00'::time, '20:00'::time)
+  (1, '08:00'::time, '12:00'::time), (1, '16:00'::time, '20:00'::time),  -- lunes
+  (2, '16:00'::time, '20:00'::time),                                     -- martes
+  (3, '08:00'::time, '12:00'::time), (3, '16:00'::time, '20:00'::time),  -- miércoles
+  (4, '16:00'::time, '20:00'::time),                                     -- jueves
+  (5, '16:00'::time, '20:00'::time)                                      -- viernes
 ) as s(weekday, start_time, end_time)
 where not exists (select 1 from weekly_schedule);
 
