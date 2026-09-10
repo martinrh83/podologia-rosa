@@ -1,0 +1,849 @@
+<title>Preguntas para Rosa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+
+<style>
+  :root {
+    --paper:        #f6f7f5;
+    --surface:      #ffffff;
+    --surface-sunk: #eeF0ed;
+    --ink:          #14201c;
+    --muted:        #62706a;
+    --rule:         #dce1dc;
+    --accent:       #146b66;
+    --accent-soft:  #e2efee;
+    --flag:         #a2432f;
+    --flag-soft:    #f7e9e5;
+
+    --sans:  "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --serif: "IBM Plex Serif", ui-serif, Georgia, serif;
+    --mono:  "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:        #101614;
+      --surface:      #17201e;
+      --surface-sunk: #1d2725;
+      --ink:          #e6ece8;
+      --muted:        #97a49e;
+      --rule:         #2a3634;
+      --accent:       #5cbdb5;
+      --accent-soft:  #16302e;
+      --flag:         #e0866d;
+      --flag-soft:    #33201b;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:        #101614;
+    --surface:      #17201e;
+    --surface-sunk: #1d2725;
+    --ink:          #e6ece8;
+    --muted:        #97a49e;
+    --rule:         #2a3634;
+    --accent:       #5cbdb5;
+    --accent-soft:  #16302e;
+    --flag:         #e0866d;
+    --flag-soft:    #33201b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 48px 96px;
+  }
+
+  /* ---------- header ---------- */
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(2rem, 6vw, 2.9rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+
+  .standfirst {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    line-height: 1.65;
+    color: var(--muted);
+    margin: 0;
+    max-width: 34rem;
+  }
+
+  .meter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .meter strong {
+    color: var(--ink);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .meter-note { margin-left: auto; }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 56px; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .sec-code {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .sec-title {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1.12rem;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .sec-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--muted);
+    margin: 12px 0 0;
+    font-size: 1rem;
+  }
+
+  /* ---------- questions ---------- */
+
+  .q {
+    border-bottom: 1px solid var(--rule);
+    padding: 26px 0;
+  }
+
+  .q-top {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  .q-num {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    flex: none;
+    padding-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .q-body { flex: 1; min-width: 0; }
+
+  .q-text {
+    font-family: var(--serif);
+    font-size: 1.16rem;
+    line-height: 1.5;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  .q-why {
+    margin: 10px 0 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+    max-width: 36rem;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .chip {
+    font-family: var(--mono);
+    font-size: 0.71rem;
+    letter-spacing: 0.02em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: var(--surface-sunk);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .chip b {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .chip.code {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  /* the blocking question — the one place boldness is spent */
+  .q.blocker {
+    background: var(--flag-soft);
+    border-left: 3px solid var(--flag);
+    border-bottom: none;
+    padding: 24px 22px;
+    margin-top: 22px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .q.blocker .q-text { font-size: 1.3rem; }
+
+  .blocker-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--flag);
+    margin-bottom: 10px;
+  }
+
+  .probe {
+    margin: 14px 0 0;
+    padding-left: 18px;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .probe li { margin-bottom: 3px; }
+
+  /* ---------- answer field ---------- */
+
+  .answer { margin-top: 14px; }
+
+  .answer label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 2.7rem;
+    resize: vertical;
+    font-family: var(--sans);
+    font-size: 0.97rem;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 9px 11px;
+  }
+
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  textarea.filled { border-color: var(--accent); }
+
+  /* ---------- misc ---------- */
+
+  .notice {
+    margin-top: 26px;
+    padding: 13px 15px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  footer p { margin: 0 0 8px; }
+
+  .save-state {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    padding: 6px 11px;
+    border-radius: 20px;
+    background: var(--ink);
+    color: var(--paper);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+
+  .save-state.show { opacity: 0.92; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Podología Rosa · Antes de seguir construyendo</p>
+
+  <h1>Preguntas para Rosa</h1>
+
+  <p class="standfirst">
+    El sistema ya funciona, pero varias decisiones las tomamos nosotros sin
+    consultarla. Estas son las que conviene confirmar, corregir o descartar
+    con ella — ordenadas por lo que cuesta cambiarlas después.
+  </p>
+
+  <div class="meter">
+    <span><strong id="done">0</strong> de <strong id="total">0</strong> respondidas</span>
+    <span class="meter-note" id="storage-note">Las respuestas se guardan solas</span>
+  </div>
+
+  <div class="notice" id="offline-notice" hidden>
+    No se pueden guardar respuestas en esta vista, pero el documento se lee igual.
+    Anotá aparte.
+  </div>
+
+  <!-- ============ A ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-code">A</span>
+      <h2 class="sec-title">Lo que frena todo lo demás</h2>
+    </div>
+    <p class="sec-sub">
+      Dos preguntas. De las respuestas depende si el motor de horarios sirve como
+      está o hay que rehacerlo — así que van antes que cualquier otra cosa.
+    </p>
+
+    <div class="q blocker" data-q="a1">
+      <span class="blocker-tag">Bloqueante</span>
+      <p class="q-text">
+        ¿Todos los tratamientos te llevan el mismo tiempo, o cambia según qué venga
+        a hacerse el paciente?
+      </p>
+      <p class="q-why">
+        Todo el cálculo de horarios está construido sobre una sola duración fija.
+        Si una quiropodia son 30 minutos y un estudio de la pisada son 60, hay que
+        rehacer la parte más delicada del sistema. Es la única pregunta que puede
+        obligar a reescribir código ya terminado.
+      </p>
+      <ul class="probe">
+        <li>Quiropodia, ¿cuánto?</li>
+        <li>Uña encarnada (onicocriptosis), ¿cuánto?</li>
+        <li>Estudio de la pisada, ¿cuánto?</li>
+        <li>Un paciente nuevo, ¿te lleva más que uno que ya conocés?</li>
+      </ul>
+      <div class="facts">
+        <span class="chip">Hoy asumimos: <b>45 min para todo</b></span>
+        <span class="chip code">Puede cambiar el código</span>
+      </div>
+    </div>
+
+    <div class="q blocker" data-q="a2">
+      <span class="blocker-tag">Bloqueante</span>
+      <p class="q-text">
+        ¿Necesitás un rato entre paciente y paciente para esterilizar el
+        instrumental y preparar el box?
+      </p>
+      <p class="q-why">
+        Hoy los turnos se generan pegados: si uno termina 10:45, el siguiente
+        empieza 10:45. Nos dimos cuenta escribiendo este documento y nadie lo
+        confirmó con vos. Si necesitás 10 o 15 minutos en el medio, la agenda que
+        el sistema publica hoy es más apretada de lo que podés sostener.
+      </p>
+      <div class="facts">
+        <span class="chip">Hoy asumimos: <b>sin tiempo intermedio</b></span>
+        <span class="chip code">Puede cambiar el código</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ B ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-code">B</span>
+      <h2 class="sec-title">Decisiones que ya tomamos por vos</h2>
+    </div>
+    <p class="sec-sub">
+      Están construidas y funcionando. Cada una se puede cambiar, pero queremos que
+      las hayas visto y no que te enteres cuando ya estén en uso.
+    </p>
+
+    <div class="q" data-q="b1">
+      <p class="q-text">
+        El turno queda confirmado solo, sin que vos lo apruebes. ¿Está bien, o
+        preferís revisar cada pedido antes?
+      </p>
+      <p class="q-why">
+        Confirmación automática significa cero trabajo diario para vos, pero también
+        que alguien puede ocupar un horario por error o de joda y queda tomado hasta
+        que lo canceles.
+      </p>
+      <div class="facts"><span class="chip">Hoy: <b>se confirma solo</b></span></div>
+    </div>
+
+    <div class="q" data-q="b2">
+      <p class="q-text">
+        El paciente no se crea ninguna cuenta ni contraseña: deja nombre, teléfono y
+        listo. ¿Te parece bien?
+      </p>
+      <p class="q-why">
+        Es lo que hace que una persona mayor pueda sacar turno sin ayuda. La
+        contra es que no hay forma de verificar quién es hasta que aparece.
+      </p>
+      <div class="facts"><span class="chip">Hoy: <b>sin registro</b></span></div>
+    </div>
+
+    <div class="q" data-q="b3">
+      <p class="q-text">
+        Se puede reservar hasta 15 días para adelante. ¿Alcanza?
+      </p>
+      <p class="q-why">
+        Si tus pacientes de quiropodia vuelven cada 4 o 6 semanas, con 15 días no
+        llegan a sacar el próximo turno solos y te lo van a tener que pedir a vos.
+        Desde el panel vos podés cargar cualquier fecha, sin límite.
+      </p>
+      <div class="facts">
+        <span class="chip">Hoy: <b>15 días por la web</b></span>
+        <span class="chip">Vos: <b>sin límite</b></span>
+      </div>
+    </div>
+
+    <div class="q" data-q="b4">
+      <p class="q-text">
+        Cada persona puede tener como máximo 2 turnos reservados a la vez.
+        ¿Está bien ese número?
+      </p>
+      <p class="q-why">
+        Es para que nadie te llene la agenda. Si atendés familias que sacan varios
+        turnos juntos, 2 puede quedarte corto.
+      </p>
+      <div class="facts"><span class="chip">Hoy: <b>2 turnos activos</b></span></div>
+    </div>
+
+    <div class="q" data-q="b5">
+      <p class="q-text">
+        El paciente puede cancelar solo, con un link, hasta la hora misma del turno.
+        ¿Querés un mínimo de aviso, tipo 24 horas?
+      </p>
+      <p class="q-why">
+        Sin mínimo, alguien puede liberar el horario 10 minutos antes y no llegás a
+        ofrecérselo a nadie. Con mínimo, el que no puede venir directamente no avisa
+        y falta igual.
+      </p>
+      <div class="facts"><span class="chip">Hoy: <b>hasta la hora del turno</b></span></div>
+    </div>
+
+    <div class="q" data-q="b6">
+      <p class="q-text">
+        El motivo de consulta es opcional, lo ves solo vos, y se borra automáticamente
+        a los 30 días. Los datos de contacto se anonimizan al año. ¿De acuerdo?
+      </p>
+      <p class="q-why">
+        El motivo de consulta es un dato de salud, y la Ley 25.326 lo trata como dato
+        sensible: pide consentimiento expreso y cuidado extra. Por eso se borra solo.
+        Si necesitás guardarlo más tiempo, hay que decirlo en la política de
+        privacidad y pedir el consentimiento en consecuencia.
+      </p>
+      <div class="facts">
+        <span class="chip">Motivo: <b>se borra a los 30 días</b></span>
+        <span class="chip">Contacto: <b>anónimo al año</b></span>
+      </div>
+    </div>
+
+    <div class="q" data-q="b7">
+      <p class="q-text">
+        Los recordatorios por WhatsApp los mandás vos: entrás al panel una vez por
+        día y tocás un botón por paciente. ¿Te sirve así?
+      </p>
+      <p class="q-why">
+        Lo elegimos porque el mensaje sale de tu número y no cuesta nada. La
+        alternativa es automatizarlo de verdad, pero eso implica verificación de
+        Meta, plantillas aprobadas y costo por mensaje. ¿A qué hora del día te
+        queda cómodo hacerlo?
+      </p>
+      <div class="facts"><span class="chip">Hoy: <b>a mano, 1 vez por día</b></span></div>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-code">C</span>
+      <h2 class="sec-title">Datos que necesitamos para configurarlo</h2>
+    </div>
+    <p class="sec-sub">
+      Nada de esto cambia el código: son los valores reales que hoy están puestos
+      de prueba y hay que reemplazar antes de publicar.
+    </p>
+
+    <div class="q" data-q="c1">
+      <p class="q-text">
+        ¿Qué días atendés y en qué horarios exactos? ¿Cortás al mediodía?
+        ¿Trabajás sábados?
+      </p>
+      <div class="facts"><span class="chip">De prueba: <b>lun a vie, 9–13 y 16–20</b></span></div>
+    </div>
+
+    <div class="q" data-q="c2">
+      <p class="q-text">
+        ¿Cuál es la lista real de tratamientos que ofrecés?
+      </p>
+      <div class="facts">
+        <span class="chip">De prueba: <b>quiropodia, uña encarnada, pie diabético, verrugas, estudio de la pisada</b></span>
+      </div>
+    </div>
+
+    <div class="q" data-q="c3">
+      <p class="q-text">
+        ¿Publicamos los precios en el sitio, o preferís que diga «consultar»?
+        Si van los precios, ¿cada cuánto los actualizás?
+      </p>
+      <p class="q-why">
+        Los precios se editan desde el panel en diez segundos, justamente porque con
+        la inflación una lista fija queda vieja en dos meses. Pero si te resulta un
+        problema tenerlos públicos, «consultar» también es una opción válida y muy
+        común.
+      </p>
+    </div>
+
+    <div class="q" data-q="c4">
+      <p class="q-text">
+        ¿Trabajás con obra social o prepaga, o es todo particular?
+      </p>
+      <p class="q-why">
+        Nunca lo preguntamos y puede cambiar bastante. Si atendés por obra social,
+        quizás haya que pedir el número de afiliado al reservar, mostrar qué
+        coberturas tomás, y los precios publicados significan otra cosa.
+      </p>
+      <div class="facts">
+        <span class="chip">Hoy: <b>no se pregunta nada de esto</b></span>
+        <span class="chip code">Puede cambiar el código</span>
+      </div>
+    </div>
+
+    <div class="q" data-q="c5">
+      <p class="q-text">
+        Dirección exacta del consultorio, teléfono y número de WhatsApp.
+        ¿Usás un número aparte del personal?
+      </p>
+      <p class="q-why">
+        El número de WhatsApp es el que va a aparecer cuando les mandes los
+        recordatorios, así que conviene que sea el que querés que tengan.
+      </p>
+    </div>
+
+    <div class="q" data-q="c6">
+      <p class="q-text">
+        Tu número de matrícula, y el texto que quieras que diga la página
+        «Sobre mí». ¿Tenés fotos del consultorio?
+      </p>
+      <p class="q-why">
+        Hoy hay un texto de relleno escrito por nosotros. Para una página de salud,
+        dos párrafos tuyos de verdad valen más que cualquier cosa que inventemos.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ D ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-code">D</span>
+      <h2 class="sec-title">Cosas que hoy no existen</h2>
+    </div>
+    <p class="sec-sub">
+      Las dejamos afuera a propósito para poder terminar. Si alguna te resulta
+      imprescindible, decilo ahora y la agregamos antes de que empieces a usarlo.
+    </p>
+
+    <div class="q" data-q="d1">
+      <p class="q-text">
+        Reprogramar un turno. Hoy hay que cancelarlo y sacar otro.
+      </p>
+      <p class="q-why">
+        Es lo que más suele pedirse. El riesgo actual: alguien cancela para mover el
+        turno, y cuando va a sacar el nuevo el horario que quería ya no está.
+      </p>
+    </div>
+
+    <div class="q" data-q="d2">
+      <p class="q-text">
+        Cobrar una seña al reservar (Mercado Pago).
+      </p>
+      <p class="q-why">
+        Es la forma más efectiva de bajar los ausentes, pero agrega fricción para
+        reservar y te mete en el mundo de reintegros.
+      </p>
+    </div>
+
+    <div class="q" data-q="d3">
+      <p class="q-text">
+        Lista de espera para avisar cuando se libera un horario.
+      </p>
+    </div>
+
+    <div class="q" data-q="d4">
+      <p class="q-text">
+        Turnos que se repiten solos, por ejemplo cada 6 semanas para pacientes
+        de control.
+      </p>
+    </div>
+
+    <div class="q" data-q="d5">
+      <p class="q-text">
+        Visitas a domicilio.
+      </p>
+      <p class="q-why">
+        Si las hacés, hay que pensarlo distinto: duran más, incluyen el viaje y
+        probablemente no deberían poder reservarse online sin hablar antes.
+      </p>
+    </div>
+
+    <div class="q" data-q="d6">
+      <p class="q-text">
+        Ficha o historia clínica del paciente dentro del sistema.
+      </p>
+      <p class="q-why">
+        Lo evitamos a propósito: guardar historia clínica sube mucho la exigencia
+        legal sobre los datos. Si lo necesitás, es una conversación aparte.
+      </p>
+    </div>
+
+    <div class="q" data-q="d7">
+      <p class="q-text">
+        Que entre otra persona al panel, por ejemplo alguien que te ayude con los
+        turnos.
+      </p>
+      <div class="facts"><span class="chip">Hoy: <b>un solo usuario, el tuyo</b></span></div>
+    </div>
+  </section>
+
+  <!-- ============ E ============ -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-code">E</span>
+      <h2 class="sec-title">Para saber si esto sirvió</h2>
+    </div>
+    <p class="sec-sub">
+      No cambian nada del sistema. Sirven para tener el número de antes y poder
+      comparar dentro de unos meses.
+    </p>
+
+    <div class="q" data-q="e1">
+      <p class="q-text">¿Cuántos turnos atendés por semana, más o menos?</p>
+    </div>
+
+    <div class="q" data-q="e2">
+      <p class="q-text">
+        De cada diez turnos, ¿cuántos te faltan sin avisar?
+      </p>
+      <p class="q-why">
+        Este es el número que importa. Todo el sistema de recordatorios existe para
+        bajarlo, y sin saber de cuánto partimos no vamos a saber si funcionó.
+      </p>
+    </div>
+
+    <div class="q" data-q="e3">
+      <p class="q-text">
+        ¿Por dónde te piden turno hoy? ¿Teléfono, WhatsApp, Instagram, o te golpean
+        la puerta?
+      </p>
+    </div>
+
+    <div class="q" data-q="e4">
+      <p class="q-text">
+        ¿Cuántos de tus pacientes te imaginás que van a reservar por internet, y
+        cuántos te van a seguir llamando igual?
+      </p>
+      <p class="q-why">
+        Si la respuesta es «casi todos me van a llamar», entonces la pantalla más
+        importante del sistema es la de cargar turnos a mano, y ahí hay que poner el
+        esfuerzo.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Cómo usar esto:</strong> las de la sección A son las únicas urgentes — sin ésas no conviene tocar más código. El resto se puede ir respondiendo de a poco.</p>
+    <p>Lo que escribas se guarda solo. Después puedo leer las respuestas directamente y ajustar el sistema según lo que haya dicho Rosa.</p>
+  </footer>
+</div>
+
+<div class="save-state" id="save-state">guardado</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    var blocks = Array.prototype.slice.call(document.querySelectorAll(".q[data-q]"));
+    var totalEl = document.getElementById("total");
+    var doneEl = document.getElementById("done");
+    var saveState = document.getElementById("save-state");
+    var storageNote = document.getElementById("storage-note");
+    var offlineNotice = document.getElementById("offline-notice");
+
+    var fields = {};
+    var db = null;
+    var timers = {};
+
+    totalEl.textContent = String(blocks.length);
+
+    // Build an answer field under every question.
+    blocks.forEach(function (block, index) {
+      var id = block.getAttribute("data-q");
+
+      var top = document.createElement("div");
+      top.className = "q-top";
+
+      var num = document.createElement("span");
+      num.className = "q-num";
+      num.textContent = String(index + 1).padStart(2, "0");
+
+      var body = document.createElement("div");
+      body.className = "q-body";
+      while (block.firstChild) body.appendChild(block.firstChild);
+
+      top.appendChild(num);
+      top.appendChild(body);
+      block.appendChild(top);
+
+      var wrap = document.createElement("div");
+      wrap.className = "answer";
+
+      var label = document.createElement("label");
+      label.setAttribute("for", "ans-" + id);
+      label.textContent = "Respuesta de Rosa";
+
+      var area = document.createElement("textarea");
+      area.id = "ans-" + id;
+      area.rows = 2;
+      area.setAttribute("data-answer", id);
+
+      wrap.appendChild(label);
+      wrap.appendChild(area);
+      body.appendChild(wrap);
+
+      fields[id] = area;
+
+      area.addEventListener("input", function () {
+        area.classList.toggle("filled", area.value.trim().length > 0);
+        refreshCount();
+        queueSave(id, area.value);
+      });
+    });
+
+    function refreshCount() {
+      var filled = 0;
+      Object.keys(fields).forEach(function (id) {
+        if (fields[id].value.trim().length > 0) filled += 1;
+      });
+      doneEl.textContent = String(filled);
+    }
+
+    var flashTimer = null;
+    function flash(text) {
+      saveState.textContent = text;
+      saveState.classList.add("show");
+      clearTimeout(flashTimer);
+      flashTimer = setTimeout(function () {
+        saveState.classList.remove("show");
+      }, 1400);
+    }
+
+    function queueSave(id, value) {
+      if (!db) return;
+      clearTimeout(timers[id]);
+      timers[id] = setTimeout(function () {
+        db.doc("respuestas/" + id)
+          .set({ texto: value, actualizado: new Date().toISOString() })
+          .then(function () { flash("guardado"); })
+          .catch(function () { flash("no se pudo guardar"); });
+      }, 700);
+    }
+
+    function goOffline() {
+      storageNote.textContent = "Sin guardado en esta vista";
+      offlineNotice.hidden = false;
+    }
+
+    // The page is fully usable before this resolves, and stays usable if it
+    // resolves null — answers just are not persisted.
+    if (window.claude && typeof window.claude.use === "function") {
+      window.claude.use("db").then(function (handle) {
+        if (!handle) { goOffline(); return; }
+        db = handle;
+
+        db.collection("respuestas").get().then(function (snap) {
+          snap.docs.forEach(function (doc) {
+            var area = fields[doc.id];
+            if (!area) return;
+            var data = doc.data();
+            if (data && typeof data.texto === "string") {
+              area.value = data.texto;
+              area.classList.toggle("filled", data.texto.trim().length > 0);
+              // Grow to fit restored text so nothing is hidden behind a scroll.
+              area.style.height = "auto";
+              area.style.height = Math.min(area.scrollHeight, 400) + "px";
+            }
+          });
+          refreshCount();
+        }).catch(function () { /* empty store on first open */ });
+      }).catch(goOffline);
+    } else {
+      goOffline();
+    }
+
+    refreshCount();
+  })();
+</script>
