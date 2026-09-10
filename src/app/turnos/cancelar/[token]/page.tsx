@@ -32,6 +32,27 @@ export default async function CancelarPage({ params }: PageProps<"/turnos/cancel
   const isPast = new Date(appointment.starts_at) < new Date();
   const alreadyCancelled = appointment.status === "cancelled";
 
+  // Once there is nothing left to cancel, the token stops being a key and
+  // becomes just a string in someone's browser history or an old WhatsApp
+  // message. Showing the patient's name forever after that serves no one, so
+  // spent links reveal nothing.
+  const spent = isPast || alreadyCancelled;
+
+  if (spent) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-12">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Este turno ya no está activo</h1>
+        <p className="mt-4 text-[1.05rem] text-muted">
+          {alreadyCancelled ? "Fue cancelado." : "Ya pasó."} Si querés reservar otro,{" "}
+          <a href="/turnos" className="text-accent underline">
+            elegí un nuevo horario
+          </a>
+          .
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-xl px-4 py-12">
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Tu turno</h1>
@@ -42,21 +63,7 @@ export default async function CancelarPage({ params }: PageProps<"/turnos/cancel
         {settings.address && <p className="mt-3 text-[0.95rem] text-muted">{settings.address}</p>}
       </div>
 
-      {alreadyCancelled ? (
-        <p className="mt-6 text-[1.05rem]">
-          Este turno ya fue cancelado. Si querés reservar otro,{" "}
-          <a href="/turnos" className="text-accent underline">
-            elegí un nuevo horario
-          </a>
-          .
-        </p>
-      ) : isPast ? (
-        <p className="mt-6 text-[1.05rem] text-muted">
-          Este turno ya pasó, así que no hay nada que cancelar.
-        </p>
-      ) : (
-        <CancelForm token={token} clinicPhone={settings.phone} />
-      )}
+      <CancelForm token={token} clinicPhone={settings.phone} />
     </div>
   );
 }
