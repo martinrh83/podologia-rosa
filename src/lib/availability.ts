@@ -60,10 +60,10 @@ export async function getAvailability({
       .gt("ends_at", from.toISOString()),
     supabase
       .from("appointments")
-      .select("starts_at")
+      .select("starts_at, ends_at")
       .in("status", ACTIVE_STATUSES)
-      .gte("starts_at", from.toISOString())
-      .lt("starts_at", to.toISOString()),
+      .lt("starts_at", to.toISOString())
+      .gt("ends_at", from.toISOString()),
   ]);
 
   const firstError =
@@ -79,7 +79,7 @@ export async function getAvailability({
     to,
     weeklySchedule: scheduleResult.data ?? [],
     blocks: blocksResult.data ?? [],
-    taken: (takenResult.data ?? []).map((row) => row.starts_at),
+    taken: takenResult.data ?? [],
     slotMinutes: settings.slot_minutes,
     now,
     horizonDays: audience === "admin" ? null : settings.horizon_days,

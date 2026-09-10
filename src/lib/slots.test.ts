@@ -127,7 +127,14 @@ describe("generateSlots", () => {
   });
 
   it("excludes slots already taken", () => {
-    const slots = iso(run({ taken: ["2026-09-10T12:00:00.000Z", "2026-09-10T19:00:00.000Z"] }));
+    const slots = iso(
+      run({
+        taken: [
+          { starts_at: "2026-09-10T12:00:00.000Z", ends_at: "2026-09-10T12:45:00.000Z" },
+          { starts_at: "2026-09-10T19:00:00.000Z", ends_at: "2026-09-10T19:45:00.000Z" },
+        ],
+      }),
+    );
 
     expect(slots).not.toContain("2026-09-10T12:00:00.000Z");
     expect(slots).not.toContain("2026-09-10T19:00:00.000Z");
@@ -135,9 +142,39 @@ describe("generateSlots", () => {
   });
 
   it("returns nothing when every slot of the day is booked", () => {
-    const allStarts = run().map((slot) => slot.start);
+    const everything = run().map((slot) => ({ starts_at: slot.start, ends_at: slot.end }));
 
-    expect(run({ taken: allStarts })).toEqual([]);
+    expect(run({ taken: everything })).toEqual([]);
+  });
+
+  it("hides a slot that OVERLAPS an existing turno, not just one that matches it", () => {
+    // The bug this replaced: an 11:15-12:00 turno left over from when turnos were
+    // 45 minutes long sits off the current hourly grid. Matching on start time
+    // alone left 11:00-12:00 on offer, right on top of it.
+    // 10:45-11:30 local: starts and ends mid-slot, so it lands on no grid line
+    // and its start time matches no slot at all.
+    const offGrid = [
+      { starts_at: "2026-09-10T13:45:00.000Z", ends_at: "2026-09-10T14:30:00.000Z" },
+    ];
+
+    const slots = iso(run({ taken: offGrid }));
+
+    // Both slots it cuts into must disappear, even though neither starts at
+    // 13:45 — the old start-time match kept both on offer.
+    expect(slots).not.toContain("2026-09-10T13:30:00.000Z"); // 10:30-11:15
+    expect(slots).not.toContain("2026-09-10T14:15:00.000Z"); // 11:15-12:00
+    // Untouched on either side.
+    expect(slots).toContain("2026-09-10T12:45:00.000Z"); // ends 13:30, before it
+    expect(slots).toContain("2026-09-10T15:00:00.000Z"); // starts 15:00, after it
+  });
+
+  it("frees a slot that merely abuts a turno", () => {
+    const before = [
+      { starts_at: "2026-09-10T11:15:00.000Z", ends_at: "2026-09-10T12:00:00.000Z" },
+    ];
+
+    // The turno ends exactly at the 09:00 slot's start: no clash.
+    expect(iso(run({ taken: before }))).toContain("2026-09-10T12:00:00.000Z");
   });
 
   it("returns nothing for a weekday with no scheduled shift", () => {

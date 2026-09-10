@@ -5,8 +5,14 @@ import type { BookingInput } from "@/lib/booking-schema";
 import { ACTIVE_STATUSES, type Appointment } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-/** Postgres unique-violation. This is how a double-booking surfaces. */
-const UNIQUE_VIOLATION = "23505";
+/**
+ * How a double-booking surfaces from Postgres.
+ *
+ * `23P01` is the exclusion constraint rejecting an overlap — the normal case.
+ * `23505` is kept because older databases may still carry the unique index on
+ * `starts_at` that migration 0003 replaces.
+ */
+const OVERLAP_CODES = ["23P01", "23505"];
 
 export { bookingSchema, normalizePhone, type BookingInput } from "@/lib/booking-schema";
 
@@ -102,9 +108,9 @@ export async function createBooking(
     .single();
 
   if (error) {
-    // The partial unique index fired: someone took this slot between our
+    // The database refused an overlap: someone took this time between our
     // availability check and this insert. This is the race working as designed.
-    if (error.code === UNIQUE_VIOLATION) {
+    if (OVERLAP_CODES.includes(error.code ?? "")) {
       return {
         ok: false,
         reason: "slot_taken",

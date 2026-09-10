@@ -19,11 +19,18 @@ export type ScheduleRow = {
   end_time: string;
 };
 
-/** A one-off closure: holiday, vacation, errand. Absolute instants. */
-export type BlockRow = {
+/**
+ * A stretch of time that is not available: a closure, or an existing turno.
+ *
+ * Both are treated identically — what matters is the range they occupy, not why.
+ */
+export type BusyRange = {
   starts_at: string | Date;
   ends_at: string | Date;
 };
+
+/** A one-off closure: holiday, vacation, errand. Absolute instants. */
+export type BlockRow = BusyRange;
 
 export type Slot = {
   start: Date;
@@ -37,8 +44,15 @@ export type GenerateSlotsInput = {
   to: Date;
   weeklySchedule: ScheduleRow[];
   blocks: BlockRow[];
-  /** `starts_at` of every appointment that currently holds a slot. */
-  taken: Array<string | Date>;
+  /**
+   * The time every active appointment occupies.
+   *
+   * Ranges, not start times: an appointment left over from a different slot
+   * length (say 11:15-12:00 after the clinic moved to hourly turnos) sits off
+   * the current grid, and matching on start time alone would happily offer
+   * 11:00-12:00 right on top of it.
+   */
+  taken: BusyRange[];
   slotMinutes: number;
   now: Date;
   /**
@@ -139,10 +153,11 @@ export function generateSlots({
   const earliest = now.getTime() + minLeadMinutes * MINUTE_MS;
   const cutoff = horizonDays === null ? Infinity : horizonCutoff(now, horizonDays).getTime();
 
-  const takenStarts = new Set(taken.map((value) => new Date(value).getTime()));
-  const blockRanges = blocks.map((block) => ({
-    start: new Date(block.starts_at).getTime(),
-    end: new Date(block.ends_at).getTime(),
+  // Closures and existing turnos are the same thing here: time that is spoken
+  // for. One overlap test covers both.
+  const busy = [...blocks, ...taken].map((range) => ({
+    start: new Date(range.starts_at).getTime(),
+    end: new Date(range.ends_at).getTime(),
   }));
 
   // Index the schedule by weekday so each day is a lookup rather than a scan.
@@ -184,11 +199,12 @@ export function generateSlots({
         if (start < windowStart || start >= windowEnd) continue;
         if (start < earliest) continue;
         if (start >= cutoff) continue;
-        if (takenStarts.has(start)) continue;
 
-        // Half-open overlap: touching at the boundary is not a clash.
-        const blocked = blockRanges.some((range) => start < range.end && end > range.start);
-        if (blocked) continue;
+        // Half-open overlap: touching at the boundary is not a clash, so a turno
+        // ending at 12:00 leaves 12:00 free. Mirrors the exclusion constraint in
+        // the database, which compares the same ranges.
+        const clash = busy.some((range) => start < range.end && end > range.start);
+        if (clash) continue;
 
         slots.push({ start: new Date(start), end: new Date(end) });
       }
