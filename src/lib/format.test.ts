@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { formatDay, formatPrice, formatTime, toLocalDateKey, whatsappLink } from "./format";
 
 describe("formatters render in clinic-local time regardless of server zone", () => {
-  // 2026-09-10T22:30Z is 19:30 in Buenos Aires on the same day.
+  // 2026-09-10T22:30Z is 19:30 in Salta on the same day.
   const evening = new Date("2026-09-10T22:30:00.000Z");
   // 2026-09-11T02:00Z is 23:00 on the 10th locally — a different calendar day
-  // in UTC than in Argentina, which is where naive formatting goes wrong.
+  // in UTC than in Salta, which is where naive formatting goes wrong.
   const lateNight = new Date("2026-09-11T02:00:00.000Z");
 
   it("formats the local hour, not the UTC hour", () => {

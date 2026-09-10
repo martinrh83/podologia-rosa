@@ -8,7 +8,7 @@ import {
   type ScheduleRow,
 } from "./slots";
 
-// 2026-09-10 is a Thursday (weekday 4). Argentina is UTC-3, so 09:00 local is
+// 2026-09-10 is a Thursday (weekday 4). Salta is UTC-3, so 09:00 local is
 // 12:00Z — the tests assert that mapping explicitly rather than trusting it.
 const THURSDAY = 4;
 
@@ -46,7 +46,7 @@ const iso = (slots: ReturnType<typeof generateSlots>) =>
 describe("generateSlots", () => {
   it("maps clinic-local wall clock onto the correct absolute instant", () => {
     const slots = run();
-    // 09:00 in Buenos Aires is 12:00 UTC.
+    // 09:00 in Salta is 12:00 UTC.
     expect(slots[0].start.toISOString()).toBe("2026-09-10T12:00:00.000Z");
     expect(slots[0].end.toISOString()).toBe("2026-09-10T12:45:00.000Z");
   });
@@ -328,7 +328,7 @@ describe("localDayRange", () => {
 describe("localDayRangeFromKey", () => {
   it("interprets a bare date in clinic time, not as UTC midnight", () => {
     // The trap: new Date("2026-09-10") is 00:00Z, which is 21:00 on the 9th in
-    // Buenos Aires. The admin date picker would silently offer the wrong day.
+    // Salta. The admin date picker would silently offer the wrong day.
     const range = localDayRangeFromKey("2026-09-10");
 
     expect(range.start.toISOString()).toBe("2026-09-10T03:00:00.000Z");

@@ -5,7 +5,7 @@ insert into clinic_settings (id, slot_minutes, horizon_days, max_active_per_cont
                              clinic_name, address, phone, whatsapp, map_url)
 values (true, 60, 15, 0,
         'Podología Rosa',
-        'Av. Siempreviva 742, Buenos Aires',
+        'Completar con la dirección real, Salta',
         '+54 11 5555-4444',
         '+5491155554444',
         null)

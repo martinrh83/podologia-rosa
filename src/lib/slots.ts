@@ -1,13 +1,19 @@
 import { TZDate } from "@date-fns/tz";
 
 /**
- * The clinic's IANA timezone.
+ * The clinic's IANA timezone. The consultorio is in Salta.
  *
- * Argentina has had no DST since 2009, but this is deliberately *not* hardcoded
- * as UTC-3: if the country reinstates DST, an offset constant would silently
- * shift every turno by an hour, whereas an IANA zone just keeps working.
+ * Two deliberate choices here, and neither is cosmetic today:
+ *
+ *  - A zone name, not a `-03:00` offset. Argentina has had no DST since 2009,
+ *    but if it comes back an offset constant would silently shift every turno
+ *    by an hour.
+ *  - *Salta*, not Buenos Aires. The two agree right now, but they have not
+ *    always: Salta opted out of the 2008-2009 DST period while Buenos Aires
+ *    observed it, leaving them an hour apart. If that ever happens again, this
+ *    is the line that keeps the turnos right.
  */
-export const CLINIC_TZ = "America/Argentina/Buenos_Aires";
+export const CLINIC_TZ = "America/Argentina/Salta";
 
 const MINUTE_MS = 60_000;
 
@@ -235,7 +241,7 @@ export function groupSlotsByLocalDate(slots: Slot[]): Map<string, Slot[]> {
 /**
  * The absolute bounds of a clinic-local calendar day, `offsetDays` from `from`.
  *
- * The reminder cron needs "tomorrow in Buenos Aires", which is not the same as
+ * The admin needs "tomorrow in Salta", which is not the same as
  * "now plus 24 hours": a job running at 23:00 local would otherwise reach into
  * the day after tomorrow and skip a whole day of turnos.
  */
@@ -252,7 +258,7 @@ export function localDayRange(from: Date, offsetDays = 0): { start: Date; end: D
  *
  * Used by the admin's date picker: a native `<input type="date">` yields a bare
  * calendar date with no zone, and `new Date("2026-09-10")` would parse it as UTC
- * midnight — which is 21:00 the previous day in Buenos Aires.
+ * midnight — which is 21:00 the previous day in Salta.
  */
 export function localDayRangeFromKey(key: string): { start: Date; end: Date } {
   const [year, month, day] = key.split("-").map(Number);

@@ -4,7 +4,7 @@ import { bookingSchema, normalizeDni, normalizePhone } from "./booking-schema";
 
 describe("normalizePhone", () => {
   it("collapses every way one Argentine number gets typed into a single value", () => {
-    // All the same Buenos Aires line. If any of these normalised differently the
+    // All the same Argentine mobile line. If any of these normalised differently the
     // per-contact cap would count one person as several and stop working --
     // which is exactly the bug this replaced.
     const variants = [

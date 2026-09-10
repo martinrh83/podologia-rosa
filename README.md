@@ -62,7 +62,7 @@ supabase/migrations       Esquema y datos iniciales.
   disponibilidad online se corrige sola.
 
 - **Zona horaria:** todo se guarda en UTC y se formatea en
-  `America/Argentina/Buenos_Aires` con zona IANA, nunca con un offset fijo.
+  `America/Argentina/Salta` con zona IANA, nunca con un offset fijo.
 
 - **`motivo` es un dato sensible** (Ley 25.326). No sale nunca a `anon` y lo
   borra el cron de retención a los 30 días. Si lo exponés en algún lugar nuevo,

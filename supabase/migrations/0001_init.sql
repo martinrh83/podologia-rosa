@@ -1,5 +1,5 @@
 -- Podología Rosa — initial schema
--- All timestamps are timestamptz (UTC). Formatting to America/Argentina/Buenos_Aires
+-- All timestamps are timestamptz (UTC). Formatting to America/Argentina/Salta
 -- happens at the presentation edges only, never in the database.
 
 create extension if not exists pgcrypto;

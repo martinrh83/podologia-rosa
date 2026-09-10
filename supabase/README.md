@@ -46,7 +46,7 @@ nadie más pueda crearse una cuenta.
 
 Configurados en `vercel.json`, en horario UTC:
 
-| Job | Cron (UTC) | Hora en Buenos Aires | Qué hace |
+| Job | Cron (UTC) | Hora en Salta | Qué hace |
 |---|---|---|---|
 | `/api/cron/recordatorios` | `0 12 * * *` | 09:00 | Recordatorio a los turnos de mañana. Idempotente vía `reminder_sent_at`. |
 | `/api/cron/retencion` | `0 6 * * *` | 03:00 | Borra `motivo` viejo, anonimiza turnos de más de 12 meses, limpia rate limits. |
