@@ -67,6 +67,14 @@ export function normalizeDni(input: string): string {
   return input.replace(/\D/g, "");
 }
 
+/**
+ * El consentimiento no vive en el schema: un turno cargado por Rosa desde el
+ * panel no lo necesita, sólo los que saca el paciente. La regla está en
+ * `createBooking`, y el mensaje acá para que el formulario diga exactamente lo
+ * mismo que el servidor.
+ */
+export const CONSENT_REQUIRED_MESSAGE = "Necesitamos tu consentimiento para guardar tus datos.";
+
 export const bookingSchema = z.object({
   startsAt: z.iso.datetime({ offset: true }),
   patientFirstName: z.string().trim().min(2, "Ingresá tu nombre").max(80),
@@ -77,7 +85,7 @@ export const bookingSchema = z.object({
     .transform(normalizeDni)
     // Los DNI argentinos vigentes tienen 7 u 8 dígitos.
     .refine((value) => value.length >= 7 && value.length <= 8, "Ingresá un DNI válido"),
-  patientCoverage: z.enum(["ips", "osunsa", "particular"]),
+  patientCoverage: z.enum(["ips", "osunsa", "particular"], "Elegí tu obra social"),
   patientPhone: z
     .string()
     .trim()
@@ -86,7 +94,12 @@ export const bookingSchema = z.object({
     .transform(normalizePhone)
     .refine((value) => value.replace(/\D/g, "").length >= 8, "Ingresá un teléfono válido"),
   // Optional, and a DATO SENSIBLE under Ley 25.326 art. 2.
-  motivo: z.string().trim().max(500).optional().or(z.literal("")),
+  motivo: z
+    .string()
+    .trim()
+    .max(500, "El motivo no puede superar los 500 caracteres")
+    .optional()
+    .or(z.literal("")),
   /** Must be explicitly true for an online booking; recorded as consent_at. */
   consent: z.boolean(),
 });

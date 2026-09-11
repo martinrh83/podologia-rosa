@@ -4,6 +4,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { CopyLink } from "@/components/copy-link";
+import {
+  EMPTY_FORM,
+  firstInvalidField,
+  validateField,
+  validateForm,
+  type FieldErrors,
+  type FieldName,
+  type PatientForm,
+} from "@/lib/booking-form";
 import { COVERAGES } from "@/lib/booking-schema";
 import { capitalizeFirst, whatsappLink } from "@/lib/format";
 
@@ -43,33 +52,6 @@ type Status =
  */
 type Step = "cuando" | "datos";
 
-/**
- * Los datos del paciente viven en el estado, no en el DOM.
- *
- * Es lo que hace que un 409 —alguien tomó el horario mientras completaba— no
- * castigue al que perdió: se lo manda de vuelta al paso 1 a elegir otro horario
- * y el formulario reaparece con todo lo que ya había escrito.
- */
-type PatientForm = {
-  patientFirstName: string;
-  patientLastName: string;
-  patientDni: string;
-  patientCoverage: string;
-  patientPhone: string;
-  motivo: string;
-  consent: boolean;
-};
-
-const EMPTY_FORM: PatientForm = {
-  patientFirstName: "",
-  patientLastName: "",
-  patientDni: "",
-  patientCoverage: "",
-  patientPhone: "",
-  motivo: "",
-  consent: false,
-};
-
 export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, clinicName }: Props) {
   const router = useRouter();
 
@@ -77,6 +59,7 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
   const [selectedDayKey, setSelectedDayKey] = useState(days[0]?.key ?? null);
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
   const [form, setForm] = useState<PatientForm>(EMPTY_FORM);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   const topRef = useRef<HTMLDivElement>(null);
@@ -111,8 +94,26 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
     ? days.find((day) => day.slots.some((slot) => slot.startsAt === selectedSlot.startsAt))
     : null;
 
-  function update<K extends keyof PatientForm>(key: K, value: PatientForm[K]) {
-    setForm((current) => ({ ...current, [key]: value }));
+  function update<K extends FieldName>(key: K, value: PatientForm[K]) {
+    const next = { ...form, [key]: value };
+    setForm(next);
+
+    // Premiar temprano. Mientras el campo esté limpio no se lo molesta: marcar
+    // "Ingresá tu nombre" cuando alguien todavía va por la "M" de María es
+    // retarlo por no haber terminado. Pero una vez que el campo ya está
+    // marcado, se revalida en cada tecla para que el error desaparezca apenas
+    // lo corrige, sin esperar a que se vaya del campo.
+    if (errors[key]) {
+      setErrors((current) => ({ ...current, [key]: validateField(key, next) ?? undefined }));
+    }
+  }
+
+  /**
+   * Castigar tarde: el error aparece recién cuando el campo se da por
+   * terminado, no mientras se escribe.
+   */
+  function handleBlur(key: FieldName) {
+    setErrors((current) => ({ ...current, [key]: validateField(key, form) ?? undefined }));
   }
 
   function pickSlot(slot: BookingSlot) {
@@ -125,6 +126,18 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
     event.preventDefault();
     if (!selectedSlot) return;
 
+    const found = validateForm(form);
+    const firstInvalid = firstInvalidField(found);
+
+    if (firstInvalid) {
+      setErrors(found);
+      // Sin esto, en un teléfono el error puede quedar fuera de pantalla y
+      // parece que el botón no hizo nada. `focus` además lo trae a la vista.
+      document.getElementById(firstInvalid)?.focus();
+      return;
+    }
+
+    setErrors({});
     setStatus({ kind: "submitting" });
 
     try {
@@ -317,7 +330,15 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
               </button>
             </div>
 
+            {/*
+              `noValidate` apaga los globitos nativos del navegador: se ven
+              distintos en cada uno, no se pueden estilar y se van solos. Si nos
+              hacemos cargo de la validación, nos hacemos cargo entera. El
+              atributo `required` se queda igual, porque es lo que hace que un
+              lector de pantalla anuncie el campo como obligatorio.
+            */}
             <form
+              noValidate
               onSubmit={handleSubmit}
               className="space-y-4 rounded-xl border border-border bg-surface p-5"
             >
@@ -328,7 +349,9 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                   required
                   autoComplete="given-name"
                   value={form.patientFirstName}
+                  error={errors.patientFirstName}
                   onChange={(value) => update("patientFirstName", value)}
+                  onBlur={() => handleBlur("patientFirstName")}
                 />
                 <Field
                   label="Apellido"
@@ -336,7 +359,9 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                   required
                   autoComplete="family-name"
                   value={form.patientLastName}
+                  error={errors.patientLastName}
                   onChange={(value) => update("patientLastName", value)}
+                  onBlur={() => handleBlur("patientLastName")}
                 />
               </div>
 
@@ -347,18 +372,27 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                 inputMode="numeric"
                 hint="Sin puntos ni espacios."
                 value={form.patientDni}
+                error={errors.patientDni}
                 onChange={(value) => update("patientDni", value)}
+                onBlur={() => handleBlur("patientDni")}
               />
 
-              <fieldset>
+              <fieldset
+                role="radiogroup"
+                aria-invalid={errors.patientCoverage ? true : undefined}
+                aria-describedby={errors.patientCoverage ? "patientCoverage-error" : undefined}
+              >
                 <legend className="text-[0.95rem] font-medium">Obra social</legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  {COVERAGES.map((coverage) => (
+                  {COVERAGES.map((coverage, index) => (
                     <label
                       key={coverage.value}
                       className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-background px-3 py-3 text-[1rem] hover:border-accent"
                     >
                       <input
+                        // El primero lleva el id del grupo: es al que se le
+                        // manda el foco si el paciente no eligió ninguna.
+                        id={index === 0 ? "patientCoverage" : undefined}
                         type="radio"
                         name="patientCoverage"
                         value={coverage.value}
@@ -371,6 +405,7 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                     </label>
                   ))}
                 </div>
+                <FieldError id="patientCoverage-error" message={errors.patientCoverage} />
               </fieldset>
 
               <Field
@@ -381,7 +416,9 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                 autoComplete="tel"
                 hint="Para avisarte si surge algún cambio."
                 value={form.patientPhone}
+                error={errors.patientPhone}
                 onChange={(value) => update("patientPhone", value)}
+                onBlur={() => handleBlur("patientPhone")}
               />
 
               <div>
@@ -394,12 +431,16 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                   rows={2}
                   maxLength={500}
                   value={form.motivo}
+                  aria-describedby={`motivo-hint${errors.motivo ? " motivo-error" : ""}`}
+                  aria-invalid={errors.motivo ? true : undefined}
                   onChange={(event) => update("motivo", event.target.value)}
+                  onBlur={() => handleBlur("motivo")}
                   className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-[1rem]"
                 />
-                <p className="mt-1 text-sm text-muted">
+                <p id="motivo-hint" className="mt-1 text-sm text-muted">
                   Contanos solo si querés. Nos ayuda a preparar la consulta.
                 </p>
+                <FieldError id="motivo-error" message={errors.motivo} />
               </div>
 
               {/*
@@ -407,11 +448,15 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                 dato sensible under Ley 25.326 art. 2, so a generic "acepto los
                 términos" would not be valid consent for it.
               */}
+              <div>
               <label className="flex items-start gap-3 text-[0.95rem]">
                 <input
+                  id="consent"
                   type="checkbox"
                   name="consent"
                   required
+                  aria-describedby={errors.consent ? "consent-error" : undefined}
+                  aria-invalid={errors.consent ? true : undefined}
                   checked={form.consent}
                   onChange={(event) => update("consent", event.target.checked)}
                   className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
@@ -425,6 +470,8 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                   .
                 </span>
               </label>
+              <FieldError id="consent-error" message={errors.consent} />
+              </div>
 
               {status.kind === "error" && !status.slotTaken && (
                 <Notice tone="danger" title="No pudimos guardar el turno">
@@ -475,7 +522,9 @@ function Field({
   autoComplete,
   inputMode,
   value,
+  error,
   onChange,
+  onBlur,
 }: {
   label: string;
   name: string;
@@ -485,9 +534,12 @@ function Field({
   autoComplete?: string;
   inputMode?: "numeric" | "tel" | "text";
   value: string;
+  error?: string;
   onChange: (value: string) => void;
+  onBlur: () => void;
 }) {
   const hintId = hint ? `${name}-hint` : undefined;
+  const errorId = error ? `${name}-error` : undefined;
 
   return (
     <div>
@@ -502,17 +554,46 @@ function Field({
         required={required}
         autoComplete={autoComplete}
         inputMode={inputMode}
-        aria-describedby={hintId}
+        // Los dos, en orden: primero la ayuda, después el error.
+        aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined}
+        aria-invalid={error ? true : undefined}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-[1rem]"
+        onBlur={onBlur}
+        className={`mt-1.5 w-full rounded-lg border bg-background px-3 py-2.5 text-[1rem] ${
+          error ? "border-[color:var(--danger)]" : "border-border"
+        }`}
       />
       {hint && (
         <p id={hintId} className="mt-1 text-sm text-muted">
           {hint}
         </p>
       )}
+      <FieldError id={`${name}-error`} message={error} />
     </div>
+  );
+}
+
+/**
+ * El error de un campo.
+ *
+ * Siempre está en el DOM, aunque esté vacío: una región `aria-live` tiene que
+ * existir *antes* de que aparezca el texto, si no el lector de pantalla no
+ * anuncia nada. Eso cubre el caso de quien se va del campo con un error y
+ * nunca lo ve.
+ *
+ * El texto es texto, no sólo un borde rojo: el color por sí solo no alcanza
+ * (WCAG 1.4.1) y además no dice *qué* está mal.
+ */
+function FieldError({ id, message }: { id: string; message?: string }) {
+  return (
+    <p
+      id={id}
+      aria-live="polite"
+      className={`text-sm text-[color:var(--danger)] ${message ? "mt-1" : ""}`}
+    >
+      {message ?? ""}
+    </p>
   );
 }
 

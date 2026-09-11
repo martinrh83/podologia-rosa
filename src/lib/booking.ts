@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getAvailability, isSlotBookable } from "@/lib/availability";
-import type { BookingInput } from "@/lib/booking-schema";
+import { CONSENT_REQUIRED_MESSAGE, type BookingInput } from "@/lib/booking-schema";
 import { ACTIVE_STATUSES, type Appointment } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -49,7 +49,7 @@ export async function createBooking(
     return {
       ok: false,
       reason: "consent_required",
-      message: "Necesitamos tu consentimiento para guardar tus datos.",
+      message: CONSENT_REQUIRED_MESSAGE,
     };
   }
 
