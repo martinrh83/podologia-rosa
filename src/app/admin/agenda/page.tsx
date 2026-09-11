@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { addBlock, addShift, removeBlock, removeShift } from "@/app/actions/schedule";
 import { requireStaff } from "@/lib/auth";
 import type { ScheduleBlock, WeeklyScheduleRow } from "@/lib/db/types";
-import { formatDay } from "@/lib/format";
+import { capitalizeFirst, formatDay } from "@/lib/format";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
@@ -139,12 +139,10 @@ export default async function AgendaPage() {
               className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3"
             >
               <span>
-                <span className="capitalize">{formatDay(block.starts_at)}</span>
+                {capitalizeFirst(formatDay(block.starts_at))}
                 {" — "}
                 {/* ends_at is the exclusive midnight after the last day. */}
-                <span className="capitalize">
-                  {formatDay(new Date(new Date(block.ends_at).getTime() - 1))}
-                </span>
+                {capitalizeFirst(formatDay(new Date(new Date(block.ends_at).getTime() - 1)))}
                 {block.reason && <span className="text-muted"> · {block.reason}</span>}
               </span>
               <form action={removeBlock}>

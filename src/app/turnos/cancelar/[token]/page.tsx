@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CancelForm } from "@/components/cancel-form";
 import { getClinicSettings } from "@/lib/availability";
 import { getByToken } from "@/lib/booking";
-import { formatFull } from "@/lib/format";
+import { capitalizeFirst, formatFull } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Cancelar turno",
@@ -58,7 +58,7 @@ export default async function CancelarPage({ params }: PageProps<"/turnos/cancel
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Tu turno</h1>
 
       <div className="mt-6 rounded-xl border border-border bg-surface p-5">
-        <p className="text-lg capitalize">{formatFull(appointment.starts_at)}</p>
+        <p className="text-lg">{capitalizeFirst(formatFull(appointment.starts_at))}</p>
         <p className="mt-1 text-muted">A nombre de {appointment.patient_first_name} {appointment.patient_last_name}</p>
         {settings.address && <p className="mt-3 text-[0.95rem] text-muted">{settings.address}</p>}
       </div>

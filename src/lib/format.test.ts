@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDay, formatPrice, formatTime, toLocalDateKey, whatsappLink } from "./format";
+import {
+  capitalizeFirst,
+  formatDay,
+  formatPrice,
+  formatTime,
+  toLocalDateKey,
+  whatsappLink,
+} from "./format";
 
 describe("formatters render in clinic-local time regardless of server zone", () => {
   // 2026-09-10T22:30Z is 19:30 in Salta on the same day.
@@ -53,5 +60,19 @@ describe("whatsappLink", () => {
   it("leaves a number that already has a country code alone", () => {
     // Not 10 digits, so it is assumed to carry its own prefix already.
     expect(whatsappLink("14155552671", "hola")).toContain("wa.me/14155552671");
+  });
+});
+
+describe("capitalizeFirst", () => {
+  it("toca la primera letra y nada más", () => {
+    // Lo que distingue esto de la clase `capitalize` de CSS, que devolvía
+    // "Jueves, 10 De Septiembre".
+    expect(capitalizeFirst(formatDay("2026-09-10T20:00:00.000Z"))).toBe(
+      "Jueves, 10 de septiembre",
+    );
+  });
+
+  it("no se rompe con una cadena vacía", () => {
+    expect(capitalizeFirst("")).toBe("");
   });
 });

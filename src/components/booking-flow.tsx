@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
-import { whatsappLink } from "@/lib/format";
+import { capitalizeFirst, whatsappLink } from "@/lib/format";
 
 export type BookingSlot = { startsAt: string; label: string };
 
@@ -239,8 +239,8 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
                         : "border-border bg-surface hover:border-accent"
                     }`}
                   >
-                    <span className="block text-[0.95rem] font-medium capitalize">
-                      {day.shortLabel}
+                    <span className="block text-[0.95rem] font-medium">
+                      {capitalizeFirst(day.shortLabel)}
                     </span>
                     <span className={`block text-xs ${isSelected ? "text-white/80" : "text-muted"}`}>
                       {day.slots.length} {day.slots.length === 1 ? "horario" : "horarios"}
@@ -254,7 +254,7 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
           {selectedDay && (
             <div>
               <p className="mb-1 text-sm font-medium uppercase tracking-wide text-muted">Horario</p>
-              <p className="mb-3 text-lg capitalize">{selectedDay.label}</p>
+              <p className="mb-3 text-lg">{capitalizeFirst(selectedDay.label)}</p>
 
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {selectedDay.slots.map((slot) => {
@@ -304,8 +304,8 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[color:var(--accent)]/30 bg-accent-soft p-4">
               <div>
                 <p className="text-sm text-muted">Tu turno</p>
-                <p className="text-[1.05rem] font-medium capitalize">
-                  {slotDay?.label} · {selectedSlot.label}
+                <p className="text-[1.05rem] font-medium">
+                  {capitalizeFirst(slotDay?.label ?? "")} · {selectedSlot.label}
                 </p>
               </div>
               <button
@@ -571,7 +571,7 @@ function Confirmation({
   return (
     <Notice tone="success" title="¡Listo! Tu turno quedó confirmado">
       <p className="text-[1.05rem] text-foreground">
-        <span className="capitalize">{status.dayLabel}</span> a las {status.slotLabel}.
+        {capitalizeFirst(status.dayLabel)} a las {status.slotLabel}.
       </p>
 
       {status.cancelUrl ? (

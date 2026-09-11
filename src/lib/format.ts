@@ -55,6 +55,22 @@ export function formatShortDay(value: Date | string): string {
   return shortDayFormatter.format(new Date(value));
 }
 
+/**
+ * Primera letra en mayúscula, el resto intacto.
+ *
+ * En español los días y los meses van en minúscula, y así los devuelven los
+ * formateadores: es lo correcto cuando la fecha cae dentro de una oración, como
+ * en el mensaje de WhatsApp. Cuando en cambio la fecha es un rótulo que arranca
+ * una línea, se capitaliza acá.
+ *
+ * Existe en vez de la clase `capitalize` de CSS porque esa pone mayúscula en
+ * *cada* palabra —"11 De Septiembre"— y porque `::first-letter` no se aplica a
+ * un elemento inline.
+ */
+export function capitalizeFirst(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 /** "jueves, 10 de septiembre de 2026, 14:30" */
 export function formatFull(value: Date | string): string {
   return fullFormatter.format(new Date(value));

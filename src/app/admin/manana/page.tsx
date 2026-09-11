@@ -5,7 +5,7 @@ import { getClinicSettings } from "@/lib/availability";
 import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
-import { formatDay, formatTime } from "@/lib/format";
+import { capitalizeFirst, formatDay, formatTime } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
 
 export const metadata: Metadata = {
@@ -37,8 +37,8 @@ export default async function AdminTomorrowPage() {
 
   return (
     <div>
-      <h2 className="mb-1 text-2xl font-semibold capitalize tracking-tight">
-        {formatDay(tomorrow)}
+      <h2 className="mb-1 text-2xl font-semibold tracking-tight">
+        {capitalizeFirst(formatDay(tomorrow))}
       </h2>
       <p className="mb-5 text-muted">
         {appointments.length === 0
