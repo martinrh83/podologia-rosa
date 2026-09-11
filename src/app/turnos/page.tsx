@@ -49,7 +49,7 @@ export default async function TurnosPage() {
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sacar un turno</h1>
         <p className="mt-3 text-lg text-muted">
-          Elegí el día y el horario que te queden cómodos. Cada turno dura{" "}
+          Son dos pasos y no hace falta crear una cuenta. Cada turno dura{" "}
           {settings.slot_minutes} minutos.
         </p>
       </header>
