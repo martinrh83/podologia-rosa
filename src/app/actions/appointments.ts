@@ -41,8 +41,21 @@ export async function updateStatus(formData: FormData): Promise<void> {
 export async function createAdminBooking(formData: FormData): Promise<void> {
   await requireStaff();
 
+  const practitionerId = String(formData.get("practitionerId") ?? "");
+
+  // Volver al formulario con el profesional y el día que ya estaban elegidos:
+  // sin esto, un error manda al secretario de vuelta al principio con el
+  // paciente esperando del otro lado del mostrador.
+  const back = (message: string): never => {
+    const params = new URLSearchParams({ error: message });
+    if (practitionerId) params.set("profesional", practitionerId);
+    const fecha = String(formData.get("fecha") ?? "");
+    if (fecha) params.set("fecha", fecha);
+    redirect(`/admin/nuevo?${params}`);
+  };
+
   const parsed = bookingSchema.safeParse({
-    practitionerId: String(formData.get("practitionerId") ?? ""),
+    practitionerId,
     startsAt: String(formData.get("startsAt") ?? ""),
     patientFirstName: String(formData.get("patientFirstName") ?? ""),
     patientLastName: String(formData.get("patientLastName") ?? ""),
@@ -54,13 +67,13 @@ export async function createAdminBooking(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirect(`/admin/nuevo?error=${encodeURIComponent(parsed.error.issues[0].message)}`);
+    return back(parsed.error.issues[0].message);
   }
 
   const result = await createBooking(parsed.data, { audience: "admin" });
 
   if (!result.ok) {
-    redirect(`/admin/nuevo?error=${encodeURIComponent(result.message)}`);
+    return back(result.message);
   }
 
   revalidatePath("/admin");

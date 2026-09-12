@@ -129,8 +129,11 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
         </p>
       ) : (
         <form action={createAdminBooking} className="space-y-4 rounded-xl border border-border bg-surface p-5">
-          {/* El profesional viaja con el turno: es el que define la agenda de arriba. */}
+          {/* El profesional y el día viajan con el turno: son los que definen la
+              lista de horarios de arriba, y son a los que hay que volver si algo
+              falla. */}
           <input type="hidden" name="practitionerId" value={practitioner.id} />
+          <input type="hidden" name="fecha" value={dateKey} />
 
           <div>
             <label htmlFor="startsAt" className="block text-[0.95rem] font-medium">

@@ -65,6 +65,8 @@ export default async function AdminProfesionalesPage() {
                   <input
                     id={`fn-${practitioner.id}`}
                     name="firstName"
+                    required
+                    minLength={2}
                     defaultValue={practitioner.first_name}
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
                   />
@@ -76,6 +78,8 @@ export default async function AdminProfesionalesPage() {
                   <input
                     id={`ln-${practitioner.id}`}
                     name="lastName"
+                    required
+                    minLength={2}
                     defaultValue={practitioner.last_name}
                     className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
                   />
@@ -102,6 +106,7 @@ export default async function AdminProfesionalesPage() {
                     id={`sm-${practitioner.id}`}
                     name="slotMinutes"
                     type="number"
+                    required
                     min="5"
                     step="5"
                     inputMode="numeric"

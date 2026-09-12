@@ -21,6 +21,14 @@ export async function getClinicSettings(): Promise<ClinicSettings> {
   return data as ClinicSettings;
 }
 
+/** Se pidió la agenda de alguien que no existe, o que ya no está. */
+export class PractitionerNotFound extends Error {
+  constructor(id: string) {
+    super(`No existe el profesional ${id}`);
+    this.name = "PractitionerNotFound";
+  }
+}
+
 export type AvailabilityOptions = {
   /**
    * De quién es la agenda que se consulta.
@@ -64,17 +72,20 @@ export async function getAvailability({
   const [settingsResult, practitionerResult, scheduleResult, blocksResult, takenResult] =
     await Promise.all([
       supabase.from("clinic_settings").select("*").limit(1).single(),
-      supabase.from("practitioners").select("*").eq("id", practitionerId).single(),
+      supabase.from("practitioners").select("*").eq("id", practitionerId).maybeSingle(),
       supabase
         .from("weekly_schedule")
         .select("weekday, start_time, end_time")
         .eq("practitioner_id", practitionerId),
-      // Any block that overlaps the window at all: the practitioner's own, plus
-      // the clinic-wide ones (practitioner_id null), which apply to everybody.
+      // Todos los cierres que pisan la ventana, de quien sea.
+      //
+      // Se filtran después en memoria en vez de armar un `.or()` con el id
+      // interpolado: son un puñado de filas —vacaciones y feriados— y una
+      // cadena de filtro construida con texto que viene de afuera es la clase
+      // de cosa que hoy no se puede explotar y mañana sí.
       supabase
         .from("schedule_blocks")
-        .select("starts_at, ends_at")
-        .or(`practitioner_id.eq.${practitionerId},practitioner_id.is.null`)
+        .select("starts_at, ends_at, practitioner_id")
         .lt("starts_at", to.toISOString())
         .gt("ends_at", from.toISOString()),
       supabase
@@ -97,13 +108,23 @@ export async function getAvailability({
   }
 
   const settings = { ...DEFAULT_SETTINGS, ...(settingsResult.data ?? {}) } as ClinicSettings;
-  const practitioner = practitionerResult.data as Practitioner;
+  const practitioner = practitionerResult.data as Practitioner | null;
+
+  if (!practitioner) {
+    throw new PractitionerNotFound(practitionerId);
+  }
+
+  // Los del consultorio (practitioner_id null) valen para todos, incluido quien
+  // entre después de que se cargaran.
+  const blocks = (blocksResult.data ?? []).filter(
+    (block) => block.practitioner_id === null || block.practitioner_id === practitionerId,
+  );
 
   const slots = generateSlots({
     from,
     to,
     weeklySchedule: scheduleResult.data ?? [],
-    blocks: blocksResult.data ?? [],
+    blocks,
     taken: takenResult.data ?? [],
     // La duración sale del profesional; el horizonte sigue siendo una política
     // del consultorio, igual para todos.

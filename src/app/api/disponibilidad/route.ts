@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 
-import { getAvailability } from "@/lib/availability";
+import { getAvailability, PractitionerNotFound } from "@/lib/availability";
 
 /**
  * Free slots for a window, used by the booking form when the visitor changes day.
@@ -16,8 +17,12 @@ export async function GET(request: NextRequest) {
 
   // No existe "la disponibilidad del consultorio": cada profesional tiene su
   // agenda y su duración de turno.
-  if (!practitionerId) {
-    return NextResponse.json({ error: "Falta el profesional." }, { status: 400 });
+  //
+  // Se valida la forma antes de tocar la base: un id que no es un uuid hace que
+  // Postgres rechace la comparación y eso salía como un 500, que es decirle al
+  // cliente "me rompí" cuando lo que pasó es que preguntó mal.
+  if (!z.uuid().safeParse(practitionerId).success) {
+    return NextResponse.json({ error: "Falta el profesional o no es válido." }, { status: 400 });
   }
 
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || to <= from) {
@@ -30,7 +35,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Rango de fechas demasiado amplio." }, { status: 400 });
   }
 
-  const { slots } = await getAvailability({ practitionerId, from, to, audience: "public" });
+  let slots;
+  try {
+    ({ slots } = await getAvailability({ practitionerId, from, to, audience: "public" }));
+  } catch (error) {
+    // Un id que no corresponde a nadie es una petición mal formada, no una falla
+    // del servidor. Antes cualquiera de los dos casos daba 500.
+    if (error instanceof PractitionerNotFound) {
+      return NextResponse.json({ error: "Ese profesional no existe." }, { status: 404 });
+    }
+    throw error;
+  }
 
   return NextResponse.json({
     slots: slots.map((slot) => ({
