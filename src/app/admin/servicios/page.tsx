@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { toggleService, updateService } from "@/app/actions/schedule";
 import { requireStaff } from "@/lib/auth";
-import type { Service } from "@/lib/db/types";
+import type { ServiceWithSpecialty } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const metadata: Metadata = {
@@ -23,8 +23,20 @@ export default async function AdminServiciosPage() {
   await requireStaff();
 
   const supabase = createSupabaseAdminClient();
-  const { data } = await supabase.from("services").select("*").order("display_order");
-  const services = (data ?? []) as Service[];
+  const { data } = await supabase
+    .from("services")
+    .select("*, specialty:specialties(name, display_order)")
+    .order("display_order");
+  const services = (data ?? []) as unknown as ServiceWithSpecialty[];
+
+  // Igual que en la página pública: con una sola disciplina el título sobra,
+  // con dos es lo único que evita una pila indistinta de precios.
+  const groups = new Map<string, ServiceWithSpecialty[]>();
+  for (const service of services) {
+    const key = service.specialty?.name ?? "Sin especialidad";
+    groups.set(key, [...(groups.get(key) ?? []), service]);
+  }
+  const showHeadings = groups.size > 1;
 
   return (
     <div>
@@ -34,63 +46,75 @@ export default async function AdminServiciosPage() {
         &laquo;Consultar&raquo;.
       </p>
 
-      <ul className="mt-6 space-y-3">
-        {services.map((service) => (
-          <li
-            key={service.id}
-            className={`rounded-xl border border-border bg-surface p-4 ${
-              service.active ? "" : "opacity-60"
-            }`}
-          >
-            <form action={updateService} className="flex flex-wrap items-end gap-3">
-              <input type="hidden" name="id" value={service.id} />
+      <div className="mt-6 space-y-8">
+        {[...groups.entries()].map(([specialty, items]) => (
+          <section key={specialty}>
+            {showHeadings && (
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
+                {specialty}
+              </h3>
+            )}
 
-              <div className="grow">
-                <label htmlFor={`name-${service.id}`} className="block text-sm font-medium">
-                  Nombre
-                </label>
-                <input
-                  id={`name-${service.id}`}
-                  name="name"
-                  defaultValue={service.name}
-                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`price-${service.id}`} className="block text-sm font-medium">
-                  Precio
-                </label>
-                <input
-                  id={`price-${service.id}`}
-                  name="price"
-                  type="number"
-                  min="0"
-                  step="100"
-                  inputMode="numeric"
-                  defaultValue={service.price ?? ""}
-                  className="mt-1 w-32 rounded-lg border border-border bg-background px-3 py-2.5 tabular-nums"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover"
+            <ul className="space-y-3">
+            {items.map((service) => (
+              <li
+                key={service.id}
+                className={`rounded-xl border border-border bg-surface p-4 ${
+                  service.active ? "" : "opacity-60"
+                }`}
               >
-                Guardar
-              </button>
-            </form>
+                <form action={updateService} className="flex flex-wrap items-end gap-3">
+                  <input type="hidden" name="id" value={service.id} />
 
-            <form action={toggleService} className="mt-2">
-              <input type="hidden" name="id" value={service.id} />
-              <input type="hidden" name="active" value={String(service.active)} />
-              <button type="submit" className="text-sm text-muted hover:text-foreground">
-                {service.active ? "Ocultar del sitio" : "Mostrar en el sitio"}
-              </button>
-            </form>
-          </li>
+                  <div className="grow">
+                    <label htmlFor={`name-${service.id}`} className="block text-sm font-medium">
+                      Nombre
+                    </label>
+                    <input
+                      id={`name-${service.id}`}
+                      name="name"
+                      defaultValue={service.name}
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor={`price-${service.id}`} className="block text-sm font-medium">
+                      Precio
+                    </label>
+                    <input
+                      id={`price-${service.id}`}
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="100"
+                      inputMode="numeric"
+                      defaultValue={service.price ?? ""}
+                      className="mt-1 w-32 rounded-lg border border-border bg-background px-3 py-2.5 tabular-nums"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover"
+                  >
+                    Guardar
+                  </button>
+                </form>
+
+                <form action={toggleService} className="mt-2">
+                  <input type="hidden" name="id" value={service.id} />
+                  <input type="hidden" name="active" value={String(service.active)} />
+                  <button type="submit" className="text-sm text-muted hover:text-foreground">
+                    {service.active ? "Ocultar del sitio" : "Mostrar en el sitio"}
+                  </button>
+                </form>
+              </li>
+            ))}
+            </ul>
+          </section>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
