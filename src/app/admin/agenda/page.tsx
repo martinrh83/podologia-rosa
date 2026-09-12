@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 
-import { addBlock, addShift, removeBlock, removeShift } from "@/app/actions/schedule";
+import { removeBlock, removeShift } from "@/app/actions/schedule";
+import { BlockForm } from "@/components/block-form";
+import { ShiftForm } from "@/components/shift-form";
 import { requireStaff } from "@/lib/auth";
 import type { ScheduleBlock, WeeklyScheduleRow } from "@/lib/db/types";
 import { capitalizeFirst, formatDay } from "@/lib/format";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { weekdayLabel } from "@/lib/weekdays";
 
 export const metadata: Metadata = {
   title: "Agenda",
@@ -12,16 +15,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-const WEEKDAYS = [
-  { value: 1, label: "Lunes" },
-  { value: 2, label: "Martes" },
-  { value: 3, label: "Miércoles" },
-  { value: 4, label: "Jueves" },
-  { value: 5, label: "Viernes" },
-  { value: 6, label: "Sábado" },
-  { value: 0, label: "Domingo" },
-];
 
 export default async function AgendaPage() {
   await requireStaff();
@@ -55,7 +48,7 @@ export default async function AgendaPage() {
               className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3"
             >
               <span>
-                <strong>{WEEKDAYS.find((day) => day.value === row.weekday)?.label}</strong>{" "}
+                <strong>{weekdayLabel(row.weekday)}</strong>{" "}
                 <span className="tabular-nums text-muted">
                   {row.start_time.slice(0, 5)} a {row.end_time.slice(0, 5)}
                 </span>
@@ -75,57 +68,7 @@ export default async function AgendaPage() {
           )}
         </ul>
 
-        <form
-          action={addShift}
-          className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4"
-        >
-          <div>
-            <label htmlFor="weekday" className="block text-sm font-medium">
-              Día
-            </label>
-            <select
-              id="weekday"
-              name="weekday"
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            >
-              {WEEKDAYS.map((day) => (
-                <option key={day.value} value={day.value}>
-                  {day.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="startTime" className="block text-sm font-medium">
-              Desde
-            </label>
-            <input
-              id="startTime"
-              name="startTime"
-              type="time"
-              required
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            />
-          </div>
-          <div>
-            <label htmlFor="endTime" className="block text-sm font-medium">
-              Hasta
-            </label>
-            <input
-              id="endTime"
-              name="endTime"
-              type="time"
-              required
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            />
-          </div>
-          <button
-            type="submit"
-            className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover"
-          >
-            Agregar
-          </button>
-        </form>
+        <ShiftForm />
       </section>
 
       <section>
@@ -160,51 +103,7 @@ export default async function AgendaPage() {
           )}
         </ul>
 
-        <form
-          action={addBlock}
-          className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4"
-        >
-          <div>
-            <label htmlFor="from" className="block text-sm font-medium">
-              Desde
-            </label>
-            <input
-              id="from"
-              name="from"
-              type="date"
-              required
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            />
-          </div>
-          <div>
-            <label htmlFor="to" className="block text-sm font-medium">
-              Hasta <span className="font-normal text-muted">(incluido)</span>
-            </label>
-            <input
-              id="to"
-              name="to"
-              type="date"
-              required
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            />
-          </div>
-          <div className="grow">
-            <label htmlFor="reason" className="block text-sm font-medium">
-              Motivo <span className="font-normal text-muted">(opcional)</span>
-            </label>
-            <input
-              id="reason"
-              name="reason"
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-            />
-          </div>
-          <button
-            type="submit"
-            className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover"
-          >
-            Bloquear
-          </button>
-        </form>
+        <BlockForm />
 
         <p className="mt-3 text-sm text-muted">
           Bloquear un rango no cancela los turnos que ya estaban reservados ahí. Revisá la agenda de

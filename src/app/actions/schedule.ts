@@ -19,23 +19,54 @@ function revalidateSchedule() {
   revalidatePath("/como-llegar");
 }
 
-/** Add one shift. Two rows on the same weekday express a split shift. */
-export async function addShift(formData: FormData): Promise<void> {
+export type ScheduleState = { status: "idle" | "saved" | "error"; message?: string };
+
+/**
+ * Add one shift. Two rows on the same weekday express a split shift.
+ *
+ * Cada rechazo dice por qué. Antes todos hacían `return` en silencio: el
+ * formulario se vaciaba, la página se recargaba igual y la franja no aparecía,
+ * sin una sola palabra de explicación.
+ */
+export async function addShift(
+  _previous: ScheduleState,
+  formData: FormData,
+): Promise<ScheduleState> {
   await requireStaff();
 
   const weekday = Number(formData.get("weekday"));
   const startTime = String(formData.get("startTime") ?? "");
   const endTime = String(formData.get("endTime") ?? "");
 
-  if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) return;
-  if (!startTime || !endTime || endTime <= startTime) return;
+  if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
+    return { status: "error", message: "Elegí un día de la semana." };
+  }
+
+  if (!startTime || !endTime) {
+    return { status: "error", message: "Completá la hora de inicio y la de fin." };
+  }
+
+  if (endTime <= startTime) {
+    // El caso que más pasa: cargar "de 8 a 12" y que el 12 quede en medianoche.
+    // La franja terminaría antes de empezar, y el check de la base la rechaza.
+    return {
+      status: "error",
+      message:
+        "La hora de fin tiene que ser posterior a la de inicio. Ojo que el mediodía son las 12:00 y la medianoche las 00:00.",
+    };
+  }
 
   const supabase = createSupabaseAdminClient();
-  await supabase
+  const { error } = await supabase
     .from("weekly_schedule")
     .insert({ weekday, start_time: startTime, end_time: endTime });
 
+  if (error) {
+    return { status: "error", message: "No pudimos guardar la franja. Probá de nuevo." };
+  }
+
   revalidateSchedule();
+  return { status: "saved" };
 }
 
 export async function removeShift(formData: FormData): Promise<void> {
@@ -58,32 +89,48 @@ export async function removeShift(formData: FormData): Promise<void> {
  * start. Existing turnos inside the range are left alone on purpose: Rosa needs
  * to see and call those people, not have them silently vanish.
  */
-export async function addBlock(formData: FormData): Promise<void> {
+export async function addBlock(
+  _previous: ScheduleState,
+  formData: FormData,
+): Promise<ScheduleState> {
   await requireStaff();
 
   const fromKey = String(formData.get("from") ?? "");
   const toKey = String(formData.get("to") ?? "");
   const reason = String(formData.get("reason") ?? "").trim();
 
-  if (!fromKey || !toKey) return;
+  if (!fromKey || !toKey) {
+    return { status: "error", message: "Completá las dos fechas." };
+  }
+
+  let start: Date;
+  let end: Date;
 
   try {
-    const start = localDayRangeFromKey(fromKey).start;
+    start = localDayRangeFromKey(fromKey).start;
     // `end` of the last day, so an inclusive date range behaves as written.
-    const end = localDayRangeFromKey(toKey).end;
-    if (end <= start) return;
-
-    const supabase = createSupabaseAdminClient();
-    await supabase.from("schedule_blocks").insert({
-      starts_at: start.toISOString(),
-      ends_at: end.toISOString(),
-      reason: reason || null,
-    });
+    end = localDayRangeFromKey(toKey).end;
   } catch {
-    return;
+    return { status: "error", message: "Revisá las fechas." };
+  }
+
+  if (end <= start) {
+    return { status: "error", message: "La fecha de fin no puede ser anterior a la de inicio." };
+  }
+
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase.from("schedule_blocks").insert({
+    starts_at: start.toISOString(),
+    ends_at: end.toISOString(),
+    reason: reason || null,
+  });
+
+  if (error) {
+    return { status: "error", message: "No pudimos guardar el cierre. Probá de nuevo." };
   }
 
   revalidateSchedule();
+  return { status: "saved" };
 }
 
 export async function removeBlock(formData: FormData): Promise<void> {
