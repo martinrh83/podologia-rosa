@@ -1,0 +1,287 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  html, body { margin: 0; padding: 0; background: #f6f7f5; }
+  svg { display: block; }
+</style>
+
+<svg width="1440" height="1060" viewBox="0 0 1440 1060" xmlns="http://www.w3.org/2000/svg"
+     font-family="'IBM Plex Sans', system-ui, sans-serif">
+
+  <defs>
+    <marker id="p-gris" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a9a93"/>
+    </marker>
+    <marker id="p-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#146b66"/>
+    </marker>
+    <marker id="p-ocre" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a6428"/>
+    </marker>
+  </defs>
+
+  <rect width="1440" height="1060" fill="#f6f7f5"/>
+
+  <!-- ══════════ encabezado ══════════ -->
+  <rect x="56" y="38" width="232" height="24" rx="4" fill="#8a6428"/>
+  <text x="68" y="55" font-family="'IBM Plex Mono', monospace" font-size="12"
+        letter-spacing="1.6" fill="#ffffff">PROPUESTA · SIN APLICAR</text>
+  <text x="56" y="104" font-size="30" font-weight="600" fill="#14201c">Dos sedes: aparece un segundo eje</text>
+  <text x="56" y="134" font-size="16" fill="#62706a">Las tres tablas de la agenda pasan a colgar de dos cosas a la vez: de QUIÉN atiende y de DÓNDE lo hace.</text>
+
+  <!-- ══════════ flechas: practitioners -> agenda ══════════ -->
+  <line x1="632" y1="330" x2="666" y2="330" stroke="#146b66" stroke-width="1.5"/>
+  <line x1="666" y1="250" x2="666" y2="620" stroke="#146b66" stroke-width="1.5"/>
+  <line x1="666" y1="250" x2="692" y2="250" stroke="#146b66" stroke-width="1.5" marker-end="url(#p-teal)"/>
+  <line x1="666" y1="440" x2="692" y2="440" stroke="#146b66" stroke-width="1.5" marker-end="url(#p-teal)"/>
+  <line x1="666" y1="620" x2="692" y2="620" stroke="#146b66" stroke-width="1.5" marker-end="url(#p-teal)"/>
+
+  <!-- ══════════ flechas: locations -> agenda ══════════ -->
+  <line x1="1160" y1="290" x2="1140" y2="290" stroke="#8a6428" stroke-width="1.5"/>
+  <line x1="1140" y1="250" x2="1140" y2="620" stroke="#8a6428" stroke-width="1.5"/>
+  <line x1="1140" y1="250" x2="1128" y2="250" stroke="#8a6428" stroke-width="1.5" marker-end="url(#p-ocre)"/>
+  <line x1="1140" y1="440" x2="1128" y2="440" stroke="#8a6428" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#p-ocre)"/>
+  <line x1="1140" y1="620" x2="1128" y2="620" stroke="#8a6428" stroke-width="1.5" marker-end="url(#p-ocre)"/>
+
+  <!-- ══════════ flechas de la izquierda ══════════ -->
+  <line x1="320" y1="250" x2="348" y2="250" stroke="#8a9a93" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#p-gris)"/>
+  <text x="326" y="242" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#62706a">1:1</text>
+  <line x1="320" y1="410" x2="348" y2="410" stroke="#8a9a93" stroke-width="1.5" marker-end="url(#p-gris)"/>
+  <text x="326" y="402" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#62706a">1:*</text>
+  <line x1="188" y1="468" x2="188" y2="486" stroke="#8a9a93" stroke-width="1.5" marker-end="url(#p-gris)"/>
+
+  <!-- ══════════ staff ══════════ -->
+  <g>
+    <rect x="56" y="176" width="264" height="148" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="56" y="176" width="264" height="36" rx="8" fill="#8a9a93"/>
+    <rect x="56" y="198" width="264" height="14" fill="#8a9a93"/>
+    <text x="74" y="201" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">staff</text>
+    <text x="304" y="201" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#eef1ee" text-anchor="end">1 fila</text>
+    <text x="74" y="236" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">auth_user_id</text>
+    <text x="302" y="236" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">→ auth.users</text>
+    <text x="74" y="258" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">role</text>
+    <text x="302" y="258" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">admin · practitioner</text>
+    <text x="74" y="280" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">active</text>
+    <line x1="74" y1="294" x2="302" y2="294" stroke="#dce1dc"/>
+    <text x="74" y="312" font-size="11.5" fill="#62706a">Quién entra al panel. Sigue siendo una</text>
+    <text x="74" y="327" font-size="11.5" fill="#62706a">sola cuenta: el secretario carga todo.</text>
+  </g>
+
+  <!-- ══════════ specialties ══════════ -->
+  <g>
+    <rect x="56" y="352" width="264" height="116" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="56" y="352" width="264" height="36" rx="8" fill="#8a9a93"/>
+    <rect x="56" y="374" width="264" height="14" fill="#8a9a93"/>
+    <text x="74" y="377" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">specialties</text>
+    <text x="304" y="377" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#eef1ee" text-anchor="end">1 fila</text>
+    <text x="74" y="412" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">name</text>
+    <text x="302" y="412" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">unique</text>
+    <line x1="74" y1="428" x2="302" y2="428" stroke="#dce1dc"/>
+    <text x="74" y="446" font-size="11.5" fill="#62706a">La disciplina. No se toca con las sedes:</text>
+    <text x="74" y="461" font-size="11.5" fill="#62706a">son ejes distintos.</text>
+  </g>
+
+  <!-- ══════════ services ══════════ -->
+  <g>
+    <rect x="56" y="496" width="264" height="132" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="56" y="496" width="264" height="36" rx="8" fill="#b6bfba"/>
+    <rect x="56" y="518" width="264" height="14" fill="#b6bfba"/>
+    <text x="74" y="521" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">services</text>
+    <text x="304" y="521" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#f2f5f3" text-anchor="end">5 filas</text>
+    <text x="74" y="556" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#146b66">specialty_id</text>
+    <text x="74" y="578" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">name · price · active</text>
+    <line x1="74" y1="594" x2="302" y2="594" stroke="#dce1dc"/>
+    <text x="74" y="612" font-size="11.5" fill="#62706a">Vitrina. Los precios son del consultorio,</text>
+    <text x="74" y="627" font-size="11.5" fill="#62706a">no de cada sede.</text>
+  </g>
+
+  <!-- ══════════ practitioners · eje QUIÉN ══════════ -->
+  <g>
+    <rect x="356" y="176" width="276" height="316" rx="8" fill="#ffffff" stroke="#146b66" stroke-width="1.5"/>
+    <rect x="356" y="176" width="276" height="36" rx="8" fill="#146b66"/>
+    <rect x="356" y="198" width="276" height="14" fill="#146b66"/>
+    <text x="374" y="201" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">practitioners</text>
+    <text x="616" y="201" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#a9d4d0" text-anchor="end">QUIÉN</text>
+
+    <text x="374" y="236" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#146b66">staff_id</text>
+    <text x="614" y="236" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">null · sin cuenta</text>
+    <text x="374" y="258" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#146b66">specialty_id</text>
+    <text x="374" y="280" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">slug</text>
+    <text x="614" y="280" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">/turnos/[slug]</text>
+    <text x="374" y="302" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">first_name · last_name</text>
+    <text x="374" y="324" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">title · bio</text>
+    <text x="374" y="346" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">slot_minutes</text>
+    <text x="614" y="346" font-family="'IBM Plex Mono', monospace" font-size="11" font-weight="600" fill="#146b66" text-anchor="end">60 · 45</text>
+    <text x="374" y="368" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">active</text>
+
+    <rect x="366" y="382" width="256" height="42" rx="5" fill="#f5f1e8"/>
+    <text x="374" y="400" font-size="11.5" font-weight="600" fill="#8a6428">SIN sede acá</text>
+    <text x="374" y="416" font-size="11" fill="#6b5622">Los dos atienden en las dos.</text>
+
+    <line x1="374" y1="438" x2="614" y2="438" stroke="#dce1dc"/>
+    <text x="374" y="456" font-size="11.5" fill="#62706a">Si la sede estuviera acá, Rosa tendría</text>
+    <text x="374" y="471" font-size="11.5" fill="#62706a">que ser dos filas para poder atender</text>
+    <text x="374" y="486" font-size="11.5" fill="#62706a">en las dos. Por eso va en la franja.</text>
+  </g>
+
+  <!-- ══════════ clinic_settings ══════════ -->
+  <g>
+    <rect x="356" y="520" width="276" height="146" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="356" y="520" width="276" height="36" rx="8" fill="#8a9a93"/>
+    <rect x="356" y="542" width="276" height="14" fill="#8a9a93"/>
+    <text x="374" y="545" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">clinic_settings</text>
+    <text x="616" y="545" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#eef1ee" text-anchor="end">1 fila</text>
+    <text x="374" y="580" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">clinic_name · horizon_days</text>
+    <text x="374" y="602" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">phone · whatsapp</text>
+    <text x="374" y="624" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#a2432f" text-decoration="line-through">address · map_url</text>
+    <text x="614" y="624" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#8a6428" text-anchor="end">→ locations</text>
+    <line x1="374" y1="640" x2="614" y2="640" stroke="#dce1dc"/>
+    <text x="374" y="658" font-size="11.5" fill="#62706a">Un solo número para las dos sedes.</text>
+  </g>
+
+  <!-- ══════════ rate_limit_hits ══════════ -->
+  <g>
+    <rect x="356" y="694" width="276" height="76" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="356" y="694" width="276" height="32" rx="8" fill="#b6bfba"/>
+    <rect x="356" y="714" width="276" height="12" fill="#b6bfba"/>
+    <text x="374" y="716" font-family="'IBM Plex Mono', monospace" font-size="13" font-weight="600" fill="#ffffff">rate_limit_hits</text>
+    <text x="616" y="716" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#f2f5f3" text-anchor="end">interno</text>
+    <text x="374" y="746" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">bucket</text>
+    <text x="614" y="746" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">hash del IP</text>
+    <text x="374" y="763" font-size="11.5" fill="#62706a">5 intentos por hora. Se limpia solo.</text>
+  </g>
+
+  <!-- ══════════ weekly_schedule ══════════ -->
+  <g>
+    <rect x="700" y="176" width="420" height="150" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="700" y="176" width="420" height="36" rx="8" fill="#146b66"/>
+    <rect x="700" y="198" width="420" height="14" fill="#146b66"/>
+    <text x="718" y="201" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">weekly_schedule</text>
+    <text x="1104" y="201" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#a9d4d0" text-anchor="end">la regla que se repite</text>
+
+    <text x="718" y="236" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#146b66">practitioner_id</text>
+    <rect x="710" y="246" width="400" height="26" rx="4" fill="#f5f1e8"/>
+    <text x="718" y="264" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#8a6428">location_id</text>
+    <text x="1102" y="264" font-family="'IBM Plex Mono', monospace" font-size="11" font-weight="600" fill="#8a6428" text-anchor="end">NUEVO · not null</text>
+    <text x="718" y="292" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">weekday · start_time · end_time</text>
+    <text x="1102" y="292" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#a2432f" text-anchor="end">time</text>
+    <line x1="718" y1="304" x2="1102" y2="304" stroke="#dce1dc"/>
+    <text x="718" y="320" font-size="11.5" fill="#62706a">Rosa, sábado, 09-13, Zona Norte — es una fila más.</text>
+  </g>
+
+  <!-- ══════════ schedule_blocks ══════════ -->
+  <g>
+    <rect x="700" y="356" width="420" height="186" rx="8" fill="#ffffff" stroke="#dce1dc"/>
+    <rect x="700" y="356" width="420" height="36" rx="8" fill="#146b66"/>
+    <rect x="700" y="378" width="420" height="14" fill="#146b66"/>
+    <text x="718" y="381" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">schedule_blocks</text>
+    <text x="1104" y="381" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#a9d4d0" text-anchor="end">las excepciones</text>
+
+    <rect x="710" y="400" width="400" height="98" rx="5" fill="#f5f1e8"/>
+    <text x="718" y="418" font-family="'IBM Plex Mono', monospace" font-size="12" fill="#8a6428">location_id</text>
+    <text x="838" y="418" font-family="'IBM Plex Mono', monospace" font-size="12" fill="#146b66">practitioner_id</text>
+    <text x="1102" y="418" font-family="'IBM Plex Mono', monospace" font-size="10.5" font-weight="600" fill="#8a6428" text-anchor="end">los dos nullables</text>
+    <text x="718" y="436" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6b5622">null      null            no abre nada (feriado)</text>
+    <text x="718" y="452" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6b5622">Norte     null            esa sede no abre ese día</text>
+    <text x="718" y="468" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6b5622">null      Rosa            vacaciones, en las dos sedes</text>
+    <text x="718" y="484" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6b5622">Norte     Rosa            Rosa no va ese día; Bea sí</text>
+
+    <text x="718" y="518" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">starts_at · ends_at · reason</text>
+    <text x="1102" y="518" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#146b66" text-anchor="end">timestamptz</text>
+    <line x1="718" y1="530" x2="1102" y2="530" stroke="#dce1dc"/>
+  </g>
+
+  <!-- ══════════ appointments ══════════ -->
+  <g>
+    <rect x="700" y="556" width="420" height="420" rx="8" fill="#ffffff" stroke="#a2432f" stroke-width="1.5"/>
+    <rect x="700" y="556" width="420" height="36" rx="8" fill="#a2432f"/>
+    <rect x="700" y="578" width="420" height="14" fill="#a2432f"/>
+    <text x="718" y="581" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">appointments</text>
+    <text x="1104" y="581" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#f0cfc7" text-anchor="end">los turnos</text>
+
+    <text x="718" y="616" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#146b66">practitioner_id</text>
+    <rect x="710" y="626" width="400" height="42" rx="4" fill="#f5f1e8"/>
+    <text x="718" y="644" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#8a6428">location_id</text>
+    <text x="1102" y="644" font-family="'IBM Plex Mono', monospace" font-size="11" font-weight="600" fill="#8a6428" text-anchor="end">NUEVO · not null</text>
+    <text x="718" y="661" font-size="11" fill="#6b5622">Se guarda al reservar, NO se deriva: dónde fue no puede cambiar después.</text>
+
+    <text x="718" y="690" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">starts_at · ends_at</text>
+    <text x="1102" y="690" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#146b66" text-anchor="end">timestamptz</text>
+    <text x="718" y="712" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">status · source</text>
+    <line x1="718" y1="726" x2="1102" y2="726" stroke="#dce1dc"/>
+    <text x="718" y="748" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">patient_first_name · patient_last_name</text>
+    <text x="718" y="770" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">patient_dni · patient_coverage · patient_phone</text>
+
+    <rect x="710" y="782" width="400" height="40" rx="5" fill="#f9ece8"/>
+    <text x="718" y="799" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">motivo</text>
+    <text x="1102" y="799" font-family="'IBM Plex Mono', monospace" font-size="11" font-weight="600" fill="#a2432f" text-anchor="end">DATO SENSIBLE</text>
+    <text x="718" y="815" font-size="10.5" fill="#8f4634">Ley 25.326 art. 2 · se borra a los 30 días</text>
+
+    <text x="718" y="842" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">cancel_token · consent_at · anonymized_at</text>
+
+    <rect x="710" y="856" width="400" height="106" rx="5" fill="#eef4f3" stroke="#146b66" stroke-dasharray="3 3"/>
+    <text x="718" y="878" font-family="'IBM Plex Mono', monospace" font-size="11.5" font-weight="600" fill="#146b66">UNIQUE (practitioner_id, starts_at)</text>
+    <text x="718" y="895" font-family="'IBM Plex Mono', monospace" font-size="11.5" font-weight="600" fill="#146b66">WHERE status &lt;&gt; 'cancelled'</text>
+    <text x="718" y="916" font-size="11.5" font-weight="600" fill="#3d5b57">NO se le agrega location_id, y es a propósito.</text>
+    <text x="718" y="932" font-size="11.5" fill="#3d5b57">Tal como está dice «Rosa no puede estar en dos lugares a la</text>
+    <text x="718" y="948" font-size="11.5" fill="#3d5b57">misma hora». Con la sede adentro, sí podría.</text>
+  </g>
+
+  <!-- ══════════ locations · eje DÓNDE ══════════ -->
+  <g>
+    <rect x="1160" y="176" width="224" height="232" rx="8" fill="#ffffff" stroke="#8a6428" stroke-width="1.5"/>
+    <rect x="1160" y="176" width="224" height="36" rx="8" fill="#8a6428"/>
+    <rect x="1160" y="198" width="224" height="14" fill="#8a6428"/>
+    <text x="1178" y="201" font-family="'IBM Plex Mono', monospace" font-size="14" font-weight="600" fill="#ffffff">locations</text>
+    <text x="1368" y="201" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#f0e6d2" text-anchor="end">DÓNDE</text>
+
+    <text x="1178" y="236" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">name</text>
+    <text x="1366" y="236" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#62706a" text-anchor="end">Centro</text>
+    <text x="1178" y="258" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">address</text>
+    <text x="1178" y="280" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">map_url</text>
+    <text x="1178" y="302" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">display_order</text>
+    <text x="1178" y="324" font-family="'IBM Plex Mono', monospace" font-size="12.5" fill="#14201c">active</text>
+
+    <line x1="1178" y1="340" x2="1366" y2="340" stroke="#dce1dc"/>
+    <text x="1178" y="358" font-size="11.5" fill="#62706a">Tabla nueva. Se lleva</text>
+    <text x="1178" y="373" font-size="11.5" fill="#62706a">address y map_url de</text>
+    <text x="1178" y="388" font-size="11.5" fill="#62706a">clinic_settings.</text>
+  </g>
+
+  <!-- ══════════ nota de los dos ejes ══════════ -->
+  <g>
+    <rect x="1160" y="440" width="224" height="180" rx="10" fill="#f5f1e8" stroke="#8a6428" stroke-dasharray="3 3"/>
+    <text x="1178" y="468" font-family="'IBM Plex Mono', monospace" font-size="11"
+          letter-spacing="1.4" fill="#8a6428">LOS DOS EJES</text>
+    <text x="1178" y="494" font-size="12" fill="#14201c">Una franja, un cierre y</text>
+    <text x="1178" y="510" font-size="12" fill="#14201c">un turno responden</text>
+    <text x="1178" y="526" font-size="12" fill="#14201c">siempre dos preguntas:</text>
+    <text x="1178" y="552" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="600" fill="#146b66">quién →</text>
+    <text x="1178" y="572" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="600" fill="#8a6428">dónde →</text>
+    <text x="1178" y="598" font-size="11" fill="#6b5622">El cierre puede dejar</text>
+    <text x="1178" y="612" font-size="11" fill="#6b5622">cualquiera de las dos en null.</text>
+  </g>
+
+  <!-- ══════════ banda de cálculo ══════════ -->
+  <g>
+    <rect x="56" y="656" width="264" height="320" rx="10" fill="#eef1ee" stroke="#dce1dc"/>
+    <text x="78" y="686" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1.4" fill="#62706a">LO QUE NO ESTÁ GUARDADO</text>
+
+    <text x="78" y="720" font-family="'IBM Plex Mono', monospace" font-size="13" fill="#146b66" font-weight="600">  weekly_schedule</text>
+    <text x="78" y="742" font-family="'IBM Plex Mono', monospace" font-size="13" fill="#146b66" font-weight="600">− schedule_blocks</text>
+    <text x="78" y="764" font-family="'IBM Plex Mono', monospace" font-size="13" fill="#a2432f" font-weight="600">− appointments</text>
+    <line x1="78" y1="778" x2="300" y2="778" stroke="#9aa8a2"/>
+    <text x="78" y="800" font-family="'IBM Plex Mono', monospace" font-size="13" fill="#14201c" font-weight="600">= horarios libres</text>
+    <text x="78" y="818" font-size="11" fill="#62706a">de una profesional, en cada visita</text>
+
+    <line x1="78" y1="840" x2="300" y2="840" stroke="#dce1dc"/>
+
+    <text x="78" y="864" font-size="12" font-weight="600" fill="#8a6428">Lo único que cambia</text>
+    <text x="78" y="880" font-size="12" font-weight="600" fill="#8a6428">en el motor</text>
+    <text x="78" y="904" font-size="11.5" fill="#62706a">Cada horario libre sale de una</text>
+    <text x="78" y="920" font-size="11.5" fill="#62706a">franja, y esa franja ahora tiene</text>
+    <text x="78" y="936" font-size="11.5" fill="#62706a">sede. El slot la arrastra hasta</text>
+    <text x="78" y="952" font-size="11.5" fill="#62706a">la pantalla. Tres líneas, y sigue</text>
+    <text x="78" y="968" font-size="11.5" fill="#62706a">siendo una función pura.</text>
+  </g>
+
+</svg>
