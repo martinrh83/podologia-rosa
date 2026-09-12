@@ -38,8 +38,10 @@ src/lib/availability.ts   El I/O alrededor de slots.ts.
 src/lib/booking.ts        Crear y cancelar turnos. Lo usan el form y el admin.
 src/app/api/turnos        Endpoint público de reserva.
 src/app/api/cron          Retención de datos (borrado de motivo, anonimizado).
-src/app/admin             Panel de Rosa (hoy, mañana, nuevo turno, agenda,
-                          precios, datos del consultorio).
+src/app/admin             El panel (hoy, mañana, nuevo turno, agenda,
+                          profesionales, especialidades, precios,
+                          datos del consultorio).
+src/lib/db/practitioners  Quién atiende y a quién se le puede sacar turno.
 supabase/migrations       Esquema y datos iniciales.
 ```
 
@@ -75,5 +77,7 @@ supabase/migrations       Esquema y datos iniciales.
       todos los tratamientos y con la limpieza ya incluida. La duración única se
       sostiene y los turnos van pegados a propósito.
 - [ ] Cargar horarios, servicios y precios reales.
-- [ ] Reemplazar el texto de `/sobre-mi` y agregar matrícula.
-- [ ] Crear el usuario de Rosa y desactivar sign-ups en Supabase.
+- [ ] Completar apellido, matrícula y bio de cada profesional desde el panel.
+- [ ] Dar de baja a la profesional de prueba (Bea López).
+- [ ] Crear el usuario del panel, vincularlo a la fila de `staff`, y desactivar
+      sign-ups en Supabase.
