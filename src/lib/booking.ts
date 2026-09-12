@@ -2,7 +2,7 @@ import "server-only";
 
 import { getAvailability, isSlotBookable } from "@/lib/availability";
 import { CONSENT_REQUIRED_MESSAGE, type BookingInput } from "@/lib/booking-schema";
-import { ACTIVE_STATUSES, type Appointment } from "@/lib/db/types";
+import type { Appointment } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -21,7 +21,6 @@ export { bookingSchema, normalizePhone, type BookingInput } from "@/lib/booking-
 export type BookingFailure =
   | { ok: false; reason: "slot_taken"; message: string }
   | { ok: false; reason: "slot_unavailable"; message: string }
-  | { ok: false; reason: "contact_limit"; message: string }
   | { ok: false; reason: "consent_required"; message: string }
   | { ok: false; reason: "error"; message: string };
 
@@ -66,35 +65,12 @@ export async function createBooking(
     };
   }
 
-  const { settings, practitioner } = await getAvailability({
+  const { practitioner } = await getAvailability({
     practitionerId: input.practitionerId,
     from: startsAt,
     to: new Date(startsAt.getTime() + 1),
     audience,
   });
-
-  // Cap on active future turnos per contact. Applies to the public form only —
-  // Rosa is not rate-limited against her own calendar.
-  //
-  // Disabled by default: max_active_per_contact is 0, which means no limit. The
-  // check is kept because turning it back on is then a value in the database
-  // rather than a deploy. At 0 the count query never runs.
-  if (audience === "public" && settings.max_active_per_contact > 0) {
-    const { count, error: countError } = await supabase
-      .from("appointments")
-      .select("id", { count: "exact", head: true })
-      .eq("patient_phone", input.patientPhone)
-      .in("status", ACTIVE_STATUSES)
-      .gte("starts_at", new Date().toISOString());
-
-    if (!countError && (count ?? 0) >= settings.max_active_per_contact) {
-      return {
-        ok: false,
-        reason: "contact_limit",
-        message: `Ya tenés ${count} turnos reservados. Si necesitás otro, escribinos.`,
-      };
-    }
-  }
 
   const endsAt = new Date(startsAt.getTime() + practitioner.slot_minutes * 60_000);
 

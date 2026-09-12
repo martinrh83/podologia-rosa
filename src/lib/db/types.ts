@@ -51,7 +51,6 @@ export type PractitionerWithSpecialty = Practitioner & { specialty: { name: stri
 export type ClinicSettings = {
   id: boolean;
   horizon_days: number;
-  max_active_per_contact: number;
   clinic_name: string;
   address: string | null;
   phone: string | null;

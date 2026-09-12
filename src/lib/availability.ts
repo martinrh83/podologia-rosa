@@ -7,8 +7,7 @@ import { CLINIC_TZ, generateSlots, type Slot } from "@/lib/slots";
 /** Fallbacks so the site still renders before Rosa has configured anything. */
 const DEFAULT_SETTINGS = {
   horizon_days: 15,
-  max_active_per_contact: 0,
-} satisfies Pick<ClinicSettings, "horizon_days" | "max_active_per_contact">;
+} satisfies Pick<ClinicSettings, "horizon_days">;
 
 export async function getClinicSettings(): Promise<ClinicSettings> {
   const supabase = createSupabaseAdminClient();
