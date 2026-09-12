@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { cancelTurno, type CancelState } from "@/app/actions/cancel";
@@ -15,9 +16,9 @@ export function CancelForm({ token, clinicPhone }: { token: string; clinicPhone:
         <p className="font-medium">Tu turno fue cancelado.</p>
         <p className="mt-1 text-[0.95rem] text-muted">
           Gracias por avisar — el horario ya quedó libre para otra persona.{" "}
-          <a href="/turnos" className="text-accent underline">
+          <Link href="/turnos" className="text-accent underline">
             Reservar otro turno
-          </a>
+          </Link>
         </p>
       </div>
     );

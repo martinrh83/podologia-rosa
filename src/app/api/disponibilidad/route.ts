@@ -10,8 +10,15 @@ import { getAvailability } from "@/lib/availability";
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
+  const practitionerId = searchParams.get("profesional") ?? "";
   const from = new Date(searchParams.get("from") ?? "");
   const to = new Date(searchParams.get("to") ?? "");
+
+  // No existe "la disponibilidad del consultorio": cada profesional tiene su
+  // agenda y su duración de turno.
+  if (!practitionerId) {
+    return NextResponse.json({ error: "Falta el profesional." }, { status: 400 });
+  }
 
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || to <= from) {
     return NextResponse.json({ error: "Rango de fechas inválido." }, { status: 400 });
@@ -23,7 +30,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Rango de fechas demasiado amplio." }, { status: 400 });
   }
 
-  const { slots } = await getAvailability({ from, to, audience: "public" });
+  const { slots } = await getAvailability({ practitionerId, from, to, audience: "public" });
 
   return NextResponse.json({
     slots: slots.map((slot) => ({

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
 import { AppointmentCard } from "@/components/appointment-card";
+import { PractitionerFilter } from "@/components/practitioner-filter";
 import { getClinicSettings } from "@/lib/availability";
 import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
+import { listActivePractitioners } from "@/lib/db/practitioners";
 import { capitalizeFirst, formatDay, formatTime } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
 
@@ -24,12 +26,16 @@ export const dynamic = "force-dynamic";
  * approval and no per-message fee — the automated email is the backup, not the
  * primary.
  */
-export default async function AdminTomorrowPage() {
+export default async function AdminTomorrowPage({ searchParams }: PageProps<"/admin/manana">) {
   await requireStaff();
 
-  const [appointments, settings] = await Promise.all([
-    getAppointmentsForLocalDay(1),
+  const params = await searchParams;
+  const practitionerId = typeof params.profesional === "string" ? params.profesional : null;
+
+  const [appointments, settings, practitioners] = await Promise.all([
+    getAppointmentsForLocalDay(1, { practitionerId }),
     getClinicSettings(),
+    listActivePractitioners(),
   ]);
 
   const tomorrow = localDayRange(new Date(), 1).start;
@@ -46,15 +52,28 @@ export default async function AdminTomorrowPage() {
           : "Tocá cada botón para mandar el recordatorio por WhatsApp."}
       </p>
 
+      <PractitionerFilter
+        practitioners={practitioners}
+        selected={practitionerId}
+        basePath="/admin/manana"
+      />
+
       <ul className="space-y-3">
         {appointments.map((appointment) => (
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
             siteUrl={base}
+            showPractitioner={!practitionerId}
             reminderMessage={
               `Hola ${appointment.patient_first_name}! Te recordamos tu turno de mañana ` +
-              `a las ${formatTime(appointment.starts_at)} en ${settings.clinic_name}. ` +
+              `a las ${formatTime(appointment.starts_at)}` +
+              // Con dos agendas, saber con quién es el turno importa tanto como
+              // la hora: el paciente eligió a una de las dos.
+              (appointment.practitioner
+                ? ` con ${appointment.practitioner.first_name} ${appointment.practitioner.last_name}`
+                : "") +
+              ` en ${settings.clinic_name}. ` +
               `Si no podés venir, avisanos así lo liberamos. ¡Gracias!`
             }
           />

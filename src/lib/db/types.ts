@@ -10,9 +10,46 @@ export type AppointmentStatus = "booked" | "cancelled" | "completed" | "no_show"
 export type AppointmentSource = "online" | "admin";
 export type PatientCoverage = "ips" | "osunsa" | "particular";
 
+/** Quién puede entrar al panel. Ver 0006: separada de `Practitioner` a propósito. */
+export type Staff = {
+  id: string;
+  auth_user_id: string | null;
+  full_name: string;
+  role: "admin" | "practitioner";
+  active: boolean;
+  created_at: string;
+};
+
+export type Specialty = {
+  id: string;
+  name: string;
+  display_order: number;
+  created_at: string;
+};
+
+/** A quién se le puede sacar turno. Las agendas y los turnos cuelgan de acá. */
+export type Practitioner = {
+  id: string;
+  staff_id: string | null;
+  specialty_id: string;
+  /** Parte de /turnos/[slug]. Estable: no se regenera si cambia el nombre. */
+  slug: string;
+  first_name: string;
+  last_name: string;
+  title: string | null;
+  bio: string | null;
+  /** La duración del turno es de cada profesional, no del consultorio. */
+  slot_minutes: number;
+  active: boolean;
+  display_order: number;
+  created_at: string;
+};
+
+/** Un profesional con el nombre de su especialidad ya resuelto. */
+export type PractitionerWithSpecialty = Practitioner & { specialty: { name: string } };
+
 export type ClinicSettings = {
   id: boolean;
-  slot_minutes: number;
   horizon_days: number;
   max_active_per_contact: number;
   clinic_name: string;
@@ -25,6 +62,7 @@ export type ClinicSettings = {
 
 export type Service = {
   id: string;
+  specialty_id: string;
   name: string;
   description: string | null;
   price: number | null;
@@ -35,6 +73,7 @@ export type Service = {
 
 export type WeeklyScheduleRow = {
   id: string;
+  practitioner_id: string;
   weekday: number;
   start_time: string;
   end_time: string;
@@ -43,6 +82,8 @@ export type WeeklyScheduleRow = {
 
 export type ScheduleBlock = {
   id: string;
+  /** En null cierra el consultorio entero y aplica a todos. Ver 0006. */
+  practitioner_id: string | null;
   starts_at: string;
   ends_at: string;
   reason: string | null;
@@ -51,6 +92,7 @@ export type ScheduleBlock = {
 
 export type Appointment = {
   id: string;
+  practitioner_id: string;
   starts_at: string;
   ends_at: string;
   status: AppointmentStatus;
@@ -70,6 +112,16 @@ export type Appointment = {
   anonymized_at: string | null;
   created_at: string;
   cancelled_at: string | null;
+};
+
+/** Un servicio con su especialidad, para agrupar el listado de precios. */
+export type ServiceWithSpecialty = Service & {
+  specialty: { name: string; display_order: number } | null;
+};
+
+/** Un turno con el nombre de su profesional ya resuelto, para el panel. */
+export type AppointmentWithPractitioner = Appointment & {
+  practitioner: { first_name: string; last_name: string } | null;
 };
 
 /**

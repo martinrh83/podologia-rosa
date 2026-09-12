@@ -1,15 +1,14 @@
 import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { ACTIVE_STATUSES, type ClinicSettings } from "@/lib/db/types";
+import { ACTIVE_STATUSES, type ClinicSettings, type Practitioner } from "@/lib/db/types";
 import { CLINIC_TZ, generateSlots, type Slot } from "@/lib/slots";
 
 /** Fallbacks so the site still renders before Rosa has configured anything. */
 const DEFAULT_SETTINGS = {
-  slot_minutes: 60,
   horizon_days: 15,
   max_active_per_contact: 0,
-} satisfies Pick<ClinicSettings, "slot_minutes" | "horizon_days" | "max_active_per_contact">;
+} satisfies Pick<ClinicSettings, "horizon_days" | "max_active_per_contact">;
 
 export async function getClinicSettings(): Promise<ClinicSettings> {
   const supabase = createSupabaseAdminClient();
@@ -23,6 +22,14 @@ export async function getClinicSettings(): Promise<ClinicSettings> {
 }
 
 export type AvailabilityOptions = {
+  /**
+   * De quién es la agenda que se consulta.
+   *
+   * Obligatorio: no existe "la disponibilidad del consultorio". Cada profesional
+   * tiene sus franjas, sus bloqueos y su duración de turno, y el paciente elige
+   * con quién antes de ver un solo horario.
+   */
+  practitionerId: string;
   from: Date;
   to: Date;
   /**
@@ -42,37 +49,55 @@ export type AvailabilityOptions = {
  * needing a database.
  */
 export async function getAvailability({
+  practitionerId,
   from,
   to,
   audience,
   now = new Date(),
-}: AvailabilityOptions): Promise<{ slots: Slot[]; settings: ClinicSettings }> {
+}: AvailabilityOptions): Promise<{
+  slots: Slot[];
+  settings: ClinicSettings;
+  practitioner: Practitioner;
+}> {
   const supabase = createSupabaseAdminClient();
 
-  const [settingsResult, scheduleResult, blocksResult, takenResult] = await Promise.all([
-    supabase.from("clinic_settings").select("*").limit(1).single(),
-    supabase.from("weekly_schedule").select("weekday, start_time, end_time"),
-    // Any block that overlaps the window at all.
-    supabase
-      .from("schedule_blocks")
-      .select("starts_at, ends_at")
-      .lt("starts_at", to.toISOString())
-      .gt("ends_at", from.toISOString()),
-    supabase
-      .from("appointments")
-      .select("starts_at, ends_at")
-      .in("status", ACTIVE_STATUSES)
-      .lt("starts_at", to.toISOString())
-      .gt("ends_at", from.toISOString()),
-  ]);
+  const [settingsResult, practitionerResult, scheduleResult, blocksResult, takenResult] =
+    await Promise.all([
+      supabase.from("clinic_settings").select("*").limit(1).single(),
+      supabase.from("practitioners").select("*").eq("id", practitionerId).single(),
+      supabase
+        .from("weekly_schedule")
+        .select("weekday, start_time, end_time")
+        .eq("practitioner_id", practitionerId),
+      // Any block that overlaps the window at all: the practitioner's own, plus
+      // the clinic-wide ones (practitioner_id null), which apply to everybody.
+      supabase
+        .from("schedule_blocks")
+        .select("starts_at, ends_at")
+        .or(`practitioner_id.eq.${practitionerId},practitioner_id.is.null`)
+        .lt("starts_at", to.toISOString())
+        .gt("ends_at", from.toISOString()),
+      supabase
+        .from("appointments")
+        .select("starts_at, ends_at")
+        .eq("practitioner_id", practitionerId)
+        .in("status", ACTIVE_STATUSES)
+        .lt("starts_at", to.toISOString())
+        .gt("ends_at", from.toISOString()),
+    ]);
 
   const firstError =
-    settingsResult.error ?? scheduleResult.error ?? blocksResult.error ?? takenResult.error;
+    settingsResult.error ??
+    practitionerResult.error ??
+    scheduleResult.error ??
+    blocksResult.error ??
+    takenResult.error;
   if (firstError) {
     throw new Error(`Failed to load availability: ${firstError.message}`);
   }
 
   const settings = { ...DEFAULT_SETTINGS, ...(settingsResult.data ?? {}) } as ClinicSettings;
+  const practitioner = practitionerResult.data as Practitioner;
 
   const slots = generateSlots({
     from,
@@ -80,12 +105,14 @@ export async function getAvailability({
     weeklySchedule: scheduleResult.data ?? [],
     blocks: blocksResult.data ?? [],
     taken: takenResult.data ?? [],
-    slotMinutes: settings.slot_minutes,
+    // La duración sale del profesional; el horizonte sigue siendo una política
+    // del consultorio, igual para todos.
+    slotMinutes: practitioner.slot_minutes,
     now,
     horizonDays: audience === "admin" ? null : settings.horizon_days,
   });
 
-  return { slots, settings };
+  return { slots, settings, practitioner };
 }
 
 /**
@@ -95,11 +122,13 @@ export async function getAvailability({
  * may be seconds stale, and nothing stops someone posting an arbitrary time.
  */
 export async function isSlotBookable(
+  practitionerId: string,
   startsAt: Date,
   audience: "public" | "admin",
   now: Date = new Date(),
 ): Promise<boolean> {
   const { slots } = await getAvailability({
+    practitionerId,
     from: new Date(startsAt.getTime() - 1),
     to: new Date(startsAt.getTime() + 1),
     audience,

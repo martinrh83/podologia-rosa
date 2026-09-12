@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -44,9 +45,9 @@ export default async function CancelarPage({ params }: PageProps<"/turnos/cancel
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Este turno ya no está activo</h1>
         <p className="mt-4 text-[1.05rem] text-muted">
           {alreadyCancelled ? "Fue cancelado." : "Ya pasó."} Si querés reservar otro,{" "}
-          <a href="/turnos" className="text-accent underline">
+          <Link href="/turnos" className="text-accent underline">
             elegí un nuevo horario
-          </a>
+          </Link>
           .
         </p>
       </div>

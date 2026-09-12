@@ -34,9 +34,14 @@ export async function addShift(
 ): Promise<ScheduleState> {
   await requireStaff();
 
+  const practitionerId = String(formData.get("practitionerId") ?? "");
   const weekday = Number(formData.get("weekday"));
   const startTime = String(formData.get("startTime") ?? "");
   const endTime = String(formData.get("endTime") ?? "");
+
+  if (!practitionerId) {
+    return { status: "error", message: "Elegí de quién es la franja." };
+  }
 
   if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
     return { status: "error", message: "Elegí un día de la semana." };
@@ -59,7 +64,7 @@ export async function addShift(
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase
     .from("weekly_schedule")
-    .insert({ weekday, start_time: startTime, end_time: endTime });
+    .insert({ practitioner_id: practitionerId, weekday, start_time: startTime, end_time: endTime });
 
   if (error) {
     return { status: "error", message: "No pudimos guardar la franja. Probá de nuevo." };
@@ -98,6 +103,9 @@ export async function addBlock(
   const fromKey = String(formData.get("from") ?? "");
   const toKey = String(formData.get("to") ?? "");
   const reason = String(formData.get("reason") ?? "").trim();
+  // Vacío significa "todo el consultorio": el feriado que no es de nadie en
+  // particular y aplica también a quien entre después.
+  const practitionerId = String(formData.get("practitionerId") ?? "") || null;
 
   if (!fromKey || !toKey) {
     return { status: "error", message: "Completá las dos fechas." };
@@ -120,6 +128,7 @@ export async function addBlock(
 
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase.from("schedule_blocks").insert({
+    practitioner_id: practitionerId,
     starts_at: start.toISOString(),
     ends_at: end.toISOString(),
     reason: reason || null,

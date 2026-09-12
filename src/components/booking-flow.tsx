@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,7 +26,15 @@ export type BookingDay = {
   slots: BookingSlot[];
 };
 
+/** La profesional elegida en /turnos. Ya está decidida cuando se llega acá. */
+export type BookingPractitioner = {
+  id: string;
+  name: string;
+  title: string | null;
+};
+
 type Props = {
+  practitioner: BookingPractitioner;
   days: BookingDay[];
   horizonDays: number;
   clinicPhone: string | null;
@@ -37,7 +46,13 @@ type Status =
   | { kind: "idle" }
   | { kind: "submitting" }
   | { kind: "error"; message: string; slotTaken: boolean }
-  | { kind: "done"; slotLabel: string; dayLabel: string; cancelUrl: string };
+  | {
+      kind: "done";
+      slotLabel: string;
+      dayLabel: string;
+      practitionerName: string;
+      cancelUrl: string;
+    };
 
 /**
  * Los dos pasos del flujo.
@@ -52,7 +67,14 @@ type Status =
  */
 type Step = "cuando" | "datos";
 
-export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, clinicName }: Props) {
+export function BookingFlow({
+  practitioner,
+  days,
+  horizonDays,
+  clinicPhone,
+  clinicWhatsapp,
+  clinicName,
+}: Props) {
   const router = useRouter();
 
   const [step, setStep] = useState<Step>("cuando");
@@ -144,7 +166,11 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
       const response = await fetch("/api/turnos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, startsAt: selectedSlot.startsAt }),
+        body: JSON.stringify({
+          ...form,
+          practitionerId: practitioner.id,
+          startsAt: selectedSlot.startsAt,
+        }),
       });
 
       if (!response.ok) {
@@ -176,6 +202,7 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
         kind: "done",
         slotLabel: selectedSlot.label,
         dayLabel: slotDay?.label ?? "",
+        practitionerName: practitioner.name,
         // With no email to carry it, this link is shown once and never again.
         cancelUrl: body.cancelToken ? `/turnos/cancelar/${body.cancelToken}` : "",
       });
@@ -216,6 +243,13 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
 
   return (
     <div ref={topRef} className="space-y-6">
+      {/*
+        La profesional queda a la vista todo el tiempo, con la salida al lado.
+        Se eligió en la pantalla anterior, así que no es un paso del wizard: es
+        el contexto de los dos pasos que siguen.
+      */}
+      <PractitionerHeader practitioner={practitioner} />
+
       <Progress step={step} />
 
       {status.kind === "error" && status.slotTaken && (
@@ -496,6 +530,26 @@ export function BookingFlow({ days, horizonDays, clinicPhone, clinicWhatsapp, cl
   );
 }
 
+function PractitionerHeader({ practitioner }: { practitioner: BookingPractitioner }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface-muted p-4">
+      <div>
+        <p className="text-sm text-muted">Tu turno es con</p>
+        <p className="text-[1.05rem] font-medium">{practitioner.name}</p>
+        {practitioner.title && (
+          <p className="text-[0.95rem] text-muted">{practitioner.title}</p>
+        )}
+      </div>
+      <Link
+        href="/turnos"
+        className="shrink-0 rounded-lg border border-border bg-surface px-4 py-2.5 text-[0.95rem] font-medium hover:border-accent"
+      >
+        Cambiar
+      </Link>
+    </div>
+  );
+}
+
 /** Dónde está parado el paciente y cuánto falta. */
 function Progress({ step }: { step: Step }) {
   const current = step === "cuando" ? 1 : 2;
@@ -645,14 +699,15 @@ function Confirmation({
       : status.cancelUrl;
 
   const confirmationMessage =
-    `Hola! Saqué un turno en ${clinicName} para el ${status.dayLabel} a las ` +
-    `${status.slotLabel}.` +
+    `Hola! Saqué un turno en ${clinicName} con ${status.practitionerName} para el ` +
+    `${status.dayLabel} a las ${status.slotLabel}.` +
     (absoluteCancelUrl ? ` Este es mi enlace por si necesito cancelar: ${absoluteCancelUrl}` : "");
 
   return (
     <Notice tone="success" title="¡Listo! Tu turno quedó confirmado">
       <p className="text-[1.05rem] text-foreground">
-        {capitalizeFirst(status.dayLabel)} a las {status.slotLabel}.
+        {capitalizeFirst(status.dayLabel)} a las {status.slotLabel}, con{" "}
+        {status.practitionerName}.
       </p>
 
       {status.cancelUrl ? (

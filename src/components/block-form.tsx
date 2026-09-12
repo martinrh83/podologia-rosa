@@ -7,13 +7,17 @@ import { FormMessage } from "@/components/shift-form";
 
 const INITIAL: ScheduleState = { status: "idle" };
 
+export type BlockFormOption = { id: string; name: string };
+
 /** Alta de un cierre. Controlado por el mismo motivo que [ShiftForm]. */
-export function BlockForm() {
+export function BlockForm({ practitioners }: { practitioners: BlockFormOption[] }) {
   const [state, formAction, isPending] = useActionState(addBlock, INITIAL);
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [reason, setReason] = useState("");
+  // Vacío = todo el consultorio, y es el default: un feriado no es de nadie.
+  const [practitionerId, setPractitionerId] = useState("");
 
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
@@ -22,12 +26,33 @@ export function BlockForm() {
       setFrom("");
       setTo("");
       setReason("");
+      setPractitionerId("");
     }
   }
 
   return (
     <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
       <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label htmlFor="blockPractitioner" className="block text-sm font-medium">
+            Para quién
+          </label>
+          <select
+            id="blockPractitioner"
+            name="practitionerId"
+            value={practitionerId}
+            onChange={(event) => setPractitionerId(event.target.value)}
+            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
+          >
+            <option value="">Todo el consultorio</option>
+            {practitioners.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <label htmlFor="from" className="block text-sm font-medium">
             Desde

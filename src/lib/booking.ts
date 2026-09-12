@@ -9,6 +9,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
  * How a double-booking surfaces from Postgres.
  *
  * `23P01` is the exclusion constraint rejecting an overlap — the normal case.
+ * Desde 0006 la restricción está particionada por profesional: sólo choca con
+ * los turnos de la misma persona, no con los de su colega en el otro box.
  * `23505` is kept because older databases may still carry the unique index on
  * `starts_at` that migration 0003 replaces.
  */
@@ -55,7 +57,7 @@ export async function createBooking(
 
   const supabase = createSupabaseAdminClient();
 
-  const bookable = await isSlotBookable(startsAt, audience);
+  const bookable = await isSlotBookable(input.practitionerId, startsAt, audience);
   if (!bookable) {
     return {
       ok: false,
@@ -64,7 +66,8 @@ export async function createBooking(
     };
   }
 
-  const { settings } = await getAvailability({
+  const { settings, practitioner } = await getAvailability({
+    practitionerId: input.practitionerId,
     from: startsAt,
     to: new Date(startsAt.getTime() + 1),
     audience,
@@ -93,11 +96,12 @@ export async function createBooking(
     }
   }
 
-  const endsAt = new Date(startsAt.getTime() + settings.slot_minutes * 60_000);
+  const endsAt = new Date(startsAt.getTime() + practitioner.slot_minutes * 60_000);
 
   const { data, error } = await supabase
     .from("appointments")
     .insert({
+      practitioner_id: input.practitionerId,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
       status: "booked",

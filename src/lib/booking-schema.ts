@@ -76,6 +76,8 @@ export function normalizeDni(input: string): string {
 export const CONSENT_REQUIRED_MESSAGE = "Necesitamos tu consentimiento para guardar tus datos.";
 
 export const bookingSchema = z.object({
+  /** Con quién es el turno. No hay reserva sin profesional. */
+  practitionerId: z.uuid("Elegí un profesional"),
   startsAt: z.iso.datetime({ offset: true }),
   patientFirstName: z.string().trim().min(2, "Ingresá tu nombre").max(80),
   patientLastName: z.string().trim().min(2, "Ingresá tu apellido").max(80),

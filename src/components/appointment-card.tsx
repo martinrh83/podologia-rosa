@@ -1,7 +1,7 @@
 import { updateStatus } from "@/app/actions/appointments";
 import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
-import type { Appointment } from "@/lib/db/types";
+import type { Appointment, AppointmentWithPractitioner } from "@/lib/db/types";
 import { formatDay, formatTime, whatsappLink } from "@/lib/format";
 
 const STATUS_LABEL: Record<Appointment["status"], string> = {
@@ -12,14 +12,24 @@ const STATUS_LABEL: Record<Appointment["status"], string> = {
 };
 
 type Props = {
-  appointment: Appointment;
+  appointment: AppointmentWithPractitioner;
+  /**
+   * Nombrar a la profesional en la tarjeta. Se apaga cuando la lista ya está
+   * filtrada por una sola: repetir el mismo nombre en cada fila es ruido.
+   */
+  showPractitioner?: boolean;
   /** Renders the tap-to-send WhatsApp reminder — used on the "Mañana" screen. */
   reminderMessage?: string;
   /** Absolute base URL, so the cancel link Rosa sends works outside localhost. */
   siteUrl: string;
 };
 
-export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props) {
+export function AppointmentCard({
+  appointment,
+  reminderMessage,
+  siteUrl,
+  showPractitioner = true,
+}: Props) {
   const isCancelled = appointment.status === "cancelled";
   const cancelUrl = `${siteUrl}/turnos/cancelar/${appointment.cancel_token}`;
   const fullName = `${appointment.patient_last_name}, ${appointment.patient_first_name}`;
@@ -30,7 +40,14 @@ export function AppointmentCard({ appointment, reminderMessage, siteUrl }: Props
       className={`rounded-xl border border-border bg-surface p-4 ${isCancelled ? "opacity-60" : ""}`}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="text-xl font-semibold tabular-nums">{formatTime(appointment.starts_at)}</p>
+        <p className="text-xl font-semibold tabular-nums">
+          {formatTime(appointment.starts_at)}
+          {showPractitioner && appointment.practitioner && (
+            <span className="ml-3 text-[0.95rem] font-medium text-accent">
+              {appointment.practitioner.first_name} {appointment.practitioner.last_name}
+            </span>
+          )}
+        </p>
         <span className="text-sm text-muted">
           {STATUS_LABEL[appointment.status]}
           {appointment.source === "admin" && " · cargado a mano"}

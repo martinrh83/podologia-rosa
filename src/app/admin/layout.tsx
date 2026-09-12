@@ -8,6 +8,7 @@ const TABS = [
   { href: "/admin/manana", label: "Mañana" },
   { href: "/admin/nuevo", label: "Nuevo turno" },
   { href: "/admin/agenda", label: "Agenda" },
+  { href: "/admin/profesionales", label: "Profesionales" },
   { href: "/admin/servicios", label: "Precios" },
   { href: "/admin/consultorio", label: "Consultorio" },
 ];

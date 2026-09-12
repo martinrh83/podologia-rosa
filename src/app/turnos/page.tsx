@@ -1,66 +1,100 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
-import { BookingFlow, type BookingDay } from "@/components/booking-flow";
-import { getAvailability } from "@/lib/availability";
-import { formatDay, formatShortDay, formatTime, toLocalDateKey } from "@/lib/format";
+import { getClinicSettings } from "@/lib/availability";
+import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
+import type { PractitionerWithSpecialty } from "@/lib/db/types";
 
 export const metadata: Metadata = {
   title: "Sacar un turno",
   description:
-    "Elegí el día y el horario que te queden cómodos. No hace falta crear una cuenta ni llamar por teléfono.",
+    "Elegí con quién te querés atender y mirá sus horarios disponibles. No hace falta crear una cuenta ni llamar por teléfono.",
 };
 
-// Availability changes on every booking, so this page must never be cached.
+// La lista cambia poco, pero dar de baja a alguien tiene que sacarlo de acá en
+// el momento: un turno reservado con quien ya no atiende no lo arregla nadie.
 export const dynamic = "force-dynamic";
 
-/**
- * Outer bound on the query window. The real limit is `horizon_days`, which lives
- * in the database and is applied inside the slot engine — this only stops one
- * page render from asking for an unbounded range if Rosa sets a huge horizon.
- */
-const MAX_WINDOW_DAYS = 60;
-
 export default async function TurnosPage() {
-  const now = new Date();
-  const { slots, settings } = await getAvailability({
-    from: now,
-    to: new Date(now.getTime() + MAX_WINDOW_DAYS * 86_400_000),
-    audience: "public",
-    now,
-  });
+  const [practitioners, settings] = await Promise.all([
+    listActivePractitioners(),
+    getClinicSettings(),
+  ]);
 
-  // Group into days here rather than in the client component: it keeps the
-  // browser bundle free of timezone formatting for dates it never re-derives.
-  const byDay = new Map<string, BookingDay>();
-  for (const slot of slots) {
-    const key = toLocalDateKey(slot.start);
-    const day = byDay.get(key) ?? {
-      key,
-      label: formatDay(slot.start),
-      shortLabel: formatShortDay(slot.start),
-      slots: [],
-    };
-    day.slots.push({ startsAt: slot.start.toISOString(), label: formatTime(slot.start) });
-    byDay.set(key, day);
+  // Agrupar por especialidad sólo tiene sentido cuando hay más de una: con una
+  // sola, el título repetiría lo que ya dice el sitio entero.
+  const groups = new Map<string, PractitionerWithSpecialty[]>();
+  for (const practitioner of practitioners) {
+    const key = practitioner.specialty?.name ?? "Otros";
+    groups.set(key, [...(groups.get(key) ?? []), practitioner]);
   }
+  const showSpecialtyHeadings = groups.size > 1;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sacar un turno</h1>
         <p className="mt-3 text-lg text-muted">
-          Son dos pasos y no hace falta crear una cuenta. Cada turno dura{" "}
-          {settings.slot_minutes} minutos.
+          Elegí con quién te querés atender y te mostramos sus horarios libres.
         </p>
       </header>
 
-      <BookingFlow
-        days={[...byDay.values()]}
-        horizonDays={settings.horizon_days}
-        clinicPhone={settings.phone}
-        clinicWhatsapp={settings.whatsapp}
-        clinicName={settings.clinic_name}
-      />
+      {practitioners.length === 0 ? (
+        <div className="rounded-xl border border-border bg-surface-muted p-5">
+          <p className="font-medium">Por ahora no hay turnos online</p>
+          <p className="mt-1 text-[0.95rem] text-muted">
+            {settings.phone
+              ? `Llamanos al ${settings.phone} y lo vemos por teléfono.`
+              : "Escribinos y lo vemos por teléfono."}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {[...groups.entries()].map(([specialty, people]) => (
+            <section key={specialty} aria-labelledby={`esp-${specialty}`}>
+              {showSpecialtyHeadings && (
+                <h2
+                  id={`esp-${specialty}`}
+                  className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted"
+                >
+                  {specialty}
+                </h2>
+              )}
+
+              <ul className="space-y-3">
+                {people.map((practitioner) => (
+                  <li key={practitioner.id}>
+                    <Link
+                      href={`/turnos/${practitioner.slug}`}
+                      className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-surface p-5 transition-colors hover:border-accent"
+                    >
+                      <span>
+                        <span className="block text-[1.15rem] font-medium">
+                          {practitionerName(practitioner)}
+                        </span>
+                        {practitioner.title && (
+                          <span className="mt-0.5 block text-[0.95rem] text-muted">
+                            {practitioner.title}
+                          </span>
+                        )}
+                        <span className="mt-1 block text-sm text-muted">
+                          Turnos de {practitioner.slot_minutes} minutos
+                        </span>
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="shrink-0 rounded-lg bg-accent px-4 py-2.5 font-medium text-white"
+                      >
+                        Ver horarios
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

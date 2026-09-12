@@ -1,13 +1,19 @@
 import Link from "next/link";
 
 import { getClinicSettings } from "@/lib/availability";
+import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { getActiveServices } from "@/lib/db/services";
+import { siteUrl } from "@/lib/env";
 import { formatPrice, whatsappLink } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [settings, services] = await Promise.all([getClinicSettings(), getActiveServices()]);
+  const [settings, services, practitioners] = await Promise.all([
+    getClinicSettings(),
+    getActiveServices(),
+    listActivePractitioners(),
+  ]);
 
   /**
    * LocalBusiness structured data. This is how Rosa turns up for
@@ -21,6 +27,16 @@ export default async function HomePage() {
     ...(settings.address && { address: { "@type": "PostalAddress", streetAddress: settings.address } }),
     ...(settings.phone && { telephone: settings.phone }),
     areaServed: "AR",
+    // Cada profesional, con su propia agenda como URL. Es lo que permite que
+    // una búsqueda por nombre propio caiga en la página donde se le saca turno.
+    ...(practitioners.length > 0 && {
+      employee: practitioners.map((practitioner) => ({
+        "@type": "Person",
+        name: practitionerName(practitioner),
+        ...(practitioner.title && { jobTitle: practitioner.title }),
+        url: `${siteUrl()}/turnos/${practitioner.slug}`,
+      })),
+    }),
   };
 
   return (
@@ -97,7 +113,8 @@ export default async function HomePage() {
           </ul>
 
           <p className="mt-6 text-sm text-muted">
-            Todos los turnos duran {settings.slot_minutes} minutos.
+            La duración del turno depende de con quién te atiendas; la ves al elegir
+            profesional.
           </p>
         </div>
       </section>

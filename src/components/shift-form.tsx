@@ -15,7 +15,7 @@ const INITIAL: ScheduleState = { status: "idle" };
  * inputs sueltos, un rechazo mostraba el error y de paso le borraba a Rosa lo
  * que acababa de cargar. Acá el estado es nuestro y se limpia sólo al guardar.
  */
-export function ShiftForm() {
+export function ShiftForm({ practitionerId }: { practitionerId: string }) {
   const [state, formAction, isPending] = useActionState(addShift, INITIAL);
 
   const [weekday, setWeekday] = useState("1");
@@ -36,6 +36,9 @@ export function ShiftForm() {
 
   return (
     <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
+      {/* De quién es la franja: lo define el selector de arriba de la pantalla. */}
+      <input type="hidden" name="practitionerId" value={practitionerId} />
+
       <div className="flex flex-wrap items-end gap-3">
         <div>
           <label htmlFor="weekday" className="block text-sm font-medium">

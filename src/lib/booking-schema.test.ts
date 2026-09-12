@@ -58,6 +58,7 @@ describe("normalizeDni", () => {
 
 describe("bookingSchema", () => {
   const valid = {
+    practitionerId: "9f8e7d6c-5b4a-4321-9876-0123456789ab",
     startsAt: "2026-09-10T12:00:00.000Z",
     patientFirstName: "Rosa",
     patientLastName: "Gómez",
@@ -104,6 +105,15 @@ describe("bookingSchema", () => {
     expect(bookingSchema.safeParse({ ...valid, patientDni: "123456" }).success).toBe(false);
     expect(bookingSchema.safeParse({ ...valid, patientDni: "123456789" }).success).toBe(false);
     expect(bookingSchema.safeParse({ ...valid, patientDni: "" }).success).toBe(false);
+  });
+
+  it("no acepta una reserva sin profesional", () => {
+    // Desde que atienden dos, un turno sin dueño no significa nada: la agenda,
+    // la duración y la restricción de solapamiento son todas de una persona.
+    const sinProfesional = { ...valid, practitionerId: undefined };
+    expect(bookingSchema.safeParse(sinProfesional).success).toBe(false);
+    expect(bookingSchema.safeParse({ ...valid, practitionerId: "" }).success).toBe(false);
+    expect(bookingSchema.safeParse({ ...valid, practitionerId: "rosa" }).success).toBe(false);
   });
 
   it("requires a timestamp with an explicit offset", () => {

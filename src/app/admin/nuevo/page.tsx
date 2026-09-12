@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createAdminBooking } from "@/app/actions/appointments";
 import { getAvailability } from "@/lib/availability";
 import { COVERAGES } from "@/lib/booking-schema";
+import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { requireStaff } from "@/lib/auth";
 import { formatTime, toLocalDateKey } from "@/lib/format";
 import { localDayRangeFromKey } from "@/lib/slots";
@@ -29,22 +30,33 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
   const error = typeof params.error === "string" ? params.error : null;
   const dateKey = typeof params.fecha === "string" ? params.fecha : toLocalDateKey(new Date());
 
+  const practitioners = await listActivePractitioners();
+
+  // El profesional define qué horarios existen —su agenda, su duración— así que
+  // se elige antes que la fecha, no después.
+  const requested = typeof params.profesional === "string" ? params.profesional : null;
+  const practitioner =
+    practitioners.find((row) => row.id === requested) ?? practitioners[0] ?? null;
+
   let slots: { value: string; label: string }[] = [];
   let dateError: string | null = null;
 
-  try {
-    const range = localDayRangeFromKey(dateKey);
-    const availability = await getAvailability({
-      from: range.start,
-      to: range.end,
-      audience: "admin",
-    });
-    slots = availability.slots.map((slot) => ({
-      value: slot.start.toISOString(),
-      label: formatTime(slot.start),
-    }));
-  } catch {
-    dateError = "Esa fecha no es válida.";
+  if (practitioner) {
+    try {
+      const range = localDayRangeFromKey(dateKey);
+      const availability = await getAvailability({
+        practitionerId: practitioner.id,
+        from: range.start,
+        to: range.end,
+        audience: "admin",
+      });
+      slots = availability.slots.map((slot) => ({
+        value: slot.start.toISOString(),
+        label: formatTime(slot.start),
+      }));
+    } catch {
+      dateError = "Esa fecha no es válida.";
+    }
   }
 
   return (
@@ -54,6 +66,23 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
 
       {/* GET form so picking a date is a plain navigation — no client JS needed. */}
       <form method="get" className="mb-6 flex flex-wrap items-end gap-3">
+        <div>
+          <label htmlFor="profesional" className="block text-[0.95rem] font-medium">
+            Profesional
+          </label>
+          <select
+            id="profesional"
+            name="profesional"
+            defaultValue={practitioner?.id ?? ""}
+            className="mt-1.5 rounded-lg border border-border bg-background px-3 py-2.5"
+          >
+            {practitioners.map((row) => (
+              <option key={row.id} value={row.id}>
+                {practitionerName(row)}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label htmlFor="fecha" className="block text-[0.95rem] font-medium">
             Fecha
@@ -80,7 +109,15 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
         </p>
       )}
 
-      {dateError ? (
+      {!practitioner ? (
+        <p className="text-muted">
+          Todavía no hay profesionales cargados.{" "}
+          <Link href="/admin/profesionales" className="text-accent underline">
+            Cargá el primero
+          </Link>
+          .
+        </p>
+      ) : dateError ? (
         <p className="text-muted">{dateError}</p>
       ) : slots.length === 0 ? (
         <p className="text-muted">
@@ -92,6 +129,9 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
         </p>
       ) : (
         <form action={createAdminBooking} className="space-y-4 rounded-xl border border-border bg-surface p-5">
+          {/* El profesional viaja con el turno: es el que define la agenda de arriba. */}
+          <input type="hidden" name="practitionerId" value={practitioner.id} />
+
           <div>
             <label htmlFor="startsAt" className="block text-[0.95rem] font-medium">
               Horario
