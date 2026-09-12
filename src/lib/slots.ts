@@ -210,8 +210,12 @@ export function generateSlots({
         if (start >= cutoff) continue;
 
         // Half-open overlap: touching at the boundary is not a clash, so a turno
-        // ending at 12:00 leaves 12:00 free. Mirrors the exclusion constraint in
-        // the database, which compares the same ranges.
+        // ending at 12:00 leaves 12:00 free.
+        //
+        // Acá sí se comparan rangos. La base, desde 0008, sólo compara la hora
+        // de inicio: este motor es más estricto que la restricción que lo
+        // respalda, y por eso es el que evita ofrecer un horario que se pise
+        // con un turno que quedó fuera de la grilla.
         const clash = busy.some((range) => start < range.end && end > range.start);
         if (clash) continue;
 

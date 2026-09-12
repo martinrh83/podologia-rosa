@@ -8,11 +8,11 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 /**
  * How a double-booking surfaces from Postgres.
  *
- * `23P01` is the exclusion constraint rejecting an overlap — the normal case.
- * Desde 0006 la restricción está particionada por profesional: sólo choca con
- * los turnos de la misma persona, no con los de su colega en el otro box.
- * `23505` is kept because older databases may still carry the unique index on
- * `starts_at` that migration 0003 replaces.
+ * `23505` es el caso normal: el índice único de 0008 rechaza un segundo turno
+ * con la misma hora de inicio para la misma profesional. `23P01` se queda
+ * porque es lo que devolvería la restricción de exclusión de 0003/0006 si
+ * alguna vez se vuelve a ella — y porque una base que todavía no corrió 0008
+ * la tiene puesta.
  */
 const OVERLAP_CODES = ["23P01", "23505"];
 
