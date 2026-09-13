@@ -131,7 +131,8 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
       <section>
         <h2 className="text-2xl font-semibold tracking-tight">Días que no se atiende</h2>
         <p className="mt-1 text-muted">
-          Vacaciones, feriados, o cualquier día suelto. Los del consultorio valen para todas.
+          Vacaciones, feriados, o cualquier día suelto. Dejá los dos desplegables en
+          &laquo;todos&raquo; para cerrar el consultorio entero.
         </p>
 
         <ul className="mt-5 space-y-2">

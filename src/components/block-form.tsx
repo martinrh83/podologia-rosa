@@ -74,7 +74,7 @@ export function BlockForm({
             onChange={(event) => setPractitionerId(event.target.value)}
             className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
           >
-            <option value="">Todo el consultorio</option>
+            <option value="">Todos los profesionales</option>
             {practitioners.map((row) => (
               <option key={row.id} value={row.id}>
                 {row.name}
