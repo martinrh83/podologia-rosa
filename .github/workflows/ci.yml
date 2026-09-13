@@ -53,6 +53,15 @@ jobs:
       - name: Levantar la base y aplicar las 13 migraciones
         run: supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
 
+      # `PageProps` y `LayoutProps` no están escritos en ningún lado: los genera
+      # Next a partir de las rutas, en `.next/types/`, que está en .gitignore.
+      # En una máquina que ya compiló alguna vez existen y `tsc` pasa; en una
+      # limpia no, y fallaba con "Cannot find name 'PageProps'".
+      #
+      # Lo encontró la primera corrida de CI, que es exactamente para lo que está.
+      - name: Generar los tipos de las rutas
+        run: npx next typegen
+
       - name: Tipos
         run: npx tsc --noEmit
 
