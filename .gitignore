@@ -35,6 +35,10 @@ yarn-error.log*
 # ...except the template, which documents what a deploy needs and holds no secrets.
 !.env.example
 
+# apuntes personales de trabajo: tienen credenciales del entorno local.
+# Lo que tiene que sobrevivir va al README o a un comentario en la migración.
+/docs/supabase.md
+
 # vercel
 .vercel
 
