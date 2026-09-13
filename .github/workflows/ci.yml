@@ -1,0 +1,74 @@
+name: CI
+
+# En cada push a una rama con Pull Request abierto, y en main.
+#
+# Lo que este archivo hace es REPORTAR. Lo que impide mergear cuando algo falla
+# es una configuración aparte de GitHub:
+#   Settings -> Branches -> Add rule -> Require status checks to pass
+# Ahí hay que elegir el check "verificar".
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # ─────────────────────────────────────────────────────────────────────
+      # La base, desde cero.
+      #
+      # Ésta es la razón de ser del job: la máquina de CI está vacía, así que
+      # una migración que en la compu de alguien funciona sólo porque su base ya
+      # tenía cierto estado —una columna agregada a mano en el Studio, un update
+      # corrido una vez— acá revienta.
+      #
+      # No alcanza con un contenedor `postgres` pelado: tres migraciones
+      # dependen del esquema de autenticación, que lo crean las migraciones de
+      # GoTrue al arrancar el servicio.
+      #
+      #   0006_profesionales.sql    -> auth.users
+      #   0007_seed_staff.sql       -> auth.users
+      #   0011_rls_contra_staff.sql -> auth.uid()
+      #
+      # Se excluyen los servicios que no participan de ninguna verificación:
+      # el sitio nunca habla con Supabase desde el navegador, así que alcanza
+      # con la base, Auth y la API REST.
+      # ─────────────────────────────────────────────────────────────────────
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Levantar la base y aplicar las 13 migraciones
+        run: supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
+
+      - name: Tipos
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npx vitest run
+
+      # El build necesita las variables de entorno: son las claves fijas del
+      # stack local, que no son secretas y sólo funcionan contra 127.0.0.1.
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+          SUPABASE_SERVICE_ROLE_KEY: sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz
+          CRON_SECRET: ci
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
