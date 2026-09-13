@@ -117,12 +117,10 @@ export type Appointment = {
   patient_dni: string;
   patient_coverage: PatientCoverage;
   patient_phone: string;
-  patient_email: string | null;
   /** Dato sensible (Ley 25.326 art. 2). Staff-only, purged 30 days after the turno. */
   motivo: string | null;
   consent_at: string | null;
   cancel_token: string;
-  reminder_sent_at: string | null;
   anonymized_at: string | null;
   created_at: string;
   cancelled_at: string | null;

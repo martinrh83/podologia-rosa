@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireStaff } from "@/lib/auth";
+import { shiftsOverlap } from "@/lib/shifts";
 import { localDayRangeFromKey } from "@/lib/slots";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -67,6 +68,33 @@ export async function addShift(
   }
 
   const supabase = createSupabaseAdminClient();
+
+  // Nadie puede estar en dos lugares a la vez, ni atender dos veces la misma
+  // hora en el mismo lugar. La base no lo impide —eso sería otra restricción de
+  // exclusión— así que se chequea acá, que es donde se puede explicar cuál es la
+  // franja que estorba.
+  //
+  // Sin filtrar por sede a propósito: dos franjas que se pisan en sedes
+  // distintas son peores, no mejores.
+  const { data: existing } = await supabase
+    .from("weekly_schedule")
+    .select("start_time, end_time, location_id")
+    .eq("practitioner_id", practitionerId)
+    .eq("weekday", weekday);
+
+  const clash = (existing ?? []).find((row) =>
+    shiftsOverlap(startTime, endTime, row.start_time, row.end_time),
+  );
+
+  if (clash) {
+    return {
+      status: "error",
+      message:
+        `Se pisa con la franja de ${clash.start_time.slice(0, 5)} a ` +
+        `${clash.end_time.slice(0, 5)} que ya tiene ese día.`,
+    };
+  }
+
   const { error } = await supabase
     .from("weekly_schedule")
     .insert({

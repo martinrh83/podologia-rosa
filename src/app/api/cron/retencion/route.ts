@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
       // El DNI es lo más sensible que guardamos: se va con el resto.
       patient_dni: "",
       patient_phone: "",
-      patient_email: null,
       motivo: null,
       anonymized_at: new Date().toISOString(),
     })
