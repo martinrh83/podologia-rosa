@@ -1,12 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
+import {
+  listActivePractitioners,
+  practitionerName,
+} from "@/lib/db/practitioners";
 
-export const metadata: Metadata = {
-  title: "Equipo",
-  description: "Conocé a las profesionales que atienden en el consultorio.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const practitioners = await listActivePractitioner();
+  const names = practitioners.map((row) => practitionerName(row));
+
+  return {
+    title: "Equipo",
+    description:
+      names.length > 0
+        ? `Conocé a ${names.join(", ")}, que atienden en el consultorio.`
+        : "Conocé a las profesionales que atienden en el consultorio.",
+  };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -22,22 +33,31 @@ export default async function EquipoPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Equipo</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+        Equipo
+      </h1>
       <p className="mt-3 text-lg text-muted">
-        Atendemos de a una persona por vez, sin apuro y con el tiempo suficiente para explicarte qué
-        está pasando.
+        Atendemos de a una persona por vez, sin apuro y con el tiempo suficiente
+        para explicarte qué está pasando.
       </p>
 
       <ul className="mt-8 space-y-5">
         {practitioners.map((practitioner) => (
-          <li key={practitioner.id} className="rounded-xl border border-border bg-surface p-5">
-            <h2 className="text-xl font-medium">{practitionerName(practitioner)}</h2>
+          <li
+            key={practitioner.id}
+            className="rounded-xl border border-border bg-surface p-5"
+          >
+            <h2 className="text-xl font-medium">
+              {practitionerName(practitioner)}
+            </h2>
             <p className="mt-0.5 text-[0.95rem] text-muted">
               {practitioner.title ?? practitioner.specialty?.name}
             </p>
 
             {practitioner.bio && (
-              <p className="mt-3 leading-relaxed text-muted">{practitioner.bio}</p>
+              <p className="mt-3 leading-relaxed text-muted">
+                {practitioner.bio}
+              </p>
             )}
 
             <Link
@@ -52,7 +72,8 @@ export default async function EquipoPage() {
 
       {practitioners.length > 0 && (
         <p className="mt-8 rounded-xl border border-border bg-surface-muted p-4 text-sm text-muted">
-          Las biografías y las matrículas se cargan desde el panel, en Profesionales.
+          Las biografías y las matrículas se cargan desde el panel, en
+          Profesionales.
         </p>
       )}
     </div>
