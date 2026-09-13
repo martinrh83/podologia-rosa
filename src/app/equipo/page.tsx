@@ -7,7 +7,7 @@ import {
 } from "@/lib/db/practitioners";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const practitioners = await listActivePractitioner();
+  const practitioners = await listActivePractitioners();
   const names = practitioners.map((row) => practitionerName(row));
 
   return {
