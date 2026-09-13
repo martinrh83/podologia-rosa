@@ -39,6 +39,7 @@ yarn-error.log*
 # Lo que tiene que sobrevivir va al README o a un comentario en la migración.
 /docs/supabase.md
 /docs/migraciones-en-equipo.md
+/docs/ci-cd.md
 
 # vercel
 .vercel
