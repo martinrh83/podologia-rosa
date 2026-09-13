@@ -5,11 +5,29 @@ import { getActiveServices } from "@/lib/db/services";
 import type { ServiceWithSpecialty } from "@/lib/db/types";
 import { formatPrice } from "@/lib/format";
 
-export const metadata: Metadata = {
-  title: "Servicios y precios",
-  description:
-    "Quiropodia, uñas encarnadas, pie diabético, verrugas plantares y estudio de la pisada.",
-};
+/**
+ * La descripción sale de la base, no de una lista escrita a mano.
+ *
+ * Estaba fija —"Quiropodia, uñas encarnadas, pie diabético…"— y esa es
+ * exactamente la clase de dato que envejece sin que nadie lo note: Rosa cambia
+ * los servicios desde el panel y el resultado de Google sigue prometiendo
+ * tratamientos que ya no se hacen.
+ *
+ * Se recorta a 155 caracteres, que es lo que Google muestra antes de cortar.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const services = await getActiveServices();
+  const names = services.map((service) => service.name);
+
+  const listado = names.join(", ");
+  const description =
+    listado.length > 155 ? `${listado.slice(0, 152).trimEnd()}…` : `${listado}.`;
+
+  return {
+    title: "Servicios y precios",
+    description: names.length > 0 ? description : "Tratamientos y precios del consultorio.",
+  };
+}
 
 export const dynamic = "force-dynamic";
 
