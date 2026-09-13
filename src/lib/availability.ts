@@ -74,7 +74,7 @@ export async function getAvailability({
       supabase.from("practitioners").select("*").eq("id", practitionerId).maybeSingle(),
       supabase
         .from("weekly_schedule")
-        .select("weekday, start_time, end_time")
+        .select("weekday, start_time, end_time, location_id")
         .eq("practitioner_id", practitionerId),
       // Todos los cierres que pisan la ventana, de quien sea.
       //
@@ -84,7 +84,7 @@ export async function getAvailability({
       // de cosa que hoy no se puede explotar y mañana sí.
       supabase
         .from("schedule_blocks")
-        .select("starts_at, ends_at, practitioner_id")
+        .select("starts_at, ends_at, practitioner_id, location_id")
         .lt("starts_at", to.toISOString())
         .gt("ends_at", from.toISOString()),
       supabase
@@ -136,17 +136,21 @@ export async function getAvailability({
 }
 
 /**
- * Whether a specific instant is genuinely bookable right now.
+ * El horario pedido, si de verdad se puede reservar ahora mismo.
  *
- * The booking endpoint must re-check this server-side: the client's slot list
- * may be seconds stale, and nothing stops someone posting an arbitrary time.
+ * Devuelve el slot y no un booleano porque el que reserva necesita la sede, y
+ * la sede la decide la agenda, no el cliente: quien manda el formulario podría
+ * mandar cualquier cosa.
+ *
+ * El endpoint tiene que volver a preguntarlo del lado del servidor: la lista
+ * que vio el paciente puede tener segundos de atraso.
  */
-export async function isSlotBookable(
+export async function findBookableSlot(
   practitionerId: string,
   startsAt: Date,
   audience: "public" | "admin",
   now: Date = new Date(),
-): Promise<boolean> {
+): Promise<Slot | null> {
   const { slots } = await getAvailability({
     practitionerId,
     from: new Date(startsAt.getTime() - 1),
@@ -155,7 +159,7 @@ export async function isSlotBookable(
     now,
   });
 
-  return slots.some((slot) => slot.start.getTime() === startsAt.getTime());
+  return slots.find((slot) => slot.start.getTime() === startsAt.getTime()) ?? null;
 }
 
 export { CLINIC_TZ };

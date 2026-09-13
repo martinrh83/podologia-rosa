@@ -11,6 +11,9 @@ export type SettingsState = { status: "idle" | "saved" | "error"; message?: stri
 /**
  * Datos de contacto del consultorio.
  *
+ * La dirección y el mapa ya no están acá: se mudaron a `locations` en 0010,
+ * porque hay más de una sede. Se editan en /admin/sedes.
+ *
  * Deliberadamente NO incluye la duración del turno ni el horizonte de reserva:
  * cambiar esos valores altera el significado de cada horario futuro, y un
  * descuido ahí se nota recién cuando un paciente llega a un turno que no
@@ -23,17 +26,11 @@ export async function updateClinicSettings(
   await requireStaff();
 
   const clinicName = String(formData.get("clinicName") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const whatsapp = String(formData.get("whatsapp") ?? "").trim();
-  const mapUrl = String(formData.get("mapUrl") ?? "").trim();
 
   if (clinicName.length < 2) {
     return { status: "error", message: "El nombre del consultorio no puede quedar vacío." };
-  }
-
-  if (mapUrl && !/^https?:\/\//i.test(mapUrl)) {
-    return { status: "error", message: "El enlace del mapa tiene que empezar con https://" };
   }
 
   const supabase = createSupabaseAdminClient();
@@ -42,14 +39,12 @@ export async function updateClinicSettings(
     .from("clinic_settings")
     .update({
       clinic_name: clinicName,
-      address: address || null,
       // El teléfono se muestra tal cual lo escribe Rosa: es texto para leer.
       phone: phone || null,
       // El de WhatsApp, en cambio, lo consume wa.me, así que se guarda
       // normalizado. Si no, "387 15 555-4444" abre un chat con un número que
       // no existe.
       whatsapp: whatsapp ? normalizePhone(whatsapp) : null,
-      map_url: mapUrl || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", true);

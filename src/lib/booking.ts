@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getAvailability, isSlotBookable } from "@/lib/availability";
+import { findBookableSlot, getAvailability } from "@/lib/availability";
 import { CONSENT_REQUIRED_MESSAGE, type BookingInput } from "@/lib/booking-schema";
 import type { Appointment } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -56,8 +56,10 @@ export async function createBooking(
 
   const supabase = createSupabaseAdminClient();
 
-  const bookable = await isSlotBookable(input.practitionerId, startsAt, audience);
-  if (!bookable) {
+  // La sede sale del horario que el motor considera reservable, no de lo que
+  // mande el cliente: es la agenda la que decide dónde se atiende ese día.
+  const slot = await findBookableSlot(input.practitionerId, startsAt, audience);
+  if (!slot) {
     return {
       ok: false,
       reason: "slot_unavailable",
@@ -78,6 +80,7 @@ export async function createBooking(
     .from("appointments")
     .insert({
       practitioner_id: input.practitionerId,
+      location_id: slot.locationId,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
       status: "booked",

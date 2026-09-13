@@ -52,11 +52,20 @@ export type ClinicSettings = {
   id: boolean;
   horizon_days: number;
   clinic_name: string;
-  address: string | null;
   phone: string | null;
   whatsapp: string | null;
-  map_url: string | null;
   updated_at: string;
+};
+
+/** Dónde se atiende. La dirección y el mapa viven acá desde 0010. */
+export type Location = {
+  id: string;
+  name: string;
+  address: string;
+  map_url: string | null;
+  display_order: number;
+  active: boolean;
+  created_at: string;
 };
 
 export type Service = {
@@ -73,6 +82,8 @@ export type Service = {
 export type WeeklyScheduleRow = {
   id: string;
   practitioner_id: string;
+  /** La sede va en la franja: el mismo profesional atiende en las dos. */
+  location_id: string;
   weekday: number;
   start_time: string;
   end_time: string;
@@ -81,8 +92,10 @@ export type WeeklyScheduleRow = {
 
 export type ScheduleBlock = {
   id: string;
-  /** En null cierra el consultorio entero y aplica a todos. Ver 0006. */
+  /** En null aplica a todos los profesionales. Ver 0006. */
   practitioner_id: string | null;
+  /** En null cierra todas las sedes. Con id, sólo esa. Ver 0010. */
+  location_id: string | null;
   starts_at: string;
   ends_at: string;
   reason: string | null;
@@ -92,6 +105,8 @@ export type ScheduleBlock = {
 export type Appointment = {
   id: string;
   practitioner_id: string;
+  /** Dónde fue. Se guarda al reservar, no se deriva de la franja. */
+  location_id: string;
   starts_at: string;
   ends_at: string;
   status: AppointmentStatus;
@@ -121,6 +136,7 @@ export type ServiceWithSpecialty = Service & {
 /** Un turno con el nombre de su profesional ya resuelto, para el panel. */
 export type AppointmentWithPractitioner = Appointment & {
   practitioner: { first_name: string; last_name: string } | null;
+  location: { name: string } | null;
 };
 
 /**

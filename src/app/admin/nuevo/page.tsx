@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createAdminBooking } from "@/app/actions/appointments";
 import { getAvailability } from "@/lib/availability";
 import { COVERAGES } from "@/lib/booking-schema";
+import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { requireStaff } from "@/lib/auth";
 import { formatTime, toLocalDateKey } from "@/lib/format";
@@ -30,7 +31,11 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
   const error = typeof params.error === "string" ? params.error : null;
   const dateKey = typeof params.fecha === "string" ? params.fecha : toLocalDateKey(new Date());
 
-  const practitioners = await listActivePractitioners();
+  const [practitioners, locations] = await Promise.all([
+    listActivePractitioners(),
+    listActiveLocations(),
+  ]);
+  const locationName = new Map(locations.map((row) => [row.id, row.name]));
 
   // El profesional define qué horarios existen —su agenda, su duración— así que
   // se elige antes que la fecha, no después.
@@ -52,7 +57,12 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
       });
       slots = availability.slots.map((slot) => ({
         value: slot.start.toISOString(),
-        label: formatTime(slot.start),
+        // La sede va en la etiqueta: el secretario tiene que saber dónde está
+        // citando al paciente, y ese día puede estar partido entre las dos.
+        label:
+          locations.length > 1
+            ? `${formatTime(slot.start)} · ${locationName.get(slot.locationId) ?? ""}`
+            : formatTime(slot.start),
       }));
     } catch {
       dateError = "Esa fecha no es válida.";

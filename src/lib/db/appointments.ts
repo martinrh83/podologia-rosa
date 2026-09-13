@@ -23,7 +23,7 @@ export async function getAppointmentsForLocalDay(
 
   let query = supabase
     .from("appointments")
-    .select("*, practitioner:practitioners(first_name, last_name)")
+    .select("*, practitioner:practitioners(first_name, last_name), location:locations(name)")
     .gte("starts_at", range.start.toISOString())
     .lt("starts_at", range.end.toISOString())
     // Los turnos de las dos profesionales se mezclan ordenados por hora: la

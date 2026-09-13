@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BookingFlow, type BookingDay } from "@/components/booking-flow";
 import { getAvailability } from "@/lib/availability";
+import { listActiveLocations } from "@/lib/db/locations";
 import { getPractitionerBySlug, practitionerName } from "@/lib/db/practitioners";
 import { formatDay, formatShortDay, formatTime, toLocalDateKey } from "@/lib/format";
 
@@ -43,13 +44,16 @@ export default async function AgendaProfesionalPage({ params }: PageProps<"/turn
   if (!practitioner) notFound();
 
   const now = new Date();
-  const { slots, settings } = await getAvailability({
+  const [{ slots, settings }, locations] = await Promise.all([
+    getAvailability({
     practitionerId: practitioner.id,
     from: now,
     to: new Date(now.getTime() + MAX_WINDOW_DAYS * 86_400_000),
-    audience: "public",
-    now,
-  });
+      audience: "public",
+      now,
+    }),
+    listActiveLocations(),
+  ]);
 
   // Group into days here rather than in the client component: it keeps the
   // browser bundle free of timezone formatting for dates it never re-derives.
@@ -60,10 +64,24 @@ export default async function AgendaProfesionalPage({ params }: PageProps<"/turn
       key,
       label: formatDay(slot.start),
       shortLabel: formatShortDay(slot.start),
+      locationName: null,
       slots: [],
     };
-    day.slots.push({ startsAt: slot.start.toISOString(), label: formatTime(slot.start) });
+    day.slots.push({
+      startsAt: slot.start.toISOString(),
+      label: formatTime(slot.start),
+      locationId: slot.locationId,
+    });
     byDay.set(key, day);
+  }
+
+  // El nombre de la sede sube al día cuando el día entero se atiende en una
+  // sola, que es el caso normal. Si está partido queda en null y la sede pasa a
+  // mostrarse en cada horario.
+  const locationName = new Map(locations.map((location) => [location.id, location.name]));
+  for (const day of byDay.values()) {
+    const ids = new Set(day.slots.map((slot) => slot.locationId));
+    day.locationName = ids.size === 1 ? (locationName.get([...ids][0]) ?? null) : null;
   }
 
   return (
@@ -77,6 +95,11 @@ export default async function AgendaProfesionalPage({ params }: PageProps<"/turn
       </header>
 
       <BookingFlow
+        locations={locations.map((location) => ({
+          id: location.id,
+          name: location.name,
+          address: location.address,
+        }))}
         practitioner={{
           id: practitioner.id,
           name: practitionerName(practitioner),

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { CancelForm } from "@/components/cancel-form";
 import { getClinicSettings } from "@/lib/availability";
+import { listActiveLocations } from "@/lib/db/locations";
 import { getByToken } from "@/lib/booking";
 import { capitalizeFirst, formatFull } from "@/lib/format";
 
@@ -26,7 +27,11 @@ export const dynamic = "force-dynamic";
 export default async function CancelarPage({ params }: PageProps<"/turnos/cancelar/[token]">) {
   const { token } = await params;
 
-  const [appointment, settings] = await Promise.all([getByToken(token), getClinicSettings()]);
+  const [appointment, settings, locations] = await Promise.all([
+    getByToken(token),
+    getClinicSettings(),
+    listActiveLocations(),
+  ]);
 
   if (!appointment) notFound();
 
@@ -61,7 +66,17 @@ export default async function CancelarPage({ params }: PageProps<"/turnos/cancel
       <div className="mt-6 rounded-xl border border-border bg-surface p-5">
         <p className="text-lg">{capitalizeFirst(formatFull(appointment.starts_at))}</p>
         <p className="mt-1 text-muted">A nombre de {appointment.patient_first_name} {appointment.patient_last_name}</p>
-        {settings.address && <p className="mt-3 text-[0.95rem] text-muted">{settings.address}</p>}
+        {/* La sede del turno, no la del consultorio: puede haber más de una. */}
+        {(() => {
+          const location = locations.find((row) => row.id === appointment.location_id);
+          if (!location) return null;
+          return (
+            <p className="mt-3 text-[0.95rem] text-muted">
+              {locations.length > 1 && <strong>{location.name} · </strong>}
+              {location.address}
+            </p>
+          );
+        })()}
       </div>
 
       <CancelForm token={token} clinicPhone={settings.phone} />

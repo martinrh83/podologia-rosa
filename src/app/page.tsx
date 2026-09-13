@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getClinicSettings } from "@/lib/availability";
+import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { getActiveServices } from "@/lib/db/services";
 import { siteUrl } from "@/lib/env";
@@ -9,10 +10,11 @@ import { formatPrice, whatsappLink } from "@/lib/format";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [settings, services, practitioners] = await Promise.all([
+  const [settings, services, practitioners, locations] = await Promise.all([
     getClinicSettings(),
     getActiveServices(),
     listActivePractitioners(),
+    listActiveLocations(),
   ]);
 
   /**
@@ -24,7 +26,18 @@ export default async function HomePage() {
     "@type": "MedicalBusiness",
     name: settings.clinic_name,
     medicalSpecialty: "Podiatric",
-    ...(settings.address && { address: { "@type": "PostalAddress", streetAddress: settings.address } }),
+    // Con una sede va `address`; con varias, cada una es un `location`. Es lo
+    // que hace que Google pueda mostrar la más cercana al que busca.
+    ...(locations.length === 1 && {
+      address: { "@type": "PostalAddress", streetAddress: locations[0].address },
+    }),
+    ...(locations.length > 1 && {
+      location: locations.map((row) => ({
+        "@type": "Place",
+        name: row.name,
+        address: { "@type": "PostalAddress", streetAddress: row.address },
+      })),
+    }),
     ...(settings.phone && { telephone: settings.phone }),
     areaServed: "AR",
     // Cada profesional, con su propia agenda como URL. Es lo que permite que

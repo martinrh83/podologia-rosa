@@ -18,6 +18,8 @@ type Props = {
    * filtrada por una sola: repetir el mismo nombre en cada fila es ruido.
    */
   showPractitioner?: boolean;
+  /** Igual con la sede: sólo tiene sentido cuando hay más de una. */
+  showLocation?: boolean;
   /** Renders the tap-to-send WhatsApp reminder — used on the "Mañana" screen. */
   reminderMessage?: string;
   /** Absolute base URL, so the cancel link Rosa sends works outside localhost. */
@@ -29,6 +31,7 @@ export function AppointmentCard({
   reminderMessage,
   siteUrl,
   showPractitioner = true,
+  showLocation = false,
 }: Props) {
   const isCancelled = appointment.status === "cancelled";
   const cancelUrl = `${siteUrl}/turnos/cancelar/${appointment.cancel_token}`;
@@ -49,6 +52,11 @@ export function AppointmentCard({
           )}
         </p>
         <span className="text-sm text-muted">
+          {showLocation && appointment.location && (
+            <span className="mr-2 uppercase tracking-wide text-accent">
+              {appointment.location.name}
+            </span>
+          )}
           {STATUS_LABEL[appointment.status]}
           {appointment.source === "admin" && " · cargado a mano"}
         </span>

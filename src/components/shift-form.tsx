@@ -15,10 +15,19 @@ const INITIAL: ScheduleState = { status: "idle" };
  * inputs sueltos, un rechazo mostraba el error y de paso le borraba a Rosa lo
  * que acababa de cargar. Acá el estado es nuestro y se limpia sólo al guardar.
  */
-export function ShiftForm({ practitionerId }: { practitionerId: string }) {
+export type ShiftFormLocation = { id: string; name: string };
+
+export function ShiftForm({
+  practitionerId,
+  locations,
+}: {
+  practitionerId: string;
+  locations: ShiftFormLocation[];
+}) {
   const [state, formAction, isPending] = useActionState(addShift, INITIAL);
 
   const [weekday, setWeekday] = useState("1");
+  const [locationId, setLocationId] = useState(locations[0]?.id ?? "");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
@@ -40,6 +49,30 @@ export function ShiftForm({ practitionerId }: { practitionerId: string }) {
       <input type="hidden" name="practitionerId" value={practitionerId} />
 
       <div className="flex flex-wrap items-end gap-3">
+        {locations.length > 1 && (
+          <div>
+            <label htmlFor="locationId" className="block text-sm font-medium">
+              Sede
+            </label>
+            <select
+              id="locationId"
+              name="locationId"
+              value={locationId}
+              onChange={(event) => setLocationId(event.target.value)}
+              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
+            >
+              {locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {locations.length <= 1 && (
+          <input type="hidden" name="locationId" value={locationId} />
+        )}
+
         <div>
           <label htmlFor="weekday" className="block text-sm font-medium">
             Día

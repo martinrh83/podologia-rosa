@@ -10,14 +10,21 @@ const INITIAL: ScheduleState = { status: "idle" };
 export type BlockFormOption = { id: string; name: string };
 
 /** Alta de un cierre. Controlado por el mismo motivo que [ShiftForm]. */
-export function BlockForm({ practitioners }: { practitioners: BlockFormOption[] }) {
+export function BlockForm({
+  practitioners,
+  locations,
+}: {
+  practitioners: BlockFormOption[];
+  locations: BlockFormOption[];
+}) {
   const [state, formAction, isPending] = useActionState(addBlock, INITIAL);
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [reason, setReason] = useState("");
-  // Vacío = todo el consultorio, y es el default: un feriado no es de nadie.
+  // Vacío = todos, y es el default: un feriado no es de nadie ni de una sede.
   const [practitionerId, setPractitionerId] = useState("");
+  const [locationId, setLocationId] = useState("");
 
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
@@ -27,12 +34,35 @@ export function BlockForm({ practitioners }: { practitioners: BlockFormOption[] 
       setTo("");
       setReason("");
       setPractitionerId("");
+      setLocationId("");
     }
   }
 
   return (
     <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
       <div className="flex flex-wrap items-end gap-3">
+        {locations.length > 1 && (
+          <div>
+            <label htmlFor="blockLocation" className="block text-sm font-medium">
+              En qué sede
+            </label>
+            <select
+              id="blockLocation"
+              name="locationId"
+              value={locationId}
+              onChange={(event) => setLocationId(event.target.value)}
+              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
+            >
+              <option value="">Todas</option>
+              {locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label htmlFor="blockPractitioner" className="block text-sm font-medium">
             Para quién

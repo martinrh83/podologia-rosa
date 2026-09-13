@@ -12,10 +12,14 @@ import {
 // 12:00Z — the tests assert that mapping explicitly rather than trusting it.
 const THURSDAY = 4;
 
+/** Las dos sedes. Ids cualquiera: al motor sólo le importa que sean distintos. */
+const CENTRO = "centro";
+const NORTE = "norte";
+
 /** Split shift: mornings 09:00-13:00, afternoons 16:00-20:00. */
 const SPLIT_SHIFT: ScheduleRow[] = [
-  { weekday: THURSDAY, start_time: "09:00", end_time: "13:00" },
-  { weekday: THURSDAY, start_time: "16:00", end_time: "20:00" },
+  { weekday: THURSDAY, start_time: "09:00", end_time: "13:00", location_id: CENTRO },
+  { weekday: THURSDAY, start_time: "16:00", end_time: "20:00", location_id: CENTRO },
 ];
 
 const WINDOW = {
@@ -207,6 +211,7 @@ describe("booking horizon", () => {
     weekday,
     start_time: "09:00",
     end_time: "10:30",
+    location_id: CENTRO,
   }));
 
   // 2026-09-01T12:00Z is 09:00 local on Tuesday the 1st.
@@ -246,6 +251,7 @@ describe("booking horizon", () => {
       weekday,
       start_time: "00:00",
       end_time: "01:00",
+      location_id: CENTRO,
     }));
 
     const dates = [
@@ -327,5 +333,69 @@ describe("localDayRangeFromKey", () => {
 
   it("rejects a malformed key rather than producing an Invalid Date", () => {
     expect(() => localDayRangeFromKey("no-es-fecha")).toThrow();
+  });
+});
+
+describe("sedes", () => {
+  /** Mismo día, mañana en una sede y tarde en la otra. */
+  const DOS_SEDES: ScheduleRow[] = [
+    { weekday: THURSDAY, start_time: "09:00", end_time: "13:00", location_id: CENTRO },
+    { weekday: THURSDAY, start_time: "16:00", end_time: "20:00", location_id: NORTE },
+  ];
+
+  it("cada horario sale con la sede de su franja", () => {
+    const slots = run({ weeklySchedule: DOS_SEDES });
+
+    const manana = slots.filter((slot) => slot.start.toISOString() < "2026-09-10T18:00");
+    const tarde = slots.filter((slot) => slot.start.toISOString() >= "2026-09-10T18:00");
+
+    expect(manana.length).toBeGreaterThan(0);
+    expect(tarde.length).toBeGreaterThan(0);
+    expect(new Set(manana.map((slot) => slot.locationId))).toEqual(new Set([CENTRO]));
+    expect(new Set(tarde.map((slot) => slot.locationId))).toEqual(new Set([NORTE]));
+  });
+
+  it("un cierre de una sede no toca a la otra", () => {
+    // Todo el jueves cerrado, pero sólo en Centro.
+    const slots = run({
+      weeklySchedule: DOS_SEDES,
+      blocks: [
+        {
+          starts_at: "2026-09-10T03:00:00.000Z",
+          ends_at: "2026-09-11T03:00:00.000Z",
+          location_id: CENTRO,
+        },
+      ],
+    });
+
+    expect(slots.every((slot) => slot.locationId === NORTE)).toBe(true);
+    expect(slots.length).toBeGreaterThan(0);
+  });
+
+  it("un cierre sin sede cierra las dos", () => {
+    const slots = run({
+      weeklySchedule: DOS_SEDES,
+      blocks: [
+        { starts_at: "2026-09-10T03:00:00.000Z", ends_at: "2026-09-11T03:00:00.000Z" },
+      ],
+    });
+
+    expect(slots).toEqual([]);
+  });
+
+  it("un turno ya tomado ocupa al profesional en las dos sedes", () => {
+    // Nadie está en dos lugares a la vez: un turno de la mañana en Centro tiene
+    // que bloquear también cualquier horario de la tarde que se pise, aunque
+    // ese sea en la otra sede.
+    const solapado = run({
+      weeklySchedule: [
+        { weekday: THURSDAY, start_time: "09:00", end_time: "10:00", location_id: CENTRO },
+        { weekday: THURSDAY, start_time: "09:00", end_time: "10:00", location_id: NORTE },
+      ],
+      slotMinutes: 60,
+      taken: [{ starts_at: "2026-09-10T12:00:00.000Z", ends_at: "2026-09-10T13:00:00.000Z" }],
+    });
+
+    expect(solapado).toEqual([]);
   });
 });

@@ -6,6 +6,7 @@ import { BlockForm } from "@/components/block-form";
 import { PractitionerFilter } from "@/components/practitioner-filter";
 import { ShiftForm } from "@/components/shift-form";
 import { requireStaff } from "@/lib/auth";
+import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import type { ScheduleBlock, WeeklyScheduleRow } from "@/lib/db/types";
 import { capitalizeFirst, formatDay } from "@/lib/format";
@@ -23,7 +24,12 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
   await requireStaff();
 
   const params = await searchParams;
-  const practitioners = await listActivePractitioners();
+  const [practitioners, locations] = await Promise.all([
+    listActivePractitioners(),
+    listActiveLocations(),
+  ]);
+  const locationOptions = locations.map((row) => ({ id: row.id, name: row.name }));
+  const locationName = new Map(locations.map((row) => [row.id, row.name]));
 
   // Los horarios se editan de a un profesional: son SUS horas. Los cierres, en
   // cambio, se listan todos juntos, porque los del consultorio afectan a las dos
@@ -97,6 +103,11 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
                 <span className="tabular-nums text-muted">
                   {row.start_time.slice(0, 5)} a {row.end_time.slice(0, 5)}
                 </span>
+                {locations.length > 1 && (
+                  <span className="ml-2 text-[0.9rem] text-accent">
+                    {locationName.get(row.location_id)}
+                  </span>
+                )}
               </span>
               <form action={removeShift}>
                 <input type="hidden" name="id" value={row.id} />
@@ -114,7 +125,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
           )}
         </ul>
 
-        <ShiftForm practitionerId={practitioner.id} />
+        <ShiftForm practitionerId={practitioner.id} locations={locationOptions} />
       </section>
 
       <section>
@@ -133,7 +144,13 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
                 <span className="font-medium">
                   {block.practitioner_id
                     ? (nameById.get(block.practitioner_id) ?? "—")
-                    : "Todo el consultorio"}
+                    : "Todos"}
+                  {locations.length > 1 && (
+                    <span className="text-accent">
+                      {" · "}
+                      {block.location_id ? locationName.get(block.location_id) : "todas las sedes"}
+                    </span>
+                  )}
                 </span>
                 {" · "}
                 {capitalizeFirst(formatDay(block.starts_at))}
@@ -162,6 +179,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
             id: row.id,
             name: practitionerName(row),
           }))}
+          locations={locationOptions}
         />
 
         <p className="mt-3 text-sm text-muted">

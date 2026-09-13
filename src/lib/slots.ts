@@ -24,6 +24,8 @@ export type ScheduleRow = {
   /** Clinic-local wall clock, "HH:MM" or "HH:MM:SS". */
   start_time: string;
   end_time: string;
+  /** En qué sede se atiende esa franja. El horario libre la hereda. */
+  location_id: string;
 };
 
 /**
@@ -36,12 +38,22 @@ export type BusyRange = {
   ends_at: string | Date;
 };
 
-/** A one-off closure: holiday, vacation, errand. Absolute instants. */
-export type BlockRow = BusyRange;
+/**
+ * A one-off closure: holiday, vacation, errand. Absolute instants.
+ *
+ * `location_id` en null cierra TODAS las sedes; con id, sólo esa. Los turnos ya
+ * tomados no llevan sede a propósito: un profesional ocupado lo está en todos
+ * lados, porque no puede estar en dos lugares a la vez.
+ */
+export type BlockRow = BusyRange & {
+  location_id?: string | null;
+};
 
 export type Slot = {
   start: Date;
   end: Date;
+  /** La sede de la franja de la que salió. */
+  locationId: string;
 };
 
 export type GenerateSlotsInput = {
@@ -162,11 +174,21 @@ export function generateSlots({
   const cutoff = horizonDays === null ? Infinity : horizonCutoff(now, horizonDays).getTime();
 
   // Closures and existing turnos are the same thing here: time that is spoken
-  // for. One overlap test covers both.
-  const busy = [...blocks, ...taken].map((range) => ({
-    start: new Date(range.starts_at).getTime(),
-    end: new Date(range.ends_at).getTime(),
-  }));
+  // for. Una sola prueba de solapamiento cubre las dos, con una diferencia: un
+  // cierre puede ser de una sede sola, y un turno tomado ocupa al profesional
+  // esté donde esté.
+  const busy = [
+    ...blocks.map((range) => ({
+      start: new Date(range.starts_at).getTime(),
+      end: new Date(range.ends_at).getTime(),
+      locationId: range.location_id ?? null,
+    })),
+    ...taken.map((range) => ({
+      start: new Date(range.starts_at).getTime(),
+      end: new Date(range.ends_at).getTime(),
+      locationId: null,
+    })),
+  ];
 
   const slots: Slot[] = [];
   const windowStart = from.getTime();
@@ -210,16 +232,26 @@ export function generateSlots({
         if (start >= cutoff) continue;
 
         // Half-open overlap: touching at the boundary is not a clash, so a turno
-        // ending at 12:00 leaves 12:00 free.
+        // ending at 12:00 leaves 12:00 free. Un cierre con sede sólo choca con
+        // los horarios de esa sede; en null choca con todos.
         //
         // Acá sí se comparan rangos. La base, desde 0008, sólo compara la hora
         // de inicio: este motor es más estricto que la restricción que lo
         // respalda, y por eso es el que evita ofrecer un horario que se pise
         // con un turno que quedó fuera de la grilla.
-        const clash = busy.some((range) => start < range.end && end > range.start);
+        const clash = busy.some(
+          (range) =>
+            start < range.end &&
+            end > range.start &&
+            (range.locationId === null || range.locationId === shift.location_id),
+        );
         if (clash) continue;
 
-        slots.push({ start: new Date(start), end: new Date(end) });
+        slots.push({
+          start: new Date(start),
+          end: new Date(end),
+          locationId: shift.location_id,
+        });
       }
     }
   }

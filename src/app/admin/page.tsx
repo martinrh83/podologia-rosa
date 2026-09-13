@@ -5,6 +5,7 @@ import { PractitionerFilter } from "@/components/practitioner-filter";
 import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
+import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners } from "@/lib/db/practitioners";
 import { capitalizeFirst, formatDay } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
@@ -22,9 +23,10 @@ export default async function AdminTodayPage({ searchParams }: PageProps<"/admin
   const params = await searchParams;
   const practitionerId = typeof params.profesional === "string" ? params.profesional : null;
 
-  const [appointments, practitioners] = await Promise.all([
+  const [appointments, practitioners, locations] = await Promise.all([
     getAppointmentsForLocalDay(0, { practitionerId }),
     listActivePractitioners(),
+    listActiveLocations(),
   ]);
 
   const base = siteUrl();
@@ -55,6 +57,7 @@ export default async function AdminTodayPage({ searchParams }: PageProps<"/admin
             siteUrl={base}
             // Ya filtrada por una sola: repetir su nombre en cada fila es ruido.
             showPractitioner={!practitionerId}
+            showLocation={locations.length > 1}
           />
         ))}
       </ul>

@@ -39,9 +39,10 @@ src/lib/booking.ts        Crear y cancelar turnos. Lo usan el form y el admin.
 src/app/api/turnos        Endpoint público de reserva.
 src/app/api/cron          Retención de datos (borrado de motivo, anonimizado).
 src/app/admin             El panel (hoy, mañana, nuevo turno, agenda,
-                          profesionales, especialidades, precios,
-                          datos del consultorio).
+                          profesionales, sedes, especialidades,
+                          precios, datos del consultorio).
 src/lib/db/practitioners  Quién atiende y a quién se le puede sacar turno.
+src/lib/db/locations      Las sedes. La franja horaria dice en cuál se atiende.
 supabase/migrations       Esquema y datos iniciales.
 ```
 

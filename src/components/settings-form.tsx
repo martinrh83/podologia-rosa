@@ -19,12 +19,6 @@ export function SettingsForm({ settings }: { settings: ClinicSettings }) {
         required
       />
 
-      <Field
-        id="address"
-        label="Dirección"
-        defaultValue={settings.address ?? ""}
-        hint="Como querés que aparezca en la página."
-      />
 
       <Field
         id="phone"
@@ -42,13 +36,6 @@ export function SettingsForm({ settings }: { settings: ClinicSettings }) {
         hint="Con característica, sin el 0 ni el 15. Ej: 387 555-4444."
       />
 
-      <Field
-        id="mapUrl"
-        label="Enlace del mapa"
-        type="url"
-        defaultValue={settings.map_url ?? ""}
-        hint="Pegá el enlace de Google Maps del consultorio."
-      />
 
       {state.status === "error" && (
         <p role="alert" className="text-[0.95rem] text-[color:var(--danger)]">

@@ -6,6 +6,7 @@ import { getClinicSettings } from "@/lib/availability";
 import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
+import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners } from "@/lib/db/practitioners";
 import { capitalizeFirst, formatDay, formatTime } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
@@ -32,10 +33,11 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
   const params = await searchParams;
   const practitionerId = typeof params.profesional === "string" ? params.profesional : null;
 
-  const [appointments, settings, practitioners] = await Promise.all([
+  const [appointments, settings, practitioners, locations] = await Promise.all([
     getAppointmentsForLocalDay(1, { practitionerId }),
     getClinicSettings(),
     listActivePractitioners(),
+    listActiveLocations(),
   ]);
 
   const tomorrow = localDayRange(new Date(), 1).start;
@@ -65,6 +67,7 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
             appointment={appointment}
             siteUrl={base}
             showPractitioner={!practitionerId}
+            showLocation={locations.length > 1}
             reminderMessage={
               `Hola ${appointment.patient_first_name}! Te recordamos tu turno de mañana ` +
               `a las ${formatTime(appointment.starts_at)}` +
@@ -73,7 +76,11 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
               (appointment.practitioner
                 ? ` con ${appointment.practitioner.first_name} ${appointment.practitioner.last_name}`
                 : "") +
-              ` en ${settings.clinic_name}. ` +
+              ` en ${settings.clinic_name}` +
+              (locations.length > 1 && appointment.location
+                ? ` (sede ${appointment.location.name})`
+                : "") +
+              `. ` +
               `Si no podés venir, avisanos así lo liberamos. ¡Gracias!`
             }
           />

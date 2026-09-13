@@ -17,14 +17,23 @@ import {
 import { COVERAGES } from "@/lib/booking-schema";
 import { capitalizeFirst, whatsappLink } from "@/lib/format";
 
-export type BookingSlot = { startsAt: string; label: string };
+export type BookingSlot = { startsAt: string; label: string; locationId: string };
 
 export type BookingDay = {
   key: string;
   label: string;
   shortLabel: string;
+  /**
+   * La sede, cuando todo el día se atiende en una sola — que es lo normal.
+   * En null el día está partido entre dos, y entonces la sede va en cada
+   * horario: nadie tiene que adivinar adónde ir.
+   */
+  locationName: string | null;
   slots: BookingSlot[];
 };
+
+/** Las sedes, para resolver el nombre y la dirección del horario elegido. */
+export type BookingLocation = { id: string; name: string; address: string };
 
 /** La profesional elegida en /turnos. Ya está decidida cuando se llega acá. */
 export type BookingPractitioner = {
@@ -36,6 +45,7 @@ export type BookingPractitioner = {
 type Props = {
   practitioner: BookingPractitioner;
   days: BookingDay[];
+  locations: BookingLocation[];
   horizonDays: number;
   clinicPhone: string | null;
   clinicWhatsapp: string | null;
@@ -51,6 +61,7 @@ type Status =
       slotLabel: string;
       dayLabel: string;
       practitionerName: string;
+      locationLine: string;
       cancelUrl: string;
     };
 
@@ -70,6 +81,7 @@ type Step = "cuando" | "datos";
 export function BookingFlow({
   practitioner,
   days,
+  locations,
   horizonDays,
   clinicPhone,
   clinicWhatsapp,
@@ -115,6 +127,11 @@ export function BookingFlow({
   const slotDay = selectedSlot
     ? days.find((day) => day.slots.some((slot) => slot.startsAt === selectedSlot.startsAt))
     : null;
+
+  const byId = new Map(locations.map((location) => [location.id, location]));
+  const slotLocation = selectedSlot ? (byId.get(selectedSlot.locationId) ?? null) : null;
+  // Con una sola sede el nombre no agrega nada: el sitio entero es esa sede.
+  const showLocationName = locations.length > 1;
 
   function update<K extends FieldName>(key: K, value: PatientForm[K]) {
     const next = { ...form, [key]: value };
@@ -203,6 +220,11 @@ export function BookingFlow({
         slotLabel: selectedSlot.label,
         dayLabel: slotDay?.label ?? "",
         practitionerName: practitioner.name,
+        locationLine: slotLocation
+          ? showLocationName
+            ? `${slotLocation.name} · ${slotLocation.address}`
+            : slotLocation.address
+          : "",
         // With no email to carry it, this link is shown once and never again.
         cancelUrl: body.cancelToken ? `/turnos/cancelar/${body.cancelToken}` : "",
       });
@@ -292,6 +314,15 @@ export function BookingFlow({
                     <span className={`block text-xs ${isSelected ? "text-white/80" : "text-muted"}`}>
                       {day.slots.length} {day.slots.length === 1 ? "horario" : "horarios"}
                     </span>
+                    {showLocationName && day.locationName && (
+                      <span
+                        className={`mt-0.5 block text-[0.7rem] uppercase tracking-wide ${
+                          isSelected ? "text-white/80" : "text-accent"
+                        }`}
+                      >
+                        {day.locationName}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -320,6 +351,15 @@ export function BookingFlow({
                       }`}
                     >
                       {slot.label}
+                      {showLocationName && !selectedDay.locationName && (
+                        <span
+                          className={`mt-0.5 block text-[0.7rem] uppercase tracking-wide ${
+                            isSelected ? "text-white/80" : "text-accent"
+                          }`}
+                        >
+                          {byId.get(slot.locationId)?.name}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -354,6 +394,12 @@ export function BookingFlow({
                 <p className="text-[1.05rem] font-medium">
                   {capitalizeFirst(slotDay?.label ?? "")} · {selectedSlot.label}
                 </p>
+                {slotLocation && (
+                  <p className="mt-0.5 text-[0.95rem] text-muted">
+                    {showLocationName && <strong>{slotLocation.name} · </strong>}
+                    {slotLocation.address}
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -700,7 +746,9 @@ function Confirmation({
 
   const confirmationMessage =
     `Hola! Saqué un turno en ${clinicName} con ${status.practitionerName} para el ` +
-    `${status.dayLabel} a las ${status.slotLabel}.` +
+    `${status.dayLabel} a las ${status.slotLabel}` +
+    (status.locationLine ? ` en ${status.locationLine}` : "") +
+    `.` +
     (absoluteCancelUrl ? ` Este es mi enlace por si necesito cancelar: ${absoluteCancelUrl}` : "");
 
   return (
@@ -709,6 +757,9 @@ function Confirmation({
         {capitalizeFirst(status.dayLabel)} a las {status.slotLabel}, con{" "}
         {status.practitionerName}.
       </p>
+      {status.locationLine && (
+        <p className="mt-1 text-[1.05rem] font-medium text-foreground">{status.locationLine}</p>
+      )}
 
       {status.cancelUrl ? (
         <div className="mt-4 rounded-lg border border-border bg-surface p-4">
