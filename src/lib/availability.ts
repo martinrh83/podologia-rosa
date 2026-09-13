@@ -68,14 +68,30 @@ export async function getAvailability({
 }> {
   const supabase = createSupabaseAdminClient();
 
-  const [settingsResult, practitionerResult, scheduleResult, blocksResult, takenResult] =
-    await Promise.all([
+  const [
+    settingsResult,
+    practitionerResult,
+    scheduleResult,
+    activeLocationsResult,
+    blocksResult,
+    takenResult,
+  ] = await Promise.all([
       supabase.from("clinic_settings").select("*").limit(1).single(),
-      supabase.from("practitioners").select("*").eq("id", practitionerId).maybeSingle(),
+      // `active` acá y no en cada página: éste es el único lugar por el que
+      // pasan todas. Un profesional dado de baja es, para el que pregunta,
+      // indistinguible de uno que no existe — que además es lo deseable.
+      supabase
+        .from("practitioners")
+        .select("*")
+        .eq("id", practitionerId)
+        .eq("active", true)
+        .maybeSingle(),
       supabase
         .from("weekly_schedule")
         .select("weekday, start_time, end_time, location_id")
         .eq("practitioner_id", practitionerId),
+      // Las sedes activas, para descartar las franjas de una que cerró.
+      supabase.from("locations").select("id").eq("active", true),
       // Todos los cierres que pisan la ventana, de quien sea.
       //
       // Se filtran después en memoria en vez de armar un `.or()` con el id
@@ -100,6 +116,7 @@ export async function getAvailability({
     settingsResult.error ??
     practitionerResult.error ??
     scheduleResult.error ??
+    activeLocationsResult.error ??
     blocksResult.error ??
     takenResult.error;
   if (firstError) {
@@ -119,10 +136,18 @@ export async function getAvailability({
     (block) => block.practitioner_id === null || block.practitioner_id === practitionerId,
   );
 
+  // Una sede dada de baja deja de ofrecer horarios. Sin esto, sus franjas
+  // seguían generando turnos que después la página no sabía ubicar: el paciente
+  // reservaba en un consultorio cerrado y la confirmación no decía adónde ir.
+  const openLocations = new Set((activeLocationsResult.data ?? []).map((row) => row.id));
+  const weeklySchedule = (scheduleResult.data ?? []).filter((shift) =>
+    openLocations.has(shift.location_id),
+  );
+
   const slots = generateSlots({
     from,
     to,
-    weeklySchedule: scheduleResult.data ?? [],
+    weeklySchedule,
     blocks,
     taken: takenResult.data ?? [],
     // La duración sale del profesional; el horizonte sigue siendo una política

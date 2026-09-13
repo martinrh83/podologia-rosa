@@ -1,6 +1,6 @@
 import "server-only";
 
-import { findBookableSlot, getAvailability } from "@/lib/availability";
+import { findBookableSlot, getAvailability, PractitionerNotFound } from "@/lib/availability";
 import { CONSENT_REQUIRED_MESSAGE, type BookingInput } from "@/lib/booking-schema";
 import type { Appointment } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -58,7 +58,25 @@ export async function createBooking(
 
   // La sede sale del horario que el motor considera reservable, no de lo que
   // mande el cliente: es la agenda la que decide dónde se atiende ese día.
-  const slot = await findBookableSlot(input.practitionerId, startsAt, audience);
+  //
+  // El id del profesional también viene del cliente, así que puede apuntar a
+  // alguien que se dio de baja entre que se cargó la página y se mandó el
+  // formulario. Eso es una petición que no se puede cumplir, no una falla:
+  // dejarlo propagar daba un 500.
+  let slot;
+  try {
+    slot = await findBookableSlot(input.practitionerId, startsAt, audience);
+  } catch (error) {
+    if (error instanceof PractitionerNotFound) {
+      return {
+        ok: false,
+        reason: "slot_unavailable",
+        message: "Ese profesional ya no está tomando turnos. Elegí otro, por favor.",
+      };
+    }
+    throw error;
+  }
+
   if (!slot) {
     return {
       ok: false,

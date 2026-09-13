@@ -4,7 +4,7 @@ import Link from "next/link";
 import { togglePractitioner, updatePractitioner } from "@/app/actions/practitioners";
 import { NewPractitionerForm } from "@/components/practitioner-admin";
 import { requireStaff } from "@/lib/auth";
-import { listAllPractitioners, listSpecialties } from "@/lib/db/practitioners";
+import { listActiveSpecialties, listAllPractitioners } from "@/lib/db/practitioners";
 
 export const metadata: Metadata = {
   title: "Profesionales",
@@ -25,7 +25,7 @@ export default async function AdminProfesionalesPage() {
 
   const [practitioners, specialties] = await Promise.all([
     listAllPractitioners(),
-    listSpecialties(),
+    listActiveSpecialties(),
   ]);
 
   return (

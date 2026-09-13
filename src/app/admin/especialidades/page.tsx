@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { toggleSpecialty } from "@/app/actions/practitioners";
 import { NewSpecialtyForm } from "@/components/practitioner-admin";
 import { requireStaff } from "@/lib/auth";
 import { listAllPractitioners, listSpecialties } from "@/lib/db/practitioners";
@@ -47,13 +48,25 @@ export default async function AdminEspecialidadesPage() {
           return (
             <li
               key={specialty.id}
-              className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3"
+              className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg border border-border bg-surface px-4 py-3 ${
+                specialty.active ? "" : "opacity-60"
+              }`}
             >
               <strong>{specialty.name}</strong>
-              <span className="text-sm text-muted">
-                {count === 0
-                  ? "sin profesionales"
-                  : `${count} ${count === 1 ? "profesional" : "profesionales"}`}
+              <span className="flex items-center gap-4 text-sm text-muted">
+                <span>
+                  {count === 0
+                    ? "sin profesionales"
+                    : `${count} ${count === 1 ? "profesional" : "profesionales"}`}
+                  {!specialty.active && " · no se ofrece"}
+                </span>
+                <form action={toggleSpecialty}>
+                  <input type="hidden" name="id" value={specialty.id} />
+                  <input type="hidden" name="active" value={String(specialty.active)} />
+                  <button type="submit" className="hover:text-foreground">
+                    {specialty.active ? "Dar de baja" : "Volver a activar"}
+                  </button>
+                </form>
               </span>
             </li>
           );

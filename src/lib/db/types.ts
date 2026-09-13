@@ -24,6 +24,7 @@ export type Specialty = {
   id: string;
   name: string;
   display_order: number;
+  active: boolean;
   created_at: string;
 };
 
@@ -128,7 +129,7 @@ export type Appointment = {
 
 /** Un servicio con su especialidad, para agrupar el listado de precios. */
 export type ServiceWithSpecialty = Service & {
-  specialty: { name: string; display_order: number } | null;
+  specialty: { name: string; display_order: number; active: boolean } | null;
 };
 
 /** Un turno con el nombre de su profesional ya resuelto, para el panel. */

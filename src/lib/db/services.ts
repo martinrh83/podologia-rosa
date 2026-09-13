@@ -9,11 +9,15 @@ export async function getActiveServices(): Promise<ServiceWithSpecialty[]> {
 
   const { data, error } = await supabase
     .from("services")
-    .select("*, specialty:specialties(name, display_order)")
+    .select("*, specialty:specialties(name, display_order, active)")
     .eq("active", true)
     .order("display_order", { ascending: true });
 
   if (error) throw new Error(`No se pudieron leer los servicios: ${error.message}`);
 
-  return (data ?? []) as unknown as ServiceWithSpecialty[];
+  // Dar de baja una disciplina esconde sus precios: si no se ofrece, publicar
+  // lo que costaba es una invitación a un llamado incómodo.
+  return ((data ?? []) as unknown as ServiceWithSpecialty[]).filter(
+    (service) => service.specialty?.active !== false,
+  );
 }

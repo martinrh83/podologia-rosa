@@ -81,18 +81,25 @@ export async function getPractitionerById(id: string): Promise<Practitioner | nu
   return (data as Practitioner) ?? null;
 }
 
+/** Todas, activas o no. Para el panel. */
 export async function listSpecialties(): Promise<Specialty[]> {
   const supabase = createSupabaseAdminClient();
 
   const { data, error } = await supabase
     .from("specialties")
     .select("*")
+    .order("active", { ascending: false })
     .order("display_order")
     .order("name");
 
   if (error) throw new Error(`No se pudieron leer las especialidades: ${error.message}`);
 
   return (data ?? []) as Specialty[];
+}
+
+/** Las que se pueden elegir al dar de alta a alguien. */
+export async function listActiveSpecialties(): Promise<Specialty[]> {
+  return (await listSpecialties()).filter((specialty) => specialty.active);
 }
 
 /** "Ana Gómez" — como se lo nombra al paciente. */

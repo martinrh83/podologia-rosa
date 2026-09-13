@@ -128,6 +128,27 @@ export async function togglePractitioner(formData: FormData): Promise<void> {
   revalidatePractitioners();
 }
 
+/**
+ * Dar de baja o reactivar una especialidad.
+ *
+ * Nunca se borra: la referencian profesionales y servicios. Inactiva sale del
+ * alta de profesionales y esconde sus precios del sitio.
+ */
+export async function toggleSpecialty(formData: FormData): Promise<void> {
+  await requireStaff();
+
+  const id = String(formData.get("id") ?? "");
+  const active = String(formData.get("active") ?? "") === "true";
+  if (!id) return;
+
+  const supabase = createSupabaseAdminClient();
+  await supabase.from("specialties").update({ active: !active }).eq("id", id);
+
+  revalidatePath("/admin/especialidades");
+  revalidatePath("/servicios");
+  revalidatePath("/turnos");
+}
+
 export async function createSpecialty(
   _previous: PractitionerState,
   formData: FormData,
