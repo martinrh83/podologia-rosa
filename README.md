@@ -80,5 +80,8 @@ supabase/migrations       Esquema y datos iniciales.
 - [ ] Cargar horarios, servicios y precios reales.
 - [ ] Completar apellido, matrícula y bio de cada profesional desde el panel.
 - [ ] Dar de baja a la profesional de prueba (Bea López).
-- [ ] Crear el usuario del panel, vincularlo a la fila de `staff`, y desactivar
-      sign-ups en Supabase.
+- [ ] Crear el usuario del panel **y vincularlo a la fila de `staff`**. Desde
+      0011 la RLS pregunta por esa fila: un usuario de Supabase sin `staff` no
+      ve nada, ni siquiera siendo `authenticated`. Los sign-ups ya están
+      apagados en `config.toml`, y hay que confirmarlo también en el dashboard
+      del proyecto en la nube, que tiene su propia opción.

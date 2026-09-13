@@ -172,7 +172,12 @@ enable_refresh_token_rotation = true
 # Requires enable_refresh_token_rotation = true.
 refresh_token_reuse_interval = 10
 # Allow/disallow new user signups to your project.
-enable_signup = true
+#
+# APAGADO A PROPOSITO. Con esto en true cualquiera se registraba solo, obtenia un
+# JWT de `authenticated` y —antes de 0011— eso alcanzaba para leer todos los
+# turnos con nombre, DNI, telefono y motivo. Las cuentas del panel se crean a
+# mano desde el dashboard o con la service role key.
+enable_signup = false
 # Allow/disallow anonymous sign-ins to your project.
 enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
