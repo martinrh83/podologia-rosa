@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { createAdminBooking } from "@/app/actions/appointments";
+import { SlotFilters } from "@/components/slot-filters";
 import { getAvailability } from "@/lib/availability";
 import { COVERAGES } from "@/lib/booking-schema";
 import { listActiveLocations } from "@/lib/db/locations";
@@ -74,44 +75,11 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
       <h2 className="mb-1 text-2xl font-semibold tracking-tight">Nuevo turno</h2>
       <p className="mb-5 text-muted">Para turnos que te piden por teléfono o en el consultorio.</p>
 
-      {/* GET form so picking a date is a plain navigation — no client JS needed. */}
-      <form method="get" className="mb-6 flex flex-wrap items-end gap-3">
-        <div>
-          <label htmlFor="profesional" className="block text-[0.95rem] font-medium">
-            Profesional
-          </label>
-          <select
-            id="profesional"
-            name="profesional"
-            defaultValue={practitioner?.id ?? ""}
-            className="mt-1.5 rounded-lg border border-border bg-background px-3 py-2.5"
-          >
-            {practitioners.map((row) => (
-              <option key={row.id} value={row.id}>
-                {practitionerName(row)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="fecha" className="block text-[0.95rem] font-medium">
-            Fecha
-          </label>
-          <input
-            id="fecha"
-            name="fecha"
-            type="date"
-            defaultValue={dateKey}
-            className="mt-1.5 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-lg border border-border bg-surface px-4 py-2.5 hover:border-accent"
-        >
-          Ver horarios
-        </button>
-      </form>
+      <SlotFilters
+        practitioners={practitioners.map((row) => ({ id: row.id, name: practitionerName(row) }))}
+        practitionerId={practitioner?.id ?? ""}
+        dateKey={dateKey}
+      />
 
       {error && (
         <p role="alert" className="mb-4 rounded-lg border border-[color:var(--danger)]/30 bg-[color:var(--danger)]/5 p-4">
