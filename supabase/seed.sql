@@ -68,3 +68,32 @@ update staff
 set auth_user_id = (select id from auth.users where email = 'rosa@example.com')
 where full_name = 'Secretaría'
   and auth_user_id is null;
+
+-- ---------------------------------------------------------------------------
+-- Catálogo de servicios para desarrollar.
+--
+-- Lo borró la migración 0016 porque era contenido inventado viviendo en una
+-- migración, y así llegaba a producción. Acá sí corresponde: `db reset` lo
+-- repone en local, `db push` no lo toca, y en la nube el catálogo real lo carga
+-- el consultorio desde /admin/servicios.
+--
+-- Los precios son de ejemplo. No los copies a producción: con la inflación, un
+-- número escrito en un archivo del repo está mal a los dos meses — que es
+-- exactamente la razón por la que los precios viven en la base y hay una
+-- pantalla para editarlos.
+--
+-- Idempotente, como el resto: sólo siembra si la tabla está vacía.
+-- `specialty_id` es NOT NULL desde 0006: los servicios cuelgan de una
+-- disciplina, no del consultorio. Se resuelve por nombre en vez de hardcodear
+-- un uuid, que cambia en cada base.
+insert into services (name, description, price, display_order, specialty_id)
+select s.name, s.description, s.price, s.display_order,
+       (select id from specialties where name = 'Podología')
+from (values
+  ('Quiropodia',           'Tratamiento completo de callos, durezas y uñas.', 15000::numeric, 1),
+  ('Uñas encarnadas',      'Tratamiento y seguimiento de onicocriptosis.',    18000::numeric, 2),
+  ('Pie diabético',        'Control y cuidado preventivo especializado.',     20000::numeric, 3),
+  ('Verrugas plantares',   'Tratamiento de papilomas en la planta del pie.',  18000::numeric, 4),
+  ('Estudio de la pisada', 'Evaluación biomecánica y recomendaciones.',       25000::numeric, 5)
+) as s(name, description, price, display_order)
+where not exists (select 1 from services);
