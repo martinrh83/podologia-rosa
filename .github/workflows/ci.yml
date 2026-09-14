@@ -59,7 +59,12 @@ jobs:
       - uses: supabase/setup-cli@v3
 
       - name: Levantar la base y aplicar las migraciones
-        run: supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
+        run: |
+          # Queda en el log a propósito. Cuando una migración se porta distinto
+          # acá que en tu máquina, la primera pregunta es con qué CLI corrió, y
+          # la action no lo dice. Tiene que coincidir con package.json.
+          supabase --version
+          supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
 
       # `PageProps` y `LayoutProps` no están escritos en ningún lado: los genera
       # Next a partir de las rutas, en `.next/types/`, que está en .gitignore.
