@@ -48,9 +48,14 @@ port = 54329
 # Configure one of the supported pooler modes: `transaction`, `session`.
 pool_mode = "transaction"
 # How many server connections to allow per user/database pair.
-default_pool_size = 20
+#
+# Los valores de la nube, no los del pooler local — que además está en
+# `enabled = false`, así que acá son inertes. Puestos así, `config push` no le
+# toca el pooling a producción, que en el plan free es lo último que querés
+# tocar sin querer.
+default_pool_size = 15
 # Maximum number of client connections allowed.
-max_client_conn = 100
+max_client_conn = 200
 
 # [db.vault]
 # secret_key = "env(SECRET_VALUE)"
@@ -151,15 +156,36 @@ max_indexes = 5
 # Vector Buckets is available to Supabase Pro plan.
 # [storage.vector.buckets.documents-openai]
 
+# CUIDADO AL EDITAR ESTE ARCHIVO
+#
+# `supabase config push` empuja TODO el diff contra el proyecto de la nube y no
+# tiene forma de subir una sola opción. Así que cada valor que acá esté relajado
+# "porque es local" es una degradación de seguridad esperando a que alguien
+# pushee.
+#
+# Ya pasó una vez: el primer `config push` de este proyecto quería desactivar
+# MFA, sacar el límite de envío de mails, acortar el OTP y apuntar `site_url` a
+# 127.0.0.1 — todo por comodidad local, todo contra producción.
+#
+# La regla: si una opción no NECESITA diferir entre local y la nube, poné acá el
+# valor que querés en la nube. Las que sí tienen que diferir van por `env()`,
+# con el valor local en `supabase/.env` (ver `supabase/.env.example`).
+#
+# Y SIEMPRE `supabase config diff` antes de `supabase config push`. Si una
+# variable de `env()` no está definida, el CLI no falla: manda el string
+# literal `env(NOMBRE)` como valor. El diff lo muestra; el push no pregunta.
+
 [auth]
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+# Difiere por entorno, así que sale del ambiente en vez de estar fija acá.
+site_url = "env(SUPABASE_AUTH_SITE_URL)"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# Ídem. Una allowlist con localhost en producción es un agujero de redirect.
+additional_redirect_urls = ["env(SUPABASE_AUTH_SITE_URL)"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -227,13 +253,13 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+max_frequency = "1m0s"
 # Number of characters used in the email OTP.
-otp_length = 6
+otp_length = 8
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
@@ -304,8 +330,9 @@ max_enrolled_factors = 10
 
 # Control MFA via App Authenticator (TOTP)
 [auth.mfa.totp]
-enroll_enabled = false
-verify_enabled = false
+# Nadie lo usa hoy, pero apagarlo acá lo apagaría en la nube al pushear.
+enroll_enabled = true
+verify_enabled = true
 
 # Configure MFA via Phone Messaging
 [auth.mfa.phone]

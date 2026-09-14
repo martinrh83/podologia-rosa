@@ -36,6 +36,7 @@ yarn-error.log*
 # ningún secreto: una para local y otra para las variables de Vercel.
 !.env.example
 !.env.production.example
+!supabase/.env.example
 
 # apuntes personales de trabajo: tienen credenciales del entorno local.
 # Lo que tiene que sobrevivir va al README o a un comentario en la migración.
