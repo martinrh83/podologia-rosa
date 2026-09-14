@@ -32,8 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-# ...except the template, which documents what a deploy needs and holds no secrets.
+# ...except las plantillas, que documentan qué necesita un deploy y no tienen
+# ningún secreto: una para local y otra para las variables de Vercel.
 !.env.example
+!.env.production.example
 
 # apuntes personales de trabajo: tienen credenciales del entorno local.
 # Lo que tiene que sobrevivir va al README o a un comentario en la migración.
