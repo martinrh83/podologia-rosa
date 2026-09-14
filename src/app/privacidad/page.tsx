@@ -7,7 +7,19 @@ export const metadata: Metadata = {
   description: "Qué datos guardamos, para qué, por cuánto tiempo y cómo pedir que los borremos.",
 };
 
-export const dynamic = "force-dynamic";
+/**
+ * Estática, y la reconstruye el panel.
+ *
+ * Esto no se renderiza por visita: son datos de catálogo que sólo cambian
+ * cuando alguien edita el consultorio, y cada acción que los toca ya llama a
+ * `revalidatePath()` sobre esta ruta — así que dar de baja a un profesional o
+ * corregir un precio se ve en el acto, sin esperar un deploy.
+ *
+ * El `revalidate` es la red de seguridad para lo que entra por fuera de la app
+ * (una corrección a mano en Studio, un script): sin él, un cambio que no pase
+ * por una acción no se vería nunca.
+ */
+export const revalidate = 3600;
 
 /**
  * Privacy notice.

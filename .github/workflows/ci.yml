@@ -50,7 +50,7 @@ jobs:
         with:
           version: latest
 
-      - name: Levantar la base y aplicar las 13 migraciones
+      - name: Levantar la base y aplicar las migraciones
         run: supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
 
       # `PageProps` y `LayoutProps` no están escritos en ningún lado: los genera
@@ -71,14 +71,31 @@ jobs:
       - name: Tests
         run: npx vitest run
 
-      # Sin variables de entorno, a propósito.
+      # ─────────────────────────────────────────────────────────────────────
+      # Las claves del stack que acabamos de levantar.
       #
-      # `src/lib/env.ts` valida perezosamente —cada accessor comprueba lo suyo
-      # recién cuando lo llaman— y ninguna página se prerenderiza: todas son
-      # `force-dynamic`, así que nada toca la base durante el build. Verificado
-      # compilando sin `.env.local` y sin ninguna variable.
+      # Antes el build no necesitaba ninguna: todas las páginas eran
+      # `force-dynamic` y nada tocaba la base al compilar. Desde que las de
+      # catálogo se prerenderizan, el build las consulta, y sin variables falla
+      # con "Faltan variables de entorno" al exportar /como-llegar.
       #
-      # El día que haga falta una de verdad va como secreto de Actions
-      # (`${{ secrets.NOMBRE }}`), nunca escrita acá.
+      # Se leen del CLI en vez de escribirlas acá. Son fijas y públicas —las
+      # misma en toda máquina que corra `supabase start`, derivadas del JWT
+      # secret público de la CLI, válidas sólo contra 127.0.0.1— pero un archivo
+      # commiteado con `SUPABASE_SERVICE_ROLE_KEY:` y un valor al lado parece
+      # una filtración aunque no lo sea, y enseña un patrón que el día que
+      # alguien necesite una clave real va a repetir.
+      #
+      # Una clave de verdad iría como secreto de Actions (`${{ secrets.X }}`).
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Tomar las claves del stack local
+        run: |
+          eval "$(supabase status -o env)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+
       - name: Build
         run: npm run build
