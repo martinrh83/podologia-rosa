@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { logout } from "@/app/actions/auth";
-import { getStaffUser } from "@/lib/auth";
+import { getStaffSession } from "@/lib/auth";
 
 const TABS = [
   { href: "/admin", label: "Hoy" },
@@ -19,11 +19,12 @@ const TABS = [
  * one-handed, with a patient standing in front of her.
  */
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
-  const user = await getStaffUser();
+  const session = await getStaffSession();
 
   // The login page renders inside this layout too, so the chrome is only shown
-  // once there is a session.
-  if (!user) return <>{children}</>;
+  // once there is a session. Un usuario de Auth sin fila en `staff` cae acá
+  // igual que uno deslogueado: no ve ni las pestañas del panel.
+  if (!session) return <>{children}</>;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">

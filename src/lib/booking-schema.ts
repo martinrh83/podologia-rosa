@@ -58,6 +58,17 @@ export const COVERAGES = [
 export type Coverage = (typeof COVERAGES)[number]["value"];
 
 /**
+ * Los valores solos, que son los que valida el schema.
+ *
+ * Derivados de `COVERAGES` y no escritos de nuevo: la lista se muestra en tres
+ * pantallas y se valida acá, y cuando estaban tipeadas por separado agregar una
+ * obra social eran dos ediciones. Olvidarse de ésta dejaba al formulario
+ * ofreciendo una opción que el servidor rechazaba — un error que sólo aparece
+ * cuando un paciente la elige.
+ */
+const COVERAGE_VALUES = COVERAGES.map((coverage) => coverage.value);
+
+/**
  * DNI a dígitos: "20.123.456" y "20123456" son la misma persona.
  *
  * Se guarda normalizado para que buscar por DNI encuentre al paciente sin
@@ -87,7 +98,7 @@ export const bookingSchema = z.object({
     .transform(normalizeDni)
     // Los DNI argentinos vigentes tienen 7 u 8 dígitos.
     .refine((value) => value.length >= 7 && value.length <= 8, "Ingresá un DNI válido"),
-  patientCoverage: z.enum(["ips", "osunsa", "particular"], "Elegí tu obra social"),
+  patientCoverage: z.enum(COVERAGE_VALUES, "Elegí tu obra social"),
   patientPhone: z
     .string()
     .trim()

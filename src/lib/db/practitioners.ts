@@ -67,20 +67,6 @@ export async function getPractitionerBySlug(
   return (data as unknown as PractitionerWithSpecialty) ?? null;
 }
 
-export async function getPractitionerById(id: string): Promise<Practitioner | null> {
-  const supabase = createSupabaseAdminClient();
-
-  const { data, error } = await supabase
-    .from("practitioners")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error) throw new Error(`No se pudo leer el profesional: ${error.message}`);
-
-  return (data as Practitioner) ?? null;
-}
-
 /** Todas, activas o no. Para el panel. */
 export async function listSpecialties(): Promise<Specialty[]> {
   const supabase = createSupabaseAdminClient();

@@ -16,7 +16,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 export type PractitionerState = { status: "idle" | "saved" | "error"; message?: string };
 
 function revalidatePractitioners() {
-  for (const path of ["/", "/turnos", "/equipo", "/admin/profesionales", "/admin/agenda"]) {
+  // `/sitemap.xml` también: lista una URL por profesional, así que dar de alta
+  // o de baja a alguien lo cambia. Ahora que no se renderiza por visita, si no
+  // se invalida acá Google sigue viendo la lista vieja.
+  for (const path of ["/", "/turnos", "/equipo", "/sitemap.xml", "/admin/profesionales", "/admin/agenda"]) {
     revalidatePath(path);
   }
 }

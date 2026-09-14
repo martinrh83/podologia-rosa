@@ -23,7 +23,9 @@ export async function generateMetadata({
   const { slug } = await params;
   const practitioner = await getPractitionerBySlug(slug);
 
-  if (!practitioner) return { title: "Profesional no encontrado" };
+  // Tiene que coincidir con el <h1> de `not-found.tsx`: el `metadata` de ese
+  // archivo no se aplica, porque esto ya resolvió el título antes del notFound().
+  if (!practitioner) return { title: "Esa agenda ya no está disponible" };
 
   const name = practitionerName(practitioner);
 
