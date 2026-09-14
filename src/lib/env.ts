@@ -60,10 +60,6 @@ export function supabaseServiceEnv() {
   return { url, serviceRoleKey };
 }
 
-export function cronSecret(): string {
-  return z.string().min(16).parse(process.env.CRON_SECRET);
-}
-
 /**
  * Absolute base URL, used by the sitemap and robots.txt.
  *

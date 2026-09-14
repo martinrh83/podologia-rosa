@@ -6,9 +6,16 @@
  * schema change must be reflected here.
  */
 
+import type { Coverage } from "@/lib/booking-schema";
+
 export type AppointmentStatus = "booked" | "cancelled" | "completed" | "no_show";
 export type AppointmentSource = "online" | "admin";
-export type PatientCoverage = "ips" | "osunsa" | "particular";
+/**
+ * La columna `patient_coverage`. El listado vive en `booking-schema`, que es
+ * donde lo consume el formulario; acá sólo se lo referencia para que la fila y
+ * lo que se valida no puedan separarse.
+ */
+export type PatientCoverage = Coverage;
 
 /** Quién puede entrar al panel. Ver 0006: separada de `Practitioner` a propósito. */
 export type Staff = {
@@ -137,12 +144,6 @@ export type AppointmentWithPractitioner = Appointment & {
   practitioner: { first_name: string; last_name: string } | null;
   location: { name: string } | null;
 };
-
-/**
- * Columns that are safe to surface on a public page — deliberately excludes
- * `motivo`, and anything identifying another patient.
- */
-export const PUBLIC_APPOINTMENT_COLUMNS = "id, starts_at, ends_at, status" as const;
 
 /** Statuses that still occupy a slot. Mirrors the partial unique index. */
 export const ACTIVE_STATUSES: AppointmentStatus[] = ["booked", "completed", "no_show"];
