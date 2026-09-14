@@ -46,12 +46,25 @@ jobs:
       # el sitio nunca habla con Supabase desde el navegador, así que alcanza
       # con la base, Auth y la API REST.
       # ─────────────────────────────────────────────────────────────────────
+      # Sin `version:` a propósito: setup-cli la lee del lockfile.
+      #
+      # Antes acá decía `latest` y en tu máquina corrías `npx supabase`, que
+      # baja la que haya. O sea que la herramienta que aplica las migraciones
+      # podía ser una versión distinta en cada lado, y cambiar sola de un día
+      # para el otro sin que nadie tocara nada.
+      #
+      # Es el mismo problema que `npm ci` resuelve para las dependencias, y se
+      # resuelve igual: la versión vive en el lockfile y se mueve cuando alguien
+      # decide moverla, en un commit que se ve.
       - uses: supabase/setup-cli@v3
-        with:
-          version: latest
 
       - name: Levantar la base y aplicar las migraciones
-        run: supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
+        run: |
+          # Queda en el log a propósito. Cuando una migración se porta distinto
+          # acá que en tu máquina, la primera pregunta es con qué CLI corrió, y
+          # la action no lo dice. Tiene que coincidir con package.json.
+          supabase --version
+          supabase start -x studio,imgproxy,storage-api,edge-runtime,logflare,vector,supavisor,realtime,mailpit
 
       # `PageProps` y `LayoutProps` no están escritos en ningún lado: los genera
       # Next a partir de las rutas, en `.next/types/`, que está en .gitignore.
