@@ -1,6 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["gru1"],
+
+  "//": "Los deploys los dispara el pipeline, no Vercel. Ver .github/workflows/ci.yml.",
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
+
   "crons": [
     { "path": "/api/cron/retencion", "schedule": "0 6 * * *" }
   ]
