@@ -1,12 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["gru1"],
-
-  "//": "Los deploys los dispara el pipeline, no Vercel. Ver .github/workflows/ci.yml. En false para TODAS las ramas, no sólo main: los previews de cada PR fallaban al buildear porque las variables de Supabase están sólo en el scope Production —darselas a Preview haria que un PR escriba en la base real— y desde que las paginas de catalogo se prerenderizan, el build consulta la base. Una X roja que siempre esta en rojo deja de mirarse.",
-  "git": {
-    "deploymentEnabled": false
-  },
-
   "crons": [
     { "path": "/api/cron/retencion", "schedule": "0 6 * * *" }
   ]
