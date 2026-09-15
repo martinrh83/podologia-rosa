@@ -112,3 +112,69 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # DEPLOY A PRODUCCIÓN
+  #
+  # Staging lo deploya Vercel solo al ver el merge; producción pasa por acá.
+  # Eso convierte el pipeline de continuous deployment en continuous delivery:
+  # todo lo que está en `main` PODRÍA ir a producción, pero va cuando una
+  # persona lo aprueba.
+  #
+  # Tres cosas hacen que la compuerta sea real y no decorativa:
+  #
+  #   needs: verificar    no arranca si CI falló
+  #   if: refs/heads/main sólo en merges, nunca en un PR. En un repo público
+  #                       eso importa: un PR de un fork no tiene que poder
+  #                       llegar ni cerca de estos secrets
+  #   environment         tiene required reviewers, así que GitHub frena el job
+  #                       y espera a que alguien apruebe
+  #
+  # Y requiere que el proyecto de producción tenga APAGADO el auto-deploy por
+  # Git en Vercel. Si no, Vercel deploya al mergear y la aprobación llega tarde.
+  # ───────────────────────────────────────────────────────────────────────────
+  produccion:
+    needs: verificar
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: produccion
+      url: https://podologia-mitre-salta.vercel.app
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: npm i -g vercel@latest
+
+      # Trae la configuración del proyecto y sus variables de entorno de
+      # producción. Sin esto el build no sabe a qué Supabase apuntar.
+      - name: Traer la config de Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # El build corre ACÁ, no en Vercel. Es lo que nos devuelve el control del
+      # orden: cuando metamos las migraciones, van antes de este paso.
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Que el deploy termine no significa que el sitio ande. Si esto falla, el
+      # job queda en rojo y sabés que hay que volver atrás.
+      - name: Smoke test
+        run: |
+          U=https://podologia-mitre-salta.vercel.app
+          set -e
+          test "$(curl -s -o /dev/null -w '%{http_code}' $U/turnos)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' $U/no-existe)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' $U/api/cron/retencion)" = "401"
+          curl -s "$U/sitemap.xml" | grep -q "podologia-mitre-salta"
+          echo "el sitio responde"
