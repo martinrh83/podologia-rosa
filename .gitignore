@@ -44,6 +44,19 @@ yarn-error.log*
 /docs/migraciones-en-equipo.md
 /docs/ci-cd.md
 
+# skills de agentes, instalados con `npx skills add`
+#
+# Son instrucciones para agentes que trabajen en este repo, no código de la app.
+# Se ignoran por dos razones: los de `.claude/` son symlinks a rutas absolutas de
+# la máquina donde se instalaron —en otra computadora quedan rotos— y los de
+# `.agents/` son skills de terceros que ya viven en su propio repositorio.
+#
+# Si algún día el equipo quiere compartirlos, lo que se commitea es `.agents/`
+# (los archivos de verdad) y se siguen ignorando los symlinks.
+/.agents
+/.claude
+/skills-lock.json
+
 # vercel
 .vercel
 
