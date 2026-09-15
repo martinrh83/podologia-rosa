@@ -1,0 +1,50 @@
+name: Smoke
+
+# Después de cada deploy, no antes.
+#
+# `deployment_status` lo emite la integración de Vercel cuando un deploy termina.
+# Sin token, sin secrets, sin esperar: GitHub nos avisa.
+#
+# Esto NO previene un deploy malo —para eso habría que probar el preview y recién
+# después promover— pero es la diferencia entre enterarte vos y enterarte porque
+# un paciente no pudo sacar turno.
+on: deployment_status
+
+jobs:
+  smoke:
+    # Vercel emite también `pending` y `failure`; sólo interesa verificar lo que
+    # efectivamente quedó arriba.
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Se rutea por el NOMBRE del ambiente y no por `environment_url`.
+      #
+      # Ese campo trae la URL del deployment —la larga, con hash— que tiene Vercel
+      # Authentication y redirige a vercel.com/sso-api. Verificado: el smoke test
+      # daría falso negativo contra una pantalla de login de Vercel. Los alias
+      # públicos, en cambio, son fijos.
+      #
+      # Los nombres los pone Vercel, uno por proyecto y entorno:
+      #   Production – podologia-mitre-salta
+      #   Production – podologia-mitre-staging
+      #   Preview – podologia-mitre-…
+      - name: Verificar el ambiente recién deployado
+        env:
+          AMBIENTE: ${{ github.event.deployment.environment }}
+        run: |
+          case "$AMBIENTE" in
+            Production*staging) U=https://podologia-mitre-staging.vercel.app ;;
+            Production*salta)   U=https://podologia-mitre-salta.vercel.app ;;
+            *)
+              echo "«$AMBIENTE» no es un ambiente estable (preview, o uno nuevo)."
+              echo "No hay alias fijo que verificar."
+              exit 0
+              ;;
+          esac
+          echo "ambiente: $AMBIENTE"
+          echo "url:      $U"
+          echo
+          ./.github/smoke.sh "$U"
