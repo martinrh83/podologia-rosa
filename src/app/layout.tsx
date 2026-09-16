@@ -46,16 +46,16 @@ type NavLink = { href: string; label: string; /** Cuándo tiene sentido ofrecerl
 
 const NAV: NavLink[] = [
   { href: "/#treatments", label: "Tratamientos", requires: "services" },
-  { href: "/#team", label: "Quién te atiende", requires: "practitioners" },
+  { href: "/#team", label: "Profesionales", requires: "practitioners" },
   { href: "/#directions", label: "Cómo llegar" },
-  { href: "/#faq", label: "Preguntas" },
+  { href: "/#faq", label: "Preguntas frecuentes" },
 ];
 
 /**
  * Un ancla a una sección que no existe no lleva a ningún lado, así que el menú
  * se arma con lo que el home realmente va a renderizar.
  *
- * Tratamientos y "quién te atiende" desaparecen si no hay nada cargado — y
+ * Tratamientos y "profesionales" desaparecen si no hay nada cargado — y
  * producción estuvo exactamente así, sin servicios, después de que 0016 borrara
  * el catálogo de ejemplo.
  *

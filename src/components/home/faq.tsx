@@ -6,7 +6,7 @@ export function Faq() {
 
   return (
     <section id="faq" className="scroll-mt-20">
-      <div className="mx-auto max-w-3xl px-4 py-14">
+      <div className="mx-auto max-w-5xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Preguntas frecuentes</h2>
 
         {/*
@@ -14,7 +14,7 @@ export function Faq() {
           esto, funciona sin hidratar, y el buscador lee el contenido igual
           aunque esté plegado.
         */}
-        <div className="mt-6 divide-y divide-border border-y border-border">
+        <div className="mt-6 max-w-3xl divide-y divide-border border-y border-border">
           {FAQ.map((item) => (
             <details key={item.question} className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[1.05rem] font-medium">

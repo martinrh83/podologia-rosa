@@ -66,7 +66,7 @@ export function Directions({
 
   return (
     <section id="directions" className="scroll-mt-20 border-y border-border bg-surface">
-      <div className="mx-auto max-w-3xl px-4 py-14">
+      <div className="mx-auto max-w-5xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Cómo llegar</h2>
 
         <div className="mt-6 grid gap-8 sm:grid-cols-2">

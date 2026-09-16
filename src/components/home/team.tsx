@@ -21,9 +21,9 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
 
   return (
     <section id="team" className="scroll-mt-20">
-      <div className="mx-auto max-w-3xl px-4 py-14">
-        <h2 className="text-2xl font-semibold tracking-tight">Quién te atiende</h2>
-        <p className="mt-3 text-lg text-muted">
+      <div className="mx-auto max-w-5xl px-4 py-14">
+        <h2 className="text-2xl font-semibold tracking-tight">Profesionales</h2>
+        <p className="mt-3 max-w-2xl text-lg text-muted">
           Atendemos de a una persona por vez, sin apuro y con el tiempo suficiente para
           explicarte qué está pasando.
         </p>
@@ -47,7 +47,7 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
                 href={`/turnos/${practitioner.slug}`}
                 className="mt-4 inline-block self-start rounded-lg border border-accent px-4 py-2.5 font-medium text-accent hover:bg-accent hover:text-white"
               >
-                Sacar un turno con {practitioner.first_name}
+                Sacar turno con {practitioner.first_name}
               </Link>
             </li>
           ))}

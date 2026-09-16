@@ -15,10 +15,10 @@ export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
 
   return (
     <section id="treatments" className="scroll-mt-20 border-y border-border bg-surface">
-      <div className="mx-auto max-w-3xl px-4 py-14">
+      <div className="mx-auto max-w-5xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
 
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <li key={service.id} className="rounded-xl border border-border bg-background p-5">
               <p className="text-[1.05rem] font-medium">{service.name}</p>
@@ -31,7 +31,7 @@ export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
           ))}
         </ul>
 
-        <p className="mt-6 text-sm text-muted">
+        <p className="mt-6 max-w-2xl text-sm text-muted">
           ¿No sabés cuál te corresponde? Sacá turno igual y lo vemos juntas. La duración
           depende de con quién te atiendas; la ves al elegir profesional.
         </p>

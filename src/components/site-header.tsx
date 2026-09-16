@@ -81,8 +81,8 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
     //
     // Lo segundo no es un detalle teórico: la última sección es corta y queda
     // cerca del fondo, así que con el scroll al máximo la franja toca a las dos
-    // últimas a la vez. Eligiendo la primera, "Preguntas" no podía resaltarse
-    // nunca — no había forma de scrollear lo suficiente.
+    // últimas a la vez. Eligiendo la primera, "Preguntas frecuentes" no podía
+    // resaltarse nunca — no había forma de scrollear lo suficiente.
     const visible = new Set<string>();
 
     const observer = new IntersectionObserver(
@@ -111,7 +111,7 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
         </Link>
 
         {/* Escritorio */}
-        <nav aria-label="Principal" className="ml-auto hidden items-center gap-x-5 md:flex">
+        <nav aria-label="Principal" className="ml-auto hidden items-center gap-x-5 lg:flex">
           {nav.map((item) => {
             const id = item.href.split("#")[1];
             const isActive = Boolean(id) && id === activeId;
@@ -132,16 +132,11 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
           })}
         </nav>
 
-        {/*
-          Dos etiquetas, no una: a 390px "Sacar un turno" envolvía a dos líneas
-          y estiraba el encabezado a 100px. Medido, no supuesto.
-        */}
         <Link
           href="/turnos"
-          className="ml-auto whitespace-nowrap rounded-lg bg-accent px-4 py-2.5 text-[0.95rem] font-medium text-white transition-colors hover:bg-accent-hover md:ml-0"
+          className="ml-auto whitespace-nowrap rounded-lg bg-accent px-4 py-2.5 text-[0.95rem] font-medium text-white transition-colors hover:bg-accent-hover lg:ml-0"
         >
-          <span className="sm:hidden">Sacar turno</span>
-          <span className="hidden sm:inline">Sacar un turno</span>
+          Sacar turno
         </Link>
 
         {/* Teléfono */}
@@ -152,7 +147,7 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            className="-mr-2 rounded-lg p-2 text-foreground md:hidden"
+            className="-mr-2 rounded-lg p-2 text-foreground lg:hidden"
           >
             {/* Dos barras que se cruzan al abrir: una sola forma, sin íconos. */}
             <span className="relative block h-4 w-6" aria-hidden>
@@ -175,7 +170,7 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
         <nav
           id="mobile-menu"
           aria-label="Principal"
-          className="border-t border-border md:hidden"
+          className="border-t border-border lg:hidden"
         >
           <ul className="mx-auto max-w-5xl px-4 py-2">
             {nav.map((item) => {

@@ -35,7 +35,7 @@ export default function NotFound() {
           href="/turnos"
           className="rounded-lg bg-accent px-5 py-3 font-medium text-white transition-colors hover:bg-accent-hover"
         >
-          Sacar un turno
+          Sacar turno
         </Link>
         <Link
           href="/"

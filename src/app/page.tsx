@@ -1,7 +1,6 @@
-import Link from "next/link";
-
 import { Directions, type ScheduleRow } from "@/components/home/directions";
 import { Faq } from "@/components/home/faq";
+import { Hero } from "@/components/home/hero";
 import { Team } from "@/components/home/team";
 import { Treatments } from "@/components/home/treatments";
 import { getClinicSettings } from "@/lib/availability";
@@ -10,7 +9,6 @@ import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { getActiveServices } from "@/lib/db/services";
 import { siteUrl } from "@/lib/env";
-import { whatsappLink } from "@/lib/format";
 
 /**
  * Estática, y la reconstruye el panel.
@@ -33,7 +31,7 @@ export default async function HomePage() {
     getActiveServices(),
     listActivePractitioners(),
     listActiveLocations(),
-    // Los horarios que se muestran en "Cómo llegar" salen de la agenda real.
+    // Los horarios del hero y de "Cómo llegar" salen de la agenda real.
     supabase
       .from("weekly_schedule")
       .select("weekday, start_time, end_time, location_id")
@@ -82,47 +80,7 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <section className="mx-auto max-w-3xl px-4 py-14 sm:py-20">
-        <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-          Cuidamos tus pies,
-          <br />
-          <span className="text-accent">sin vueltas.</span>
-        </h1>
-        <p className="mt-5 max-w-xl text-lg text-muted">
-          Consultorio de podología. Sacá tu turno online en menos de un minuto: sin llamar, sin
-          esperar, y sin crear ninguna cuenta.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href="/turnos"
-            className="rounded-lg bg-accent px-6 py-3.5 text-[1.05rem] font-medium text-white hover:bg-accent-hover"
-          >
-            Sacar un turno
-          </Link>
-          {settings.phone && (
-            <a
-              href={`tel:${settings.phone}`}
-              className="rounded-lg border border-border bg-surface px-6 py-3.5 text-[1.05rem] hover:border-accent"
-            >
-              Llamar al consultorio
-            </a>
-          )}
-          {settings.whatsapp && (
-            <a
-              href={whatsappLink(
-                settings.whatsapp,
-                `Hola! Quería consultar por un turno en ${settings.clinic_name}.`,
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg border border-border bg-surface px-6 py-3.5 text-[1.05rem] hover:border-accent"
-            >
-              WhatsApp
-            </a>
-          )}
-        </div>
-      </section>
+      <Hero settings={settings} locations={locations} schedule={schedule} />
 
       <Treatments services={services} />
       <Team practitioners={practitioners} />
