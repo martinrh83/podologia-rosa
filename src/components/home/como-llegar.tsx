@@ -65,7 +65,7 @@ export function ComoLlegar({
   const varias = locations.length > 1;
 
   return (
-    <section id="como-llegar" className="scroll-mt-20 border-y border-border bg-surface">
+    <section id="como-llegar" className="scroll-mt-8 border-y border-border bg-surface">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Cómo llegar</h2>
 

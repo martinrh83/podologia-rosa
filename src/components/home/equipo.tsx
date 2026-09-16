@@ -20,7 +20,7 @@ export function Equipo({ practitioners }: { practitioners: PractitionerWithSpeci
   if (practitioners.length === 0) return null;
 
   return (
-    <section id="equipo" className="scroll-mt-20">
+    <section id="equipo" className="scroll-mt-8">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Quién te atiende</h2>
         <p className="mt-3 text-lg text-muted">
