@@ -58,11 +58,32 @@ body {
   border-radius: 4px;
 }
 
+/*
+ * El menú apunta a secciones del home, así que el salto es deslizante.
+ *
+ * Una línea de CSS y ninguna librería: el navegador ya lo hace con los
+ * `<a href="#...">` nativos y mantiene el hash en la URL, cosa que varios
+ * paquetes de React rompen — te queda el scroll lindo y un link que no se
+ * puede compartir.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /*
+   * Aparte, porque `scroll-behavior` no es una animación ni una transición: la
+   * regla de arriba no lo alcanza. Para alguien con sensibilidad vestibular, el
+   * desplazamiento deslizante es justo lo que pidió no tener.
+   */
+  html {
+    scroll-behavior: auto;
   }
 }

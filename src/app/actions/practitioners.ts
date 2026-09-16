@@ -19,7 +19,7 @@ function revalidatePractitioners() {
   // `/sitemap.xml` también: lista una URL por profesional, así que dar de alta
   // o de baja a alguien lo cambia. Ahora que no se renderiza por visita, si no
   // se invalida acá Google sigue viendo la lista vieja.
-  for (const path of ["/", "/turnos", "/equipo", "/sitemap.xml", "/admin/profesionales", "/admin/agenda"]) {
+  for (const path of ["/", "/turnos", "/sitemap.xml", "/admin/profesionales", "/admin/agenda"]) {
     revalidatePath(path);
   }
 }

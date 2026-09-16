@@ -17,7 +17,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 function revalidateSchedule() {
   revalidatePath("/admin/agenda");
   revalidatePath("/turnos");
-  revalidatePath("/como-llegar");
 }
 
 export type ScheduleState = { status: "idle" | "saved" | "error"; message?: string };
