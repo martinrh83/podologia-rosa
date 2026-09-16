@@ -5,7 +5,7 @@ export function Preguntas() {
   if (PREGUNTAS.length === 0) return null;
 
   return (
-    <section id="preguntas" className="scroll-mt-8">
+    <section id="preguntas" className="scroll-mt-20">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Preguntas frecuentes</h2>
 

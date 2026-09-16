@@ -14,7 +14,7 @@ export function Tratamientos({ services }: { services: ServiceWithSpecialty[] })
   if (services.length === 0) return null;
 
   return (
-    <section id="tratamientos" className="scroll-mt-8 border-y border-border bg-surface">
+    <section id="tratamientos" className="scroll-mt-20 border-y border-border bg-surface">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
 

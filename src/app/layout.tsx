@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 
+import { SiteHeader } from "@/components/site-header";
+
 import { listActivePractitioners } from "@/lib/db/practitioners";
 import { getActiveServices } from "@/lib/db/services";
 
@@ -80,32 +82,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es-AR" className={`${geist.variable} h-full antialiased`}>
       <body className="font-sans min-h-full flex flex-col">
-        <header className="border-b border-border bg-surface">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-4">
-            <Link href="/" className="text-lg font-semibold tracking-tight">
-              Podología <span className="text-accent">Rosa</span>
-            </Link>
-
-            <nav aria-label="Principal" className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-[0.95rem] text-muted transition-colors hover:text-foreground"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <Link
-              href="/turnos"
-              className="ml-auto rounded-lg bg-accent px-4 py-2.5 text-[0.95rem] font-medium text-white transition-colors hover:bg-accent-hover"
-            >
-              Sacar un turno
-            </Link>
-          </div>
-        </header>
+        <SiteHeader nav={nav} />
 
         <main className="flex-1">{children}</main>
 
