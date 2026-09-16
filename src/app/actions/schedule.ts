@@ -212,7 +212,6 @@ export async function updateService(formData: FormData): Promise<void> {
   await supabase.from("services").update({ name, price }).eq("id", id);
 
   revalidatePath("/admin/servicios");
-  revalidatePath("/servicios");
   revalidatePath("/");
 }
 
@@ -227,6 +226,5 @@ export async function toggleService(formData: FormData): Promise<void> {
   await supabase.from("services").update({ active: !active }).eq("id", id);
 
   revalidatePath("/admin/servicios");
-  revalidatePath("/servicios");
   revalidatePath("/");
 }

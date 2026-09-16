@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   capitalizeFirst,
   formatDay,
-  formatPrice,
   formatTime,
   toLocalDateKey,
   whatsappLink,
@@ -28,17 +27,6 @@ describe("formatters render in clinic-local time regardless of server zone", () 
 
   it("writes the day in Spanish", () => {
     expect(formatDay(evening)).toBe("jueves, 10 de septiembre");
-  });
-});
-
-describe("formatPrice", () => {
-  it("renders pesos without decimal noise", () => {
-    expect(formatPrice(15000)).toContain("15.000");
-    expect(formatPrice(15000)).not.toContain(",00");
-  });
-
-  it("returns null when Rosa has not set a price", () => {
-    expect(formatPrice(null)).toBeNull();
   });
 });
 

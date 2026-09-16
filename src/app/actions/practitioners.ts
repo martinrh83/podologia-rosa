@@ -148,7 +148,6 @@ export async function toggleSpecialty(formData: FormData): Promise<void> {
   await supabase.from("specialties").update({ active: !active }).eq("id", id);
 
   revalidatePath("/admin/especialidades");
-  revalidatePath("/servicios");
   revalidatePath("/turnos");
 }
 
@@ -175,7 +174,6 @@ export async function createSpecialty(
   }
 
   revalidatePath("/admin/especialidades");
-  revalidatePath("/servicios");
   revalidatePath("/turnos");
   return { status: "saved" };
 }

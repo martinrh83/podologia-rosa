@@ -5,7 +5,7 @@ import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { getActiveServices } from "@/lib/db/services";
 import { siteUrl } from "@/lib/env";
-import { formatPrice, whatsappLink } from "@/lib/format";
+import { whatsappLink } from "@/lib/format";
 
 /**
  * Estática, y la reconstruye el panel.
@@ -113,36 +113,46 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-border bg-surface">
-        <div className="mx-auto max-w-3xl px-4 py-12">
-          <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
+      {/*
+        Tratamientos, sin precios.
+        
+        Los precios no se publican: en el panel siguen estando, como referencia
+        interna, pero al paciente se le dice en la consulta. Eso también evita
+        que un número quede desactualizado a la vista con la inflación.
 
-          <ul className="mt-6 space-y-4">
-            {services.map((service) => {
-              const price = formatPrice(service.price);
-              return (
+        La sección entera desaparece si no hay tratamientos cargados. Un bloque
+        con el título y nada abajo se lee peor que no tenerlo, y el home fluye
+        igual sin él — que es exactamente el estado en que quedó producción
+        cuando 0016 borró el catálogo de ejemplo.
+      */}
+      {services.length > 0 && (
+        <section id="tratamientos" className="border-y border-border bg-surface">
+          <div className="mx-auto max-w-3xl px-4 py-12">
+            <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
+
+            <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+              {services.map((service) => (
                 <li
                   key={service.id}
-                  className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border pb-4 last:border-0"
+                  className="rounded-xl border border-border bg-background p-5"
                 >
-                  <div>
-                    <p className="text-[1.05rem] font-medium">{service.name}</p>
-                    {service.description && (
-                      <p className="mt-0.5 text-[0.95rem] text-muted">{service.description}</p>
-                    )}
-                  </div>
-                  <p className="tabular-nums text-muted">{price ?? "Consultar"}</p>
+                  <p className="text-[1.05rem] font-medium">{service.name}</p>
+                  {service.description && (
+                    <p className="mt-1 text-[0.95rem] leading-relaxed text-muted">
+                      {service.description}
+                    </p>
+                  )}
                 </li>
-              );
-            })}
-          </ul>
+              ))}
+            </ul>
 
-          <p className="mt-6 text-sm text-muted">
-            La duración del turno depende de con quién te atiendas; la ves al elegir
-            profesional.
-          </p>
-        </div>
-      </section>
+            <p className="mt-6 text-sm text-muted">
+              ¿No sabés cuál te corresponde? Sacá turno igual y lo vemos juntas. La
+              duración depende de con quién te atiendas; la ves al elegir profesional.
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-3xl px-4 py-12">
         <h2 className="text-2xl font-semibold tracking-tight">Cómo funciona</h2>

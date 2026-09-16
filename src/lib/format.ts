@@ -87,16 +87,6 @@ export function toLocalDateKey(value: Date | string): string {
   }).format(new Date(value));
 }
 
-/** "$ 15.000" — Argentine peso, no decimals (they are noise at these amounts). */
-export function formatPrice(value: number | null): string | null {
-  if (value === null) return null;
-
-  return new Intl.NumberFormat(LOCALE, {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 /**
  * Build a wa.me link with a pre-filled message.
