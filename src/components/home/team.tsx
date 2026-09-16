@@ -16,11 +16,11 @@ import type { PractitionerWithSpecialty } from "@/lib/db/types";
  * Las biografías salen de `practitioners.bio`, que cada una edita desde el
  * panel.
  */
-export function Equipo({ practitioners }: { practitioners: PractitionerWithSpecialty[] }) {
+export function Team({ practitioners }: { practitioners: PractitionerWithSpecialty[] }) {
   if (practitioners.length === 0) return null;
 
   return (
-    <section id="equipo" className="scroll-mt-20">
+    <section id="team" className="scroll-mt-20">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Quién te atiende</h2>
         <p className="mt-3 text-lg text-muted">

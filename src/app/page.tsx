@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { ComoLlegar, type Franja } from "@/components/home/como-llegar";
-import { Equipo } from "@/components/home/equipo";
-import { Preguntas } from "@/components/home/preguntas";
-import { Tratamientos } from "@/components/home/tratamientos";
+import { Directions, type ScheduleRow } from "@/components/home/directions";
+import { Faq } from "@/components/home/faq";
+import { Team } from "@/components/home/team";
+import { Treatments } from "@/components/home/treatments";
 import { getClinicSettings } from "@/lib/availability";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { listActiveLocations } from "@/lib/db/locations";
@@ -37,7 +37,7 @@ export default async function HomePage() {
     supabase
       .from("weekly_schedule")
       .select("weekday, start_time, end_time, location_id")
-      .then(({ data }) => (data ?? []) as Franja[]),
+      .then(({ data }) => (data ?? []) as ScheduleRow[]),
   ]);
 
   /**
@@ -124,10 +124,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Tratamientos services={services} />
-      <Equipo practitioners={practitioners} />
-      <ComoLlegar settings={settings} locations={locations} schedule={schedule} />
-      <Preguntas />
+      <Treatments services={services} />
+      <Team practitioners={practitioners} />
+      <Directions settings={settings} locations={locations} schedule={schedule} />
+      <Faq />
     </>
   );
 }

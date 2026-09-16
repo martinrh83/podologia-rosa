@@ -37,18 +37,18 @@ export const metadata: Metadata = {
  * página el sitio se lee de corrido y el camino al turno es más corto.
  *
  * Los href van con `/` adelante a propósito: desde /turnos o /privacidad un
- * `#tratamientos` pelado no llevaría a ningún lado.
+ * `#treatments` pelado no llevaría a ningún lado.
  *
  * `/turnos` sigue siendo página — es el embudo, y cada profesional tiene su
  * propia URL para que una búsqueda por nombre caiga donde se saca el turno.
  */
-type Seccion = { href: string; label: string; /** Cuándo tiene sentido ofrecerla. */ existe?: "servicios" | "profesionales" };
+type NavLink = { href: string; label: string; /** Cuándo tiene sentido ofrecerla. */ requires?: "services" | "practitioners" };
 
-const NAV: Seccion[] = [
-  { href: "/#tratamientos", label: "Tratamientos", existe: "servicios" },
-  { href: "/#equipo", label: "Quién te atiende", existe: "profesionales" },
-  { href: "/#como-llegar", label: "Cómo llegar" },
-  { href: "/#preguntas", label: "Preguntas" },
+const NAV: NavLink[] = [
+  { href: "/#treatments", label: "Tratamientos", requires: "services" },
+  { href: "/#team", label: "Quién te atiende", requires: "practitioners" },
+  { href: "/#directions", label: "Cómo llegar" },
+  { href: "/#faq", label: "Preguntas" },
 ];
 
 /**
@@ -63,21 +63,21 @@ const NAV: Seccion[] = [
  * revalidación porque son estáticas, y en el home son gratis: Next deduplica
  * las mismas consultas dentro de un render y la página ya las hace.
  */
-async function navVisible() {
+async function visibleNav() {
   const [services, practitioners] = await Promise.all([
     getActiveServices(),
     listActivePractitioners(),
   ]);
 
   return NAV.filter((item) => {
-    if (item.existe === "servicios") return services.length > 0;
-    if (item.existe === "profesionales") return practitioners.length > 0;
+    if (item.requires === "services") return services.length > 0;
+    if (item.requires === "practitioners") return practitioners.length > 0;
     return true;
   });
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const nav = await navVisible();
+  const nav = await visibleNav();
 
   return (
     <html lang="es-AR" className={`${geist.variable} h-full antialiased`}>

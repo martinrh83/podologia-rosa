@@ -22,12 +22,12 @@
  * en "Cómo llegar". Un texto fijo sobre datos que cambian es una mentira con
  * fecha de vencimiento.
  */
-export type Pregunta = { pregunta: string; respuesta: string };
+export type FaqItem = { question: string; answer: string };
 
-export const PREGUNTAS: Pregunta[] = [
+export const FAQ: FaqItem[] = [
   {
-    pregunta: "¿Cómo cancelo si no puedo ir?",
-    respuesta:
+    question: "¿Cómo cancelo si no puedo ir?",
+    answer:
       "Cuando terminás de reservar te mostramos un enlace en pantalla: ése es tu turno. " +
       "Desde ahí lo cancelás en un clic. Sacale una captura o mandátelo por WhatsApp, " +
       "porque no enviamos mails y es la única forma de cancelarlo vos misma. Si lo " +

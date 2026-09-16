@@ -28,10 +28,10 @@ export type NavItem = { href: string; label: string };
  * gracia.
  */
 export function SiteHeader({ nav }: { nav: NavItem[] }) {
-  const [abierto, setAbierto] = useState(false);
-  const [activa, setActiva] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const pathname = usePathname();
-  const [ultimoPath, setUltimoPath] = useState(pathname);
+  const [lastPathname, setLastPathname] = useState(pathname);
 
   // Cambiar de página cierra el menú y apaga el resaltado. Sin esto el menú
   // queda abierto sobre la página nueva —el componente no se desmonta al
@@ -42,10 +42,10 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
   // regla `react-hooks/set-state-in-effect` lo prohíbe porque encadena un
   // render de más. Ajustar el estado mientras se renderiza es el patrón que
   // React documenta para esto, y el que ya usa el resto del proyecto.
-  if (pathname !== ultimoPath) {
-    setUltimoPath(pathname);
-    setAbierto(false);
-    setActiva(null);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setOpen(false);
+    setActiveId(null);
   }
 
   /**
@@ -60,14 +60,14 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
    */
   useEffect(() => {
     const ids = nav.map((item) => item.href.split("#")[1]).filter(Boolean);
-    const secciones = ids
+    const sections = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
 
     // Sin secciones que observar no hay nada que hacer. Apagar el resaltado no
     // hace falta acá: de eso se encarga el ajuste durante el render de arriba,
     // que es además el único momento en que puede cambiar la página.
-    if (secciones.length === 0) return;
+    if (sections.length === 0) return;
 
     // Se lleva la cuenta de TODAS las que están en la franja, no sólo de la
     // última que entró. Dos cosas dependen de esto:
@@ -83,21 +83,21 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
     // cerca del fondo, así que con el scroll al máximo la franja toca a las dos
     // últimas a la vez. Eligiendo la primera, "Preguntas" no podía resaltarse
     // nunca — no había forma de scrollear lo suficiente.
-    const dentro = new Set<string>();
+    const visible = new Set<string>();
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) dentro.add(entry.target.id);
-          else dentro.delete(entry.target.id);
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
         }
-        const ultima = [...secciones].reverse().find((seccion) => dentro.has(seccion.id));
-        setActiva(ultima?.id ?? null);
+        const last = [...sections].reverse().find((section) => visible.has(section.id));
+        setActiveId(last?.id ?? null);
       },
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
     );
 
-    for (const seccion of secciones) observer.observe(seccion);
+    for (const section of sections) observer.observe(section);
     return () => observer.disconnect();
   }, [nav, pathname]);
 
@@ -114,14 +114,14 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
         <nav aria-label="Principal" className="ml-auto hidden items-center gap-x-5 md:flex">
           {nav.map((item) => {
             const id = item.href.split("#")[1];
-            const esActiva = Boolean(id) && id === activa;
+            const isActive = Boolean(id) && id === activeId;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                aria-current={esActiva ? "true" : undefined}
+                aria-current={isActive ? "true" : undefined}
                 className={
-                  esActiva
+                  isActive
                     ? "text-[0.95rem] font-medium text-accent"
                     : "text-[0.95rem] text-muted transition-colors hover:text-foreground"
                 }
@@ -148,22 +148,22 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
         {nav.length > 0 && (
           <button
             type="button"
-            onClick={() => setAbierto((v) => !v)}
-            aria-expanded={abierto}
-            aria-controls="menu-movil"
-            aria-label={abierto ? "Cerrar menú" : "Abrir menú"}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
             className="-mr-2 rounded-lg p-2 text-foreground md:hidden"
           >
             {/* Dos barras que se cruzan al abrir: una sola forma, sin íconos. */}
             <span className="relative block h-4 w-6" aria-hidden>
               <span
                 className={`absolute left-0 block h-0.5 w-6 bg-current transition-transform ${
-                  abierto ? "top-1.5 rotate-45" : "top-0.5"
+                  open ? "top-1.5 rotate-45" : "top-0.5"
                 }`}
               />
               <span
                 className={`absolute left-0 block h-0.5 w-6 bg-current transition-transform ${
-                  abierto ? "top-1.5 -rotate-45" : "top-3"
+                  open ? "top-1.5 -rotate-45" : "top-3"
                 }`}
               />
             </span>
@@ -171,24 +171,24 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
         )}
       </div>
 
-      {abierto && nav.length > 0 && (
+      {open && nav.length > 0 && (
         <nav
-          id="menu-movil"
+          id="mobile-menu"
           aria-label="Principal"
           className="border-t border-border md:hidden"
         >
           <ul className="mx-auto max-w-5xl px-4 py-2">
             {nav.map((item) => {
               const id = item.href.split("#")[1];
-              const esActiva = Boolean(id) && id === activa;
+              const isActive = Boolean(id) && id === activeId;
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={() => setAbierto(false)}
-                    aria-current={esActiva ? "true" : undefined}
+                    onClick={() => setOpen(false)}
+                    aria-current={isActive ? "true" : undefined}
                     className={`block border-b border-border py-3 text-[1.05rem] last:border-0 ${
-                      esActiva ? "font-medium text-accent" : "text-foreground"
+                      isActive ? "font-medium text-accent" : "text-foreground"
                     }`}
                   >
                     {item.label}

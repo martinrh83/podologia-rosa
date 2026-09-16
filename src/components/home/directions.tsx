@@ -11,7 +11,7 @@ const WEEKDAY_NAMES = [
   "Sábado",
 ];
 
-export type Franja = { weekday: number; start_time: string; end_time: string; location_id: string };
+export type ScheduleRow = { weekday: number; start_time: string; end_time: string; location_id: string };
 
 /**
  * Dónde queda, cómo contactarlos y cuándo atienden.
@@ -40,14 +40,14 @@ export type Franja = { weekday: number; start_time: string; end_time: string; lo
  *   Con más de una sede esto pide un campo en `locations` en vez de un archivo
  *   commiteado. Hoy hay una.
  */
-export function ComoLlegar({
+export function Directions({
   settings,
   locations,
   schedule,
 }: {
   settings: ClinicSettings;
   locations: Location[];
-  schedule: Franja[];
+  schedule: ScheduleRow[];
 }) {
   // Agrupar por día y por sede: dos profesionales que atienden la misma franja
   // en la misma sede son UNA franja del consultorio, no dos.
@@ -62,10 +62,10 @@ export function ComoLlegar({
     byWeekday.set(row.weekday, perLocation);
   }
 
-  const varias = locations.length > 1;
+  const hasManyLocations = locations.length > 1;
 
   return (
-    <section id="como-llegar" className="scroll-mt-20 border-y border-border bg-surface">
+    <section id="directions" className="scroll-mt-20 border-y border-border bg-surface">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Cómo llegar</h2>
 
@@ -74,7 +74,7 @@ export function ComoLlegar({
             <ul className="space-y-4">
               {locations.map((location) => (
                 <li key={location.id}>
-                  {varias && (
+                  {hasManyLocations && (
                     <p className="text-sm font-semibold uppercase tracking-wide text-accent">
                       {location.name}
                     </p>
@@ -131,7 +131,7 @@ export function ComoLlegar({
                       <div key={location} className="flex justify-between gap-4">
                         <span>{index === 0 ? WEEKDAY_NAMES[weekday] : ""}</span>
                         <span className="text-right">
-                          {varias && location && (
+                          {hasManyLocations && location && (
                             <span className="mr-2 text-[0.85rem] uppercase tracking-wide text-accent">
                               {location}
                             </span>

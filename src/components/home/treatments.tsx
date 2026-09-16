@@ -10,11 +10,11 @@ import type { ServiceWithSpecialty } from "@/lib/db/types";
  * Devuelve null si no hay nada cargado. Un bloque con el título y nada abajo se
  * lee peor que no tenerlo, y el home fluye igual sin él.
  */
-export function Tratamientos({ services }: { services: ServiceWithSpecialty[] }) {
+export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
   if (services.length === 0) return null;
 
   return (
-    <section id="tratamientos" className="scroll-mt-20 border-y border-border bg-surface">
+    <section id="treatments" className="scroll-mt-20 border-y border-border bg-surface">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
 

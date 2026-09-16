@@ -1,11 +1,11 @@
-import { PREGUNTAS } from "@/lib/faq";
+import { FAQ } from "@/lib/faq";
 
 /** Preguntas frecuentes. El contenido vive en `src/lib/faq.ts`. */
-export function Preguntas() {
-  if (PREGUNTAS.length === 0) return null;
+export function Faq() {
+  if (FAQ.length === 0) return null;
 
   return (
-    <section id="preguntas" className="scroll-mt-20">
+    <section id="faq" className="scroll-mt-20">
       <div className="mx-auto max-w-3xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Preguntas frecuentes</h2>
 
@@ -15,10 +15,10 @@ export function Preguntas() {
           aunque esté plegado.
         */}
         <div className="mt-6 divide-y divide-border border-y border-border">
-          {PREGUNTAS.map((item) => (
-            <details key={item.pregunta} className="group py-4">
+          {FAQ.map((item) => (
+            <details key={item.question} className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[1.05rem] font-medium">
-                {item.pregunta}
+                {item.question}
                 <span
                   aria-hidden
                   className="shrink-0 text-accent transition-transform group-open:rotate-45"
@@ -26,7 +26,7 @@ export function Preguntas() {
                   +
                 </span>
               </summary>
-              <p className="mt-3 leading-relaxed text-muted">{item.respuesta}</p>
+              <p className="mt-3 leading-relaxed text-muted">{item.answer}</p>
             </details>
           ))}
         </div>
