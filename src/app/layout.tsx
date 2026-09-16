@@ -25,7 +25,6 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
-  { href: "/servicios", label: "Servicios" },
   { href: "/equipo", label: "Equipo" },
   { href: "/como-llegar", label: "Cómo llegar" },
 ];

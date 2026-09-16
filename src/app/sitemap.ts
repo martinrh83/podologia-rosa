@@ -32,7 +32,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified,
       priority: 0.8,
     })),
-    { url: `${base}/servicios`, lastModified, priority: 0.8 },
     { url: `${base}/como-llegar`, lastModified, priority: 0.7 },
     { url: `${base}/equipo`, lastModified, priority: 0.6 },
     { url: `${base}/privacidad`, lastModified, priority: 0.3 },
