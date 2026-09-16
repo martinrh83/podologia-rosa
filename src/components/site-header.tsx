@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Logo } from "@/components/logo";
+
 export type NavItem = { href: string; label: string };
 
 /**
@@ -105,9 +107,13 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
     <header
       className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur"
     >
-      <div className="mx-auto flex max-w-5xl items-center gap-x-3 px-4 py-3.5 sm:gap-x-6">
-        <Link href="/" className="whitespace-nowrap text-lg font-semibold tracking-tight">
-          Podología <span className="text-accent">Rosa</span>
+      <div className="mx-auto flex max-w-5xl items-center gap-x-2 px-4 py-3.5 sm:gap-x-6">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 whitespace-nowrap text-[0.95rem] font-semibold tracking-tight sm:gap-2 sm:text-lg"
+        >
+          <Logo className="h-7 w-auto shrink-0 text-accent sm:h-8" />
+          Podología Mitre
         </Link>
 
         {/* Escritorio */}
@@ -134,7 +140,7 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
 
         <Link
           href="/turnos"
-          className="ml-auto whitespace-nowrap rounded-lg bg-accent px-4 py-2.5 text-[0.95rem] font-medium text-white transition-colors hover:bg-accent-hover lg:ml-0"
+          className="ml-auto whitespace-nowrap rounded-lg bg-accent px-3 py-2.5 sm:px-4 text-[0.95rem] font-medium text-white transition-colors hover:bg-accent-hover lg:ml-0"
         >
           Sacar turno
         </Link>

@@ -542,7 +542,7 @@ export function BookingFlow({
                   className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
                 />
                 <span>
-                  Autorizo a Podología Rosa a guardar mis datos de contacto y, si lo completé, el
+                  Autorizo a Podología Mitre a guardar mis datos de contacto y, si lo completé, el
                   motivo de mi consulta —un dato de salud— con el fin de gestionar mi turno.{" "}
                   <a href="/privacidad" target="_blank" className="text-accent underline">
                     Ver cómo tratamos tus datos
