@@ -54,7 +54,7 @@ export async function updateClinicSettings(
   }
 
   // Todas las páginas que muestran estos datos.
-  for (const path of ["/", "/como-llegar", "/turnos", "/privacidad", "/admin/consultorio"]) {
+  for (const path of ["/", "/turnos", "/privacidad", "/admin/consultorio"]) {
     revalidatePath(path);
   }
 

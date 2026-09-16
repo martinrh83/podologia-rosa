@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 
+import { listActivePractitioners } from "@/lib/db/practitioners";
+import { getActiveServices } from "@/lib/db/services";
+
 import "./globals.css";
 
 const geist = Geist({
@@ -24,12 +27,56 @@ export const metadata: Metadata = {
   },
 };
 
-const NAV = [
-  { href: "/equipo", label: "Equipo" },
-  { href: "/como-llegar", label: "Cómo llegar" },
+/**
+ * El menú apunta a secciones del home, no a páginas.
+ *
+ * Tratamientos, quién atiende y cómo llegar eran tres páginas con poco
+ * contenido cada una, y el home ya repetía parte. Como secciones de una sola
+ * página el sitio se lee de corrido y el camino al turno es más corto.
+ *
+ * Los href van con `/` adelante a propósito: desde /turnos o /privacidad un
+ * `#tratamientos` pelado no llevaría a ningún lado.
+ *
+ * `/turnos` sigue siendo página — es el embudo, y cada profesional tiene su
+ * propia URL para que una búsqueda por nombre caiga donde se saca el turno.
+ */
+type Seccion = { href: string; label: string; /** Cuándo tiene sentido ofrecerla. */ existe?: "servicios" | "profesionales" };
+
+const NAV: Seccion[] = [
+  { href: "/#tratamientos", label: "Tratamientos", existe: "servicios" },
+  { href: "/#equipo", label: "Quién te atiende", existe: "profesionales" },
+  { href: "/#como-llegar", label: "Cómo llegar" },
+  { href: "/#preguntas", label: "Preguntas" },
 ];
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * Un ancla a una sección que no existe no lleva a ningún lado, así que el menú
+ * se arma con lo que el home realmente va a renderizar.
+ *
+ * Tratamientos y "quién te atiende" desaparecen si no hay nada cargado — y
+ * producción estuvo exactamente así, sin servicios, después de que 0016 borrara
+ * el catálogo de ejemplo.
+ *
+ * Cuesta dos consultas, que en las páginas públicas se pagan una vez por
+ * revalidación porque son estáticas, y en el home son gratis: Next deduplica
+ * las mismas consultas dentro de un render y la página ya las hace.
+ */
+async function navVisible() {
+  const [services, practitioners] = await Promise.all([
+    getActiveServices(),
+    listActivePractitioners(),
+  ]);
+
+  return NAV.filter((item) => {
+    if (item.existe === "servicios") return services.length > 0;
+    if (item.existe === "profesionales") return practitioners.length > 0;
+    return true;
+  });
+}
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const nav = await navVisible();
+
   return (
     <html lang="es-AR" className={`${geist.variable} h-full antialiased`}>
       <body className="font-sans min-h-full flex flex-col">
@@ -40,7 +87,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
 
             <nav aria-label="Principal" className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              {NAV.map((item) => (
+              {nav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

@@ -1,6 +1,11 @@
 import Link from "next/link";
 
+import { ComoLlegar, type Franja } from "@/components/home/como-llegar";
+import { Equipo } from "@/components/home/equipo";
+import { Preguntas } from "@/components/home/preguntas";
+import { Tratamientos } from "@/components/home/tratamientos";
 import { getClinicSettings } from "@/lib/availability";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { getActiveServices } from "@/lib/db/services";
@@ -22,11 +27,17 @@ import { whatsappLink } from "@/lib/format";
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [settings, services, practitioners, locations] = await Promise.all([
+  const supabase = createSupabaseAdminClient();
+  const [settings, services, practitioners, locations, schedule] = await Promise.all([
     getClinicSettings(),
     getActiveServices(),
     listActivePractitioners(),
     listActiveLocations(),
+    // Los horarios que se muestran en "Cómo llegar" salen de la agenda real.
+    supabase
+      .from("weekly_schedule")
+      .select("weekday, start_time, end_time, location_id")
+      .then(({ data }) => (data ?? []) as Franja[]),
   ]);
 
   /**
@@ -113,64 +124,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/*
-        Tratamientos, sin precios.
-        
-        Los precios no se publican: en el panel siguen estando, como referencia
-        interna, pero al paciente se le dice en la consulta. Eso también evita
-        que un número quede desactualizado a la vista con la inflación.
-
-        La sección entera desaparece si no hay tratamientos cargados. Un bloque
-        con el título y nada abajo se lee peor que no tenerlo, y el home fluye
-        igual sin él — que es exactamente el estado en que quedó producción
-        cuando 0016 borró el catálogo de ejemplo.
-      */}
-      {services.length > 0 && (
-        <section id="tratamientos" className="border-y border-border bg-surface">
-          <div className="mx-auto max-w-3xl px-4 py-12">
-            <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
-
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-              {services.map((service) => (
-                <li
-                  key={service.id}
-                  className="rounded-xl border border-border bg-background p-5"
-                >
-                  <p className="text-[1.05rem] font-medium">{service.name}</p>
-                  {service.description && (
-                    <p className="mt-1 text-[0.95rem] leading-relaxed text-muted">
-                      {service.description}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
-
-            <p className="mt-6 text-sm text-muted">
-              ¿No sabés cuál te corresponde? Sacá turno igual y lo vemos juntas. La
-              duración depende de con quién te atiendas; la ves al elegir profesional.
-            </p>
-          </div>
-        </section>
-      )}
-
-      <section className="mx-auto max-w-3xl px-4 py-12">
-        <h2 className="text-2xl font-semibold tracking-tight">Cómo funciona</h2>
-        <ol className="mt-5 space-y-3 text-[1.05rem]">
-          <li className="flex gap-3">
-            <span className="font-semibold text-accent">1.</span>
-            Elegís el día y el horario que te queden cómodos.
-          </li>
-          <li className="flex gap-3">
-            <span className="font-semibold text-accent">2.</span>
-            Dejás tu nombre y un teléfono. Nada más.
-          </li>
-          <li className="flex gap-3">
-            <span className="font-semibold text-accent">3.</span>
-            Te llega la confirmación y, si no podés venir, cancelás con un clic.
-          </li>
-        </ol>
-      </section>
+      <Tratamientos services={services} />
+      <Equipo practitioners={practitioners} />
+      <ComoLlegar settings={settings} locations={locations} schedule={schedule} />
+      <Preguntas />
     </>
   );
 }

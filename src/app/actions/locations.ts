@@ -15,7 +15,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 export type LocationState = { status: "idle" | "saved" | "error"; message?: string };
 
 function revalidateLocations() {
-  for (const path of ["/", "/turnos", "/como-llegar", "/admin/sedes", "/admin/agenda"]) {
+  for (const path of ["/", "/turnos", "/admin/sedes", "/admin/agenda"]) {
     revalidatePath(path);
   }
 }
