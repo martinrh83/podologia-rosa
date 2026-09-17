@@ -125,8 +125,7 @@ export function Hero({
             <dt className="text-sm text-muted">Cuándo</dt>
             <dd className="mt-1">
               <p className="text-[1.05rem] font-medium">{week.days}</p>
-              {/* Con horarios distintos según el día, sólo los días: el detalle se ve al sacar turno. */}
-              {week.hours && <p className="mt-0.5 text-muted">{week.hours}</p>}
+              <p className="mt-0.5 text-muted">{week.hours}</p>
             </dd>
           </div>
         )}

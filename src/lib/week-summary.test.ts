@@ -15,7 +15,7 @@ describe("summarizeWeek", () => {
     expect(summarizeWeek(schedule)).toEqual({ days: "Lunes a sábado", hours: "de 9 a 18 h" });
   });
 
-  it("no dice horas si cambian según el día", () => {
+  it("si las horas cambian según el día, da de la primera apertura al último cierre", () => {
     const schedule = [
       shift(1, "08:00:00", "12:00:00"),
       shift(1, "16:00:00", "20:00:00"),
@@ -23,7 +23,7 @@ describe("summarizeWeek", () => {
       shift(6, "09:00:00", "13:00:00"),
     ];
 
-    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes, martes y sábado", hours: null });
+    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes, martes y sábado", hours: "de 8 a 20 h" });
   });
 
   it("cuenta una sola vez la franja que comparten dos profesionales", () => {

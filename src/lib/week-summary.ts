@@ -6,11 +6,12 @@ export type WeekSummary = {
   /** "Lunes a sábado", "Lunes, miércoles y viernes". */
   days: string;
   /**
-   * "de 9 a 18 h", sólo si TODOS los días atienden en las mismas franjas. Con
-   * horarios distintos por día, una frase no alcanza para decirlo sin mentir:
-   * queda en null y el hero muestra sólo los días.
+   * Si TODOS los días atienden en las mismas franjas, esas franjas: "de 8 a 12
+   * y de 16 a 20 h". Si cambian según el día, de la primera apertura al último
+   * cierre de la semana: "de 8 a 20 h". No promete que se atienda a cualquier
+   * hora de esa franja: los turnos reales se ven al reservar.
    */
-  hours: string | null;
+  hours: string;
 };
 
 /**
@@ -26,10 +27,21 @@ export function summarizeWeek(schedule: ScheduleShift[]): WeekSummary | null {
   if (signatures.size === 0) return null;
 
   const distinct = new Set(signatures.values());
+  if (distinct.size === 1) {
+    return {
+      days: describeDays([...signatures.keys()]),
+      hours: describeShifts([...distinct][0].split(",")),
+    };
+  }
+
+  // "HH:MM" se ordena bien como texto.
+  const shifts = [...distinct].flatMap((signature) => signature.split(","));
+  const opens = shifts.map((shift) => shift.split("-")[0]).sort();
+  const closes = shifts.map((shift) => shift.split("-")[1]).sort();
 
   return {
     days: describeDays([...signatures.keys()]),
-    hours: distinct.size === 1 ? describeShifts([...distinct][0].split(",")) : null,
+    hours: describeShifts([`${opens[0]}-${closes.at(-1)}`]),
   };
 }
 
