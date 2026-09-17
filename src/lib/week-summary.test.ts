@@ -12,7 +12,7 @@ describe("summarizeWeek", () => {
   it("resume una semana pareja en días y horas", () => {
     const schedule = [1, 2, 3, 4, 5, 6].map((day) => shift(day, "09:00:00", "18:00:00"));
 
-    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes a sábado", hours: "de 9 a 18 h" });
+    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes a sábado", hours: "de 9 a 18 hs" });
   });
 
   it("si las horas cambian según el día, da de la primera apertura al último cierre", () => {
@@ -23,7 +23,7 @@ describe("summarizeWeek", () => {
       shift(6, "09:00:00", "13:00:00"),
     ];
 
-    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes, martes y sábado", hours: "de 8 a 20 h" });
+    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes, martes y sábado", hours: "de 8 a 20 hs" });
   });
 
   it("cuenta una sola vez la franja que comparten dos profesionales", () => {
@@ -34,7 +34,7 @@ describe("summarizeWeek", () => {
       shift(3, "08:00:00", "12:00:00"),
     ];
 
-    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes a miércoles", hours: "de 8 a 12 h" });
+    expect(summarizeWeek(schedule)).toEqual({ days: "Lunes a miércoles", hours: "de 8 a 12 hs" });
   });
 
   it("junta las franjas partidas y respeta los minutos", () => {
@@ -45,7 +45,7 @@ describe("summarizeWeek", () => {
 
     expect(summarizeWeek(schedule)).toEqual({
       days: "Jueves y viernes",
-      hours: "de 8:30 a 12 y de 16 a 20:30 h",
+      hours: "de 8:30 a 12 y de 16 a 20:30 hs",
     });
   });
 

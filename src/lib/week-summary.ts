@@ -7,8 +7,8 @@ export type WeekSummary = {
   days: string;
   /**
    * Si TODOS los días atienden en las mismas franjas, esas franjas: "de 8 a 12
-   * y de 16 a 20 h". Si cambian según el día, de la primera apertura al último
-   * cierre de la semana: "de 8 a 20 h". No promete que se atienda a cualquier
+   * y de 16 a 20 hs". Si cambian según el día, de la primera apertura al último
+   * cierre de la semana: "de 8 a 20 hs". No promete que se atienda a cualquier
    * hora de esa franja: los turnos reales se ven al reservar.
    */
   hours: string;
@@ -88,7 +88,7 @@ function describeDays(days: number[]): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-/** ["08:00-12:00", "16:00-20:00"] → "de 8 a 12 y de 16 a 20 h". */
+/** ["08:00-12:00", "16:00-20:00"] → "de 8 a 12 y de 16 a 20 hs". */
 function describeShifts(shifts: string[]): string {
   const hour = (hhmm: string) => {
     const [h, m] = hhmm.split(":");
@@ -98,5 +98,5 @@ function describeShifts(shifts: string[]): string {
     const [start, end] = shift.split("-");
     return `de ${hour(start)} a ${hour(end)}`;
   });
-  return `${parts.join(" y ")} h`;
+  return `${parts.join(" y ")} hs`;
 }
