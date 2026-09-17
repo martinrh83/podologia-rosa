@@ -1,5 +1,8 @@
 import Image from "next/image";
 
+import { Address } from "@/components/home/address";
+import { SectionHeading } from "@/components/home/section-heading";
+
 import { mapForAddress, type LocationMap } from "@/lib/maps";
 import type { Location } from "@/lib/db/types";
 
@@ -41,41 +44,58 @@ export type ScheduleRow = { weekday: number; start_time: string; end_time: strin
  *
  *   Cada mapa se busca por la dirección de la sede (`src/lib/maps.ts`). Una
  *   sede sin mapa —nueva, o que se mudó— muestra su tarjeta igual, sin él.
+ *
+ * EL CROQUIS DEL DORSO
+ *
+ *   Cada sede es una tarjeta blanca de filete negro, sin sombra, con el croquis impreso arriba, como el que
+ *   traen en el dorso las tarjetas de consultorio, y la dirección con la altura
+ *   en rojo de numerador: es el número que se busca en la puerta.
  */
 export function Directions({ locations }: { locations: Location[] }) {
   const hasManyLocations = locations.length > 1;
 
   return (
-    <section id="directions" className="scroll-mt-20 border-y border-border bg-surface">
-      <div className="mx-auto max-w-5xl px-4 py-14">
-        <h2 className="text-2xl font-semibold tracking-tight">Cómo llegar</h2>
+    <section id="directions" className="scroll-mt-20">
+      <div aria-hidden className="perforado h-1.5" />
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+        <SectionHeading>Cómo llegar</SectionHeading>
 
         <ul
-          className={`mt-6 grid gap-6 ${hasManyLocations ? "sm:grid-cols-2" : "sm:max-w-[calc(50%-0.75rem)]"}`}
+          className={`mt-10 grid gap-8 sm:gap-12 ${hasManyLocations ? "sm:grid-cols-2" : "sm:max-w-[calc(50%-1.5rem)]"}`}
         >
           {locations.map((location) => {
             const map = mapForAddress(location.address);
             return (
               <li
                 key={location.id}
-                className="flex flex-col rounded-xl border border-border bg-background"
+                className="flex flex-col border border-foreground bg-surface"
               >
                 {map && <LocationMapImage map={map} href={location.map_url} />}
 
                 {/* flex-1 + mt-auto: los botones quedan alineados aunque una dirección ocupe dos líneas. */}
-                <div className="flex flex-1 flex-col p-5">
-                  {hasManyLocations && (
-                    <h3 className="text-lg font-semibold tracking-tight">{location.name}</h3>
-                  )}
-                  <p className="text-[1.05rem] text-muted">{location.address}</p>
+                <div className="flex flex-1 flex-col px-5 pb-6 pt-5 sm:px-7">
+                  {/*
+                    La dirección es el título de la tarjeta; el nombre de la sede
+                    va debajo, en la misma línea que la ciudad, y no como rótulo
+                    suelto encima.
+                  */}
+                  <h3 className="font-wide text-[length:clamp(1.35rem,4.5vw,1.6rem)] font-extrabold leading-tight tracking-[-0.02em]">
+                    <Address address={location.address} />
+                  </h3>
+                  <p className="mt-1 text-muted">
+                    {hasManyLocations && (
+                      <span className="font-bold text-foreground">Sede {location.name} · </span>
+                    )}
+                    Salta Capital
+                  </p>
 
                   {location.map_url && (
-                    <div className="mt-auto pt-5">
+                    <div className="mt-auto pt-6">
                       <a
                         href={location.map_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block rounded-lg border border-accent px-4 py-2.5 text-[0.95rem] font-medium text-accent hover:bg-accent hover:text-white"
+                        className="inline-block border-2 border-foreground px-5 py-3 font-bold transition-[background-color,color,transform] duration-100 hover:bg-foreground hover:text-surface active:translate-y-0.5 active:scale-[0.985]"
                       >
                         Abrir en Google Maps
                       </a>
@@ -103,7 +123,7 @@ function LocationMapImage({ map, href }: { map: LocationMap; href: string | null
       width={600}
       height={400}
       sizes="(min-width: 640px) 50vw, 100vw"
-      className="h-auto w-full border-b border-border"
+      className="h-auto w-full border-b-[5px] border-double border-foreground"
     />
   );
   if (!href) return image;

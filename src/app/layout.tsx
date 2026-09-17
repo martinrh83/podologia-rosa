@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Archivo, Kalam } from "next/font/google";
 import Link from "next/link";
 
 import { SiteHeader } from "@/components/site-header";
@@ -9,9 +9,25 @@ import { getActiveServices } from "@/lib/db/services";
 
 import "./globals.css";
 
-const geist = Geist({
+/**
+ * Archivo, de Omnibus-Type (Buenos Aires): la letra de imprenta de la tarjeta.
+ * Variable con eje de ancho, para titulares anchos y rótulos angostos con una
+ * sola familia.
+ */
+const archivo = Archivo({
   variable: "--font-sans-stack",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
+  axes: ["wdth"],
+});
+
+/**
+ * Kalam: lo que se completa a mano en birome. Sólo para datos cortos y a tamaño
+ * generoso; nunca para texto corrido.
+ */
+const kalam = Kalam({
+  variable: "--font-hand-stack",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -81,16 +97,24 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const nav = await visibleNav();
 
   return (
-    <html lang="es-AR" className={`${geist.variable} h-full antialiased`}>
+    <html lang="es-AR" className={`${archivo.variable} ${kalam.variable} h-full antialiased`}>
       <body className="font-sans min-h-full flex flex-col">
         <SiteHeader nav={nav} />
 
-        <main className="flex-1">{children}</main>
+        {/* `clip` y no `hidden`: recorta lo que asoma de costado (un sello, una tarjeta girada) sin crear un contenedor de scroll que rompa el encabezado fijo. */}
+        <main className="flex-1 overflow-x-clip">{children}</main>
 
-        <footer className="mt-16 border-t border-border bg-surface">
-          <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} Podología Mitre</p>
-            <Link href="/privacidad" className="hover:text-foreground">
+        {/* El pie es el borde de abajo de la tarjeta: troquel y letra chica. */}
+        <footer className="mt-16">
+          <div aria-hidden className="perforado h-1.5" />
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <p className="font-narrow font-semibold uppercase tracking-[0.08em]">
+              © {new Date().getFullYear()} Podología Mitre · Salta
+            </p>
+            <Link
+              href="/privacidad"
+              className="-my-2 inline-block py-2.5 underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
+            >
               Privacidad y datos personales
             </Link>
           </div>

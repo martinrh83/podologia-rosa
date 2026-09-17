@@ -98,7 +98,12 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
-      <Hero settings={settings} locations={locations} schedule={schedule} />
+      <Hero
+        settings={settings}
+        locations={locations}
+        schedule={schedule}
+        practitioners={practitioners}
+      />
 
       <Treatments services={services} />
       <Team practitioners={practitioners} />

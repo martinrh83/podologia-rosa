@@ -163,20 +163,29 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
   }
 
   return (
-    <header
-      className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur"
-    >
-      <div className="mx-auto flex max-w-5xl items-center gap-x-2 px-4 py-3.5 sm:gap-x-6">
+    <header className="sticky top-0 z-40 border-b-2 border-foreground bg-background/95 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center gap-x-2 px-4 py-3 sm:gap-x-6 sm:px-6">
+        {/*
+          El nombre va como el encabezado impreso de la tarjeta: versalitas
+          angostas, en tinta. El isotipo, en la tinta del sello.
+        */}
         <Link
           href="/"
-          className="flex items-center gap-1.5 whitespace-nowrap text-[0.95rem] font-semibold tracking-tight sm:gap-2 sm:text-lg"
+          className="flex min-h-11 min-w-0 items-center gap-2 whitespace-nowrap font-narrow text-[0.95rem] max-[359px]:gap-1.5 max-[359px]:text-[0.85rem] font-extrabold uppercase tracking-[0.06em] sm:text-[1.15rem]"
         >
-          <Logo className="h-7 w-auto shrink-0 text-accent sm:h-8" />
-          Podología Mitre
+          <Logo className="h-7 w-auto shrink-0 text-accent max-[359px]:h-6 sm:h-8" />
+          {/*
+            Debajo de 390 px el nombre en una línea no entra al lado del botón:
+            se apila en dos, como un logo impreso, en vez de cortarse o
+            esconderse.
+          */}
+          <span className="max-[389px]:w-min max-[389px]:whitespace-normal max-[389px]:leading-[0.95]">
+            Podología Mitre
+          </span>
         </Link>
 
         {/* Escritorio */}
-        <nav aria-label="Principal" className="ml-auto hidden items-center gap-x-5 lg:flex">
+        <nav aria-label="Principal" className="ml-auto hidden items-center gap-x-6 lg:flex">
           {nav.map((item) => {
             const id = item.href.split("#")[1];
             const isActive = Boolean(id) && id === activeId;
@@ -186,11 +195,11 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
                 href={item.href}
                 onClick={() => pinSection(item.href)}
                 aria-current={isActive ? "true" : undefined}
-                className={
+                className={`text-[0.95rem] font-medium underline-offset-[6px] transition-colors ${
                   isActive
-                    ? "text-[0.95rem] font-medium text-accent"
-                    : "text-[0.95rem] text-muted transition-colors hover:text-foreground"
-                }
+                    ? "text-accent underline decoration-2"
+                    : "text-muted hover:text-foreground"
+                }`}
               >
                 {item.label}
               </Link>
@@ -198,9 +207,10 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
           })}
         </nav>
 
+        {/* El sello: se hunde un píxel al apretarlo. */}
         <Link
           href="/turnos"
-          className="ml-auto whitespace-nowrap rounded-lg bg-accent px-3 py-2.5 sm:px-4 text-[0.95rem] font-medium text-white transition-colors hover:bg-accent-hover lg:ml-0"
+          className="ml-auto flex min-h-11 items-center whitespace-nowrap border-2 border-accent bg-accent px-3 text-[0.9rem] max-[359px]:px-2.5 max-[359px]:text-[0.85rem] font-bold text-white transition-[background-color,transform] duration-100 hover:border-accent-hover hover:bg-accent-hover active:translate-y-0.5 active:scale-[0.985] sm:px-4 sm:text-[0.95rem] lg:ml-0"
         >
           Sacar turno
         </Link>
@@ -213,7 +223,7 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            className="-mr-2 rounded-lg p-2 text-foreground lg:hidden"
+            className="-mr-2.5 grid size-11 shrink-0 place-items-center text-foreground lg:hidden"
           >
             {/* Dos barras que se cruzan al abrir: una sola forma, sin íconos. */}
             <span className="relative block h-4 w-6" aria-hidden>
@@ -233,12 +243,8 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
       </div>
 
       {open && nav.length > 0 && (
-        <nav
-          id="mobile-menu"
-          aria-label="Principal"
-          className="border-t border-border lg:hidden"
-        >
-          <ul className="mx-auto max-w-5xl px-4 py-2">
+        <nav id="mobile-menu" aria-label="Principal" className="border-t border-border lg:hidden">
+          <ul className="mx-auto max-w-6xl px-4 py-1 sm:px-6">
             {nav.map((item) => {
               const id = item.href.split("#")[1];
               const isActive = Boolean(id) && id === activeId;
@@ -251,8 +257,8 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
                       pinSection(item.href);
                     }}
                     aria-current={isActive ? "true" : undefined}
-                    className={`block border-b border-border py-3 text-[1.05rem] last:border-0 ${
-                      isActive ? "font-medium text-accent" : "text-foreground"
+                    className={`block border-b border-border py-3.5 text-[1.05rem] font-medium last:border-0 ${
+                      isActive ? "text-accent" : "text-foreground"
                     }`}
                   >
                     {item.label}

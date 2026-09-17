@@ -49,16 +49,22 @@ const METERS_PER_UNIT = 1.6;
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const USER_AGENT = "podologia-mitre-maps/1.0 (generación única de mapas estáticos)";
 
+/**
+ * El croquis impreso en el dorso de la tarjeta, en una sola familia de tinta:
+ * cartulina y sus sombras para plazas y agua, calles en blanco, nombres en tinta
+ * y la marca de la sede en rojo de numerador. Mismos valores
+ * que `src/app/globals.css`.
+ */
 const COLORS = {
-  ground: "#d3e4eb",
-  street: "#ededed",
-  avenue: "#fcfcfc",
-  park: "#cdf2dd",
-  water: "#53c8f0",
-  shore: "#cccccc",
-  label: "#1f2f38",
-  halo: "#ffffff",
-  pin: "#0055a4",
+  ground: "#d5dfe7",
+  street: "#f3f6f8",
+  avenue: "#fbfcfd",
+  park: "#c3cfd9",
+  water: "#b3c1cd",
+  shore: "#b4c0cb",
+  label: "#191d27",
+  halo: "#fbfcfd",
+  pin: "#b8342a",
 };
 
 /** Ancho de cada tipo de calle, en unidades del viewBox. */
@@ -523,11 +529,11 @@ ${areaPaths("water")}
 <defs>${labelDefs}</defs>
 <g font-family="${FONT}" font-size="${LABEL_SIZE}" font-weight="600" text-anchor="middle" dominant-baseline="central" fill="${COLORS.label}" stroke="${COLORS.halo}" stroke-width="3" stroke-linejoin="round" paint-order="stroke">${labelText}</g>
 <g transform="translate(${pinX} ${pinY}) scale(1.3)">
-<ellipse cy="1" rx="7" ry="2.5" fill="#15191e" opacity=".25"/>
+<ellipse cy="1" rx="7" ry="2.5" fill="#191d27" opacity=".25"/>
 <path d="M0 0C-3-9-14-15-14-26A14 14 0 0 1 14-26C14-15 3-9 0 0Z" fill="${COLORS.pin}" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
 <circle cy="-26" r="5" fill="#fff"/>
 </g>
-<g font-family="${FONT}" font-size="13" fill="#5b6472">
+<g font-family="${FONT}" font-size="13" fill="#4b5568">
 <rect x="${WIDTH - 122}" y="${HEIGHT - 22}" width="122" height="22" fill="#fff" opacity=".8"/>
 <text x="${WIDTH - 7}" y="${HEIGHT - 7}" text-anchor="end">© OpenStreetMap</text>
 </g>

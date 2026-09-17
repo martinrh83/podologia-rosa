@@ -316,7 +316,7 @@ export function BookingFlow({
                     </span>
                     {showLocationName && day.locationName && (
                       <span
-                        className={`mt-0.5 block text-[0.7rem] uppercase tracking-wide ${
+                        className={`mt-0.5 block text-[0.75rem] uppercase tracking-wide ${
                           isSelected ? "text-white/80" : "text-accent"
                         }`}
                       >
@@ -353,7 +353,7 @@ export function BookingFlow({
                       {slot.label}
                       {showLocationName && !selectedDay.locationName && (
                         <span
-                          className={`mt-0.5 block text-[0.7rem] uppercase tracking-wide ${
+                          className={`mt-0.5 block text-[0.75rem] uppercase tracking-wide ${
                             isSelected ? "text-white/80" : "text-accent"
                           }`}
                         >
