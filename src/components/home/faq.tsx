@@ -3,19 +3,21 @@ import { FAQ } from "@/lib/faq";
 /**
  * Preguntas frecuentes. El contenido vive en `src/lib/faq.ts`.
  *
- * En escritorio, el título a la izquierda y las preguntas a la derecha, en las
- * mismas dos columnas que Profesionales y Cómo llegar. Con un ancho máximo sobre
- * la lista terminaba a mitad de la sección, sin coincidir con ningún borde del
- * resto del home; en su columna las respuestas ya quedan en ~65 caracteres por
- * línea. Recién desde `lg`: entre 640 y 1024 px la columna de las respuestas
- * quedaba en unos 300 px.
+ * El título arriba y las filas de preguntas a todo el ancho, de borde a borde
+ * como el resto de las secciones. Con un ancho máximo sobre la lista, las
+ * líneas terminaban a mitad de la sección sin coincidir con ningún borde del
+ * home. Probamos el título en una columna a la izquierda y las preguntas a la
+ * derecha: dejaba media sección vacía debajo del título.
+ *
+ * Lo único angosto es el texto de cada respuesta: a todo el ancho serían ~120
+ * caracteres por línea. 34rem da ~75 (40rem daba 88).
  */
 export function Faq() {
   if (FAQ.length === 0) return null;
 
   return (
     <section id="faq" className="scroll-mt-20">
-      <div className="mx-auto grid max-w-5xl gap-6 px-4 py-14 lg:grid-cols-2">
+      <div className="mx-auto max-w-5xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Preguntas frecuentes</h2>
 
         {/*
@@ -23,7 +25,7 @@ export function Faq() {
           esto, funciona sin hidratar, y el buscador lee el contenido igual
           aunque esté plegado.
         */}
-        <div className="divide-y divide-border border-y border-border">
+        <div className="mt-6 divide-y divide-border border-y border-border">
           {FAQ.map((item) => (
             <details key={item.question} className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[1.05rem] font-medium">
@@ -40,7 +42,7 @@ export function Faq() {
                   <path d="M10 3v14M3 10h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </summary>
-              <p className="mt-3 leading-relaxed text-muted">{item.answer}</p>
+              <p className="mt-3 max-w-[34rem] leading-relaxed text-muted">{item.answer}</p>
             </details>
           ))}
         </div>
