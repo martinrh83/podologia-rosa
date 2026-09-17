@@ -8,9 +8,9 @@ colors:
   foreground: "#191d27"
   muted: "#4b5568"
   border: "#b4c0cb"
-  accent: "#3f3a9b"
-  accent-hover: "#2f2b7e"
-  accent-soft: "#e4e3f4"
+  accent: "#163c76"
+  accent-hover: "#0f2b57"
+  accent-soft: "#e7eefb"
   birome: "#1d44b3"
   numerador: "#b8342a"
   danger: "#9f3a38"
@@ -134,7 +134,7 @@ components:
 
 **Creative North Star: "La tarjetita de turno"**
 
-El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma violeta del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.
+El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma azul del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.
 
 La densidad es la de un formulario: encabezados anchos y pesados subrayados con raya doble, renglones finos, letra chica legible a 17px de base. No hay fotos de ambiente ni tarjetas con íconos: la información real (con quién, qué días, dónde, qué obra social) se presenta escrita sobre la tarjeta, y eso es la ilustración. El movimiento es un solo gesto físico, el golpe del sello, y botones que se hunden al apretarlos.
 
@@ -153,8 +153,8 @@ Una cartulina fría impresa con cuatro tintas, cada una con un solo oficio.
 
 ### Primary
 - **Tinta de sello** (accent): la marca y la acción. El botón «Sacar turno», el isotipo, los sellos de goma, el foco, la selección de texto, el ítem activo del menú y el ícono de las preguntas.
-- **Sello cargado** (accent-hover): el mismo violeta con más tinta, sólo para hover de lo que ya es sello.
-- **Sello aguado** (accent-soft): fondo tenue violeta heredado por /turnos y el panel para estados seleccionados; no aparece en el home.
+- **Sello cargado** (accent-hover): el mismo azul con más tinta, sólo para hover de lo que ya es sello.
+- **Sello aguado** (accent-soft): fondo tenue azul heredado por /turnos y el panel para estados seleccionados; no aparece en el home.
 
 ### Secondary
 - **Azul birome** (birome): lo que se completa a mano. Los datos escritos en los renglones de la tarjeta, la segunda línea del titular, el tilde de las casillas y el cursor de texto.

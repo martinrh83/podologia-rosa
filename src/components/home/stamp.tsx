@@ -1,5 +1,5 @@
 /**
- * Un sello de goma: borde doble, versalitas angostas y tinta violeta.
+ * Un sello de goma: borde doble, versalitas angostas y tinta azul.
  *
  * Tinta plana, sin granito ni bordes corridos de mentira: el sello se reconoce
  * por su forma (el marco doble, el giro, las versalitas) y así el nombre que
