@@ -5,12 +5,12 @@
  *
  * El sitio está impreso como la tarjeta que te dan en el mostrador: cartulina
  * celeste grisácea, una tinta casi negra para lo impreso, azul birome para lo
- * que se completa a mano, violeta de sello para la marca y la acción, y el rojo
+ * que se completa a mano, azul tinta de sello para la marca y la acción, y el rojo
  * del numerador sólo para números y marcas.
  *
  *   tinta sobre cartulina       13.9:1
  *   tinta suave sobre cartulina  6.2:1   (7.3:1 sobre la tarjeta blanca)
- *   sello sobre cartulina        7.5:1   blanco sobre sello 9.2:1
+ *   sello sobre cartulina        8.9:1   blanco sobre sello 10.8:1
  *   birome sobre la tarjeta      8.1:1
  *   numerador sobre la tarjeta   5.2:1   (sobre la cartulina, sólo en tamaño grande)
  *
@@ -27,9 +27,9 @@
   --muted: #4b5568; /* tinta suave */
   --border: #b4c0cb; /* renglón impreso */
 
-  --accent: #3f3a9b; /* tinta de sello */
-  --accent-hover: #2f2b7e;
-  --accent-soft: #e4e3f4;
+  --accent: #163c76; /* tinta de sello */
+  --accent-hover: #0f2b57;
+  --accent-soft: #e7eefb;
 
   --birome: #1d44b3;
   --numerador: #b8342a;
