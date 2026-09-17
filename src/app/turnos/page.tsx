@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import {
+  Counter,
+  PASOS,
+  Notice,
+  Pendientes,
+  StepHeading,
+  TurnoCard,
+  type TurnoLine,
+} from "@/components/booking/counter";
 import { getClinicSettings } from "@/lib/availability";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import type { PractitionerWithSpecialty } from "@/lib/db/types";
@@ -40,60 +49,76 @@ export default async function TurnosPage() {
   }
   const showSpecialtyHeadings = groups.size > 1;
 
+  // La tarjeta arranca en blanco: es el turno que el paciente va a armar.
+  const lines: TurnoLine[] = [
+    { label: "Con", placeholder: "lo elegís vos" },
+    { label: "Día y hora", placeholder: "lo elegís vos" },
+    { label: "A nombre de", placeholder: "tus datos" },
+  ];
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-      <header className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sacar un turno</h1>
-        <p className="mt-3 text-lg text-muted">
-          Elegí con quién te querés atender y te mostramos sus horarios libres.
-        </p>
-      </header>
+    <Counter
+      aside={
+        <>
+          <TurnoCard lines={lines} className="max-lg:hidden" />
+          <Pendientes items={PASOS} current={0} />
+        </>
+      }
+    >
+      <StepHeading
+        step={1}
+        of={3}
+        lead="Cada una tiene su propia agenda. Elegí y te mostramos sus horarios libres; no hace falta crear una cuenta ni llamar."
+      >
+        ¿Con quién te querés atender?
+      </StepHeading>
 
       {practitioners.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface-muted p-5">
-          <p className="font-medium">Por ahora no hay turnos online</p>
-          <p className="mt-1 text-[0.95rem] text-muted">
-            {settings.phone
-              ? `Llamanos al ${settings.phone} y lo vemos por teléfono.`
-              : "Escribinos y lo vemos por teléfono."}
-          </p>
+        <div className="mt-10">
+          <Notice tone="muted" title="Por ahora no hay turnos online">
+            <p>
+              {settings.phone
+                ? `Llamanos al ${settings.phone} y lo vemos por teléfono.`
+                : "Escribinos y lo vemos por teléfono."}
+            </p>
+          </Notice>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="mt-10 space-y-10">
           {[...groups.entries()].map(([specialty, people]) => (
             <section key={specialty} aria-labelledby={`esp-${specialty}`}>
               {showSpecialtyHeadings && (
                 <h2
                   id={`esp-${specialty}`}
-                  className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted"
+                  className="mb-3 font-narrow text-sm font-bold uppercase tracking-[0.12em] text-muted"
                 >
                   {specialty}
                 </h2>
               )}
 
-              <ul className="space-y-3">
+              {/*
+                Renglones de la hoja, no tarjetas sueltas: elegir con quién es
+                una línea del formulario, y el renglón entero es el enlace.
+              */}
+              <ul className="border-b border-border">
                 {people.map((practitioner) => (
-                  <li key={practitioner.id}>
+                  <li key={practitioner.id} className="border-t border-border first:border-t-0">
                     <Link
                       href={`/turnos/${practitioner.slug}`}
-                      className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-surface p-5 transition-colors hover:border-accent"
+                      className="group flex flex-wrap items-center justify-between gap-x-6 gap-y-4 py-6 transition-colors hover:text-accent"
                     >
-                      <span>
-                        <span className="block text-[1.15rem] font-medium">
+                      <span className="min-w-0">
+                        <span className="block font-wide text-[length:clamp(1.4rem,5vw,1.9rem)] font-extrabold leading-tight tracking-[-0.02em]">
                           {practitionerName(practitioner)}
                         </span>
-                        {practitioner.title && (
-                          <span className="mt-0.5 block text-[0.95rem] text-muted">
-                            {practitioner.title}
-                          </span>
-                        )}
-                        <span className="mt-1 block text-sm text-muted">
+                        <span className="mt-1 block text-muted">
+                          {practitioner.title && `${practitioner.title} · `}
                           Turnos de {practitioner.slot_minutes} minutos
                         </span>
                       </span>
                       <span
                         aria-hidden="true"
-                        className="shrink-0 rounded-lg bg-accent px-4 py-2.5 font-medium text-white"
+                        className="shrink-0 border-2 border-accent px-5 py-3 font-bold text-accent transition-colors group-hover:bg-accent group-hover:text-white"
                       >
                         Ver horarios
                       </span>
@@ -105,6 +130,6 @@ export default async function TurnosPage() {
           ))}
         </div>
       )}
-    </div>
+    </Counter>
   );
 }

@@ -40,6 +40,13 @@ const shortDayFormatter = new Intl.DateTimeFormat(LOCALE, {
   timeZone: CLINIC_TZ,
 });
 
+const cardDayFormatter = new Intl.DateTimeFormat(LOCALE, {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  timeZone: CLINIC_TZ,
+});
+
 /** "14:30" */
 export function formatTime(value: Date | string): string {
   return timeFormatter.format(new Date(value));
@@ -48,6 +55,16 @@ export function formatTime(value: Date | string): string {
 /** "jueves, 10 de septiembre" */
 export function formatDay(value: Date | string): string {
   return dayFormatter.format(new Date(value));
+}
+
+/**
+ * "jue 10 sep" — el único formato de fecha que entra en un renglón de la
+ * tarjeta. Los tres pasos, la confirmación y la cancelación usan éste: el
+ * renglón es una línea sola, y una fecha larga lo parte en dos o tres.
+ */
+export function formatCardDay(value: Date | string): string {
+  // Sin el punto de "sept." ni la coma: es un renglón, no una oración.
+  return cardDayFormatter.format(new Date(value)).replace(/[.,]/g, "");
 }
 
 /** "jue, 10" — for compact day tabs. */

@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  Counter,
+  PASOS,
+  Notice,
+  Pendientes,
+  StepHeading,
+  TurnoCard,
+  TurnoStrip,
+  type TurnoLine,
+} from "@/components/booking/counter";
 import { CopyLink } from "@/components/copy-link";
 import {
   EMPTY_FORM,
@@ -23,6 +33,8 @@ export type BookingDay = {
   key: string;
   label: string;
   shortLabel: string;
+  /** "jue 17 sep": el único formato que entra en el renglón de la tarjeta. */
+  cardLabel: string;
   /**
    * La sede, cuando todo el día se atiende en una sola — que es lo normal.
    * En null el día está partido entre dos, y entonces la sede va en cada
@@ -40,6 +52,8 @@ export type BookingPractitioner = {
   id: string;
   name: string;
   title: string | null;
+  /** Cuánto dura el turno con ella. Se lo decimos antes de que elija horario. */
+  slotMinutes: number;
 };
 
 type Props = {
@@ -60,6 +74,7 @@ type Status =
       kind: "done";
       slotLabel: string;
       dayLabel: string;
+      dayCardLabel: string;
       practitionerName: string;
       locationLine: string;
       cancelUrl: string;
@@ -219,6 +234,7 @@ export function BookingFlow({
         kind: "done",
         slotLabel: selectedSlot.label,
         dayLabel: slotDay?.label ?? "",
+        dayCardLabel: slotDay?.cardLabel ?? "",
         practitionerName: practitioner.name,
         locationLine: slotLocation
           ? showLocationName
@@ -237,63 +253,159 @@ export function BookingFlow({
     }
   }
 
+  // La tarjeta del mostrador: lo decidido, en birome; lo que falta, en blanco.
+  const lines: TurnoLine[] = [
+    { label: "Con", value: practitioner.name, note: practitioner.title },
+    {
+      label: "Día y hora",
+      placeholder: "lo elegís vos",
+      value:
+        selectedSlot && slotDay ? `${capitalizeFirst(slotDay.cardLabel)} · ${selectedSlot.label}` : null,
+      note:
+        selectedSlot && slotLocation
+          ? showLocationName
+            ? `${slotLocation.name} · ${slotLocation.address}`
+            : slotLocation.address
+          : null,
+    },
+    {
+      label: "A nombre de",
+      placeholder: "tus datos",
+      value: form.patientFirstName ? `${form.patientFirstName} ${form.patientLastName}`.trim() : null,
+    },
+  ];
+
   if (status.kind === "done") {
+    const doneLines: TurnoLine[] = [
+      { label: "Con", value: status.practitionerName },
+      {
+        label: "Día y hora",
+        value: `${capitalizeFirst(status.dayCardLabel)} · ${status.slotLabel}`,
+        note: status.locationLine || null,
+      },
+      {
+        label: "A nombre de",
+        value: `${form.patientFirstName} ${form.patientLastName}`.trim() || null,
+      },
+    ];
+
     return (
-      <div ref={topRef}>
-        <Confirmation
-          status={status}
-          clinicPhone={clinicPhone}
-          clinicWhatsapp={clinicWhatsapp}
-          clinicName={clinicName}
-        />
+      <div ref={topRef} className="scroll-mt-28">
+        <Counter
+          aside={
+            <TurnoCard lines={doneLines} stamp={{ text: "Confirmado", hint: "Podología Mitre" }} />
+          }
+        >
+          <Confirmation
+            status={status}
+            clinicPhone={clinicPhone}
+            clinicWhatsapp={clinicWhatsapp}
+            clinicName={clinicName}
+          />
+        </Counter>
       </div>
     );
   }
 
   if (days.length === 0) {
     return (
-      <div ref={topRef}>
-        <Notice tone="muted" title="Por ahora no hay horarios disponibles">
-          <p>
-            No quedan turnos libres en los próximos {horizonDays} días.
-            {clinicPhone ? ` Escribinos o llamanos al ${clinicPhone} y vemos alternativas.` : ""}
-          </p>
-        </Notice>
+      <div ref={topRef} className="scroll-mt-28">
+        <Counter aside={<TurnoCard lines={lines} className="max-lg:hidden" />}>
+          <StepHeading step={2} of={3} headingRef={headingRef}>
+            No quedan horarios libres
+          </StepHeading>
+          <div className="mt-8">
+            <Notice tone="muted" title={`Sin turnos en los próximos ${horizonDays} días`}>
+              <p>
+                {clinicPhone
+                  ? `Llamanos al ${clinicPhone} y vemos alternativas, o probá con otra profesional.`
+                  : "Probá con otra profesional o escribinos y vemos alternativas."}
+              </p>
+              <p className="mt-4">
+                <Link href="/turnos" className="font-bold text-accent underline underline-offset-4">
+                  Ver quiénes atienden
+                </Link>
+              </p>
+            </Notice>
+          </div>
+        </Counter>
       </div>
     );
   }
 
   return (
-    <div ref={topRef} className="space-y-6">
-      {/*
-        La profesional queda a la vista todo el tiempo, con la salida al lado.
-        Se eligió en la pantalla anterior, así que no es un paso del wizard: es
-        el contexto de los dos pasos que siguen.
-      */}
-      <PractitionerHeader practitioner={practitioner} />
+    <div ref={topRef} className="scroll-mt-28">
+      <Counter
+        aside={
+          <>
+            <TurnoCard lines={lines} className="max-lg:hidden" />
+            {step === "datos" && (
+              <button
+                type="button"
+                onClick={() => setStep("cuando")}
+                className="mt-5 hidden text-[0.95rem] text-muted underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground lg:block"
+              >
+                Cambiar día y hora
+              </button>
+            )}
+            <Pendientes items={PASOS} current={step === "cuando" ? 1 : 2} />
+          </>
+        }
+      >
+        <TurnoStrip
+          lines={lines}
+          action={
+            step === "datos"
+              ? { label: "Cambiar", onClick: () => setStep("cuando") }
+              : undefined
+          }
+        />
 
-      <Progress step={step} />
+        {step === "cuando" ? (
+          <section aria-labelledby="cuando-heading">
+            <StepHeading
+              step={2}
+              of={3}
+              headingRef={headingRef}
+              lead={`Los turnos duran ${practitioner.slotMinutes} minutos. Elegí el día y después el horario que te quede cómodo.`}
+            >
+              ¿Cuándo te queda cómodo?
+            </StepHeading>
 
-      {status.kind === "error" && status.slotTaken && (
-        <Notice tone="danger" title="Ese horario ya no está libre">
-          <p>{status.message} Elegí otro y seguimos con tus datos, que ya quedaron guardados.</p>
-        </Notice>
-      )}
+            <p className="mt-4">
+              <Link
+                href="/turnos"
+                className="text-[0.95rem] text-muted underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
+              >
+                Cambiar de profesional
+              </Link>
+            </p>
 
-      {step === "cuando" ? (
-        <section aria-labelledby="cuando-heading" className="space-y-6">
-          <h2
-            id="cuando-heading"
-            ref={headingRef}
-            tabIndex={-1}
-            className="text-xl font-semibold tracking-tight"
-          >
-            ¿Cuándo te queda cómodo?
-          </h2>
+            {status.kind === "error" && status.slotTaken && (
+              <div className="mt-8">
+                <Notice tone="danger" title="Ese horario ya no está libre">
+                  <p>{status.message} Elegí otro y seguimos: tus datos ya quedaron guardados.</p>
+                </Notice>
+              </div>
+            )}
 
-          <div>
-            <p className="mb-3 text-sm font-medium uppercase tracking-wide text-muted">Día</p>
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="mt-10 flex flex-wrap items-baseline justify-between gap-x-4">
+              <h3
+                id="cuando-heading"
+                className="font-narrow text-sm font-bold uppercase tracking-[0.12em] text-muted"
+              >
+                Día
+              </h3>
+              {/*
+                En el teléfono los días se corren con el dedo y el que sigue
+                queda cortado al borde: sin este aviso, nadie sabe que hay más.
+                Desde `sm` entran todos, envueltos en varias filas.
+              */}
+              <p className="text-[0.95rem] text-muted sm:hidden">
+                {days.length} {days.length === 1 ? "día" : "días"} con lugar · deslizá →
+              </p>
+            </div>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:thin] sm:flex-wrap sm:overflow-visible">
               {days.map((day) => {
                 const isSelected = day.key === selectedDay?.key;
                 return (
@@ -302,22 +414,22 @@ export function BookingFlow({
                     type="button"
                     onClick={() => setSelectedDayKey(day.key)}
                     aria-pressed={isSelected}
-                    className={`shrink-0 rounded-xl border px-4 py-3 text-center transition-colors ${
+                    className={`shrink-0 border-2 px-4 py-3 text-center transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
                       isSelected
                         ? "border-accent bg-accent text-white"
                         : "border-border bg-surface hover:border-accent"
                     }`}
                   >
-                    <span className="block text-[0.95rem] font-medium">
+                    <span className="block font-narrow text-[0.95rem] font-bold uppercase tracking-[0.08em]">
                       {capitalizeFirst(day.shortLabel)}
                     </span>
-                    <span className={`block text-xs ${isSelected ? "text-white/80" : "text-muted"}`}>
+                    <span className={`block text-[0.8rem] ${isSelected ? "text-white/85" : "text-muted"}`}>
                       {day.slots.length} {day.slots.length === 1 ? "horario" : "horarios"}
                     </span>
                     {showLocationName && day.locationName && (
                       <span
-                        className={`mt-0.5 block text-[0.75rem] uppercase tracking-wide ${
-                          isSelected ? "text-white/80" : "text-accent"
+                        className={`mt-0.5 block font-narrow text-[0.75rem] font-bold uppercase tracking-[0.1em] ${
+                          isSelected ? "text-white/85" : "text-accent"
                         }`}
                       >
                         {day.locationName}
@@ -327,288 +439,241 @@ export function BookingFlow({
                 );
               })}
             </div>
-          </div>
 
-          {selectedDay && (
-            <div>
-              <p className="mb-1 text-sm font-medium uppercase tracking-wide text-muted">Horario</p>
-              <p className="mb-3 text-lg">{capitalizeFirst(selectedDay.label)}</p>
+            {selectedDay && (
+              <div className="mt-10">
+                <h3 className="font-narrow text-sm font-bold uppercase tracking-[0.12em] text-muted">
+                  Horario
+                </h3>
+                <p className="mt-1 text-[1.15rem] font-bold">{capitalizeFirst(selectedDay.label)}</p>
 
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {selectedDay.slots.map((slot) => {
-                  const isSelected = slot.startsAt === selectedSlot?.startsAt;
-                  return (
-                    <button
-                      key={slot.startsAt}
-                      type="button"
-                      onClick={() => pickSlot(slot)}
-                      aria-pressed={isSelected}
-                      // Generous tap target: many patients are older and on a phone.
-                      className={`rounded-lg border px-3 py-3.5 text-[1.05rem] tabular-nums transition-colors ${
-                        isSelected
-                          ? "border-accent bg-accent text-white"
-                          : "border-border bg-surface hover:border-accent"
-                      }`}
-                    >
-                      {slot.label}
-                      {showLocationName && !selectedDay.locationName && (
-                        <span
-                          className={`mt-0.5 block text-[0.75rem] uppercase tracking-wide ${
-                            isSelected ? "text-white/80" : "text-accent"
-                          }`}
-                        >
-                          {byId.get(slot.locationId)?.name}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <p className="mt-3 text-[0.95rem] text-muted">
-                Tocá un horario y te pedimos los datos en el paso siguiente.
-              </p>
-            </div>
-          )}
-        </section>
-      ) : (
-        selectedSlot && (
-          <section aria-labelledby="datos-heading" className="space-y-5">
-            <h2
-              id="datos-heading"
-              ref={headingRef}
-              tabIndex={-1}
-              className="text-xl font-semibold tracking-tight"
-            >
-              Tus datos
-            </h2>
-
-            {/*
-              El turno elegido queda a la vista mientras se completa el
-              formulario, con la salida al lado: nadie tiene que acordarse de
-              qué eligió ni volver atrás a ciegas para cambiarlo.
-            */}
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[color:var(--accent)]/30 bg-accent-soft p-4">
-              <div>
-                <p className="text-sm text-muted">Tu turno</p>
-                <p className="text-[1.05rem] font-medium">
-                  {capitalizeFirst(slotDay?.label ?? "")} · {selectedSlot.label}
-                </p>
-                {slotLocation && (
-                  <p className="mt-0.5 text-[0.95rem] text-muted">
-                    {showLocationName && <strong>{slotLocation.name} · </strong>}
-                    {slotLocation.address}
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setStep("cuando")}
-                className="shrink-0 rounded-lg border border-[color:var(--accent)]/40 bg-surface px-4 py-2.5 text-[0.95rem] font-medium text-accent hover:border-accent"
-              >
-                Cambiar
-              </button>
-            </div>
-
-            {/*
-              `noValidate` apaga los globitos nativos del navegador: se ven
-              distintos en cada uno, no se pueden estilar y se van solos. Si nos
-              hacemos cargo de la validación, nos hacemos cargo entera. El
-              atributo `required` se queda igual, porque es lo que hace que un
-              lector de pantalla anuncie el campo como obligatorio.
-            */}
-            <form
-              noValidate
-              onSubmit={handleSubmit}
-              className="space-y-4 rounded-xl border border-border bg-surface p-5"
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field
-                  label="Nombre"
-                  name="patientFirstName"
-                  required
-                  autoComplete="given-name"
-                  value={form.patientFirstName}
-                  error={errors.patientFirstName}
-                  onChange={(value) => update("patientFirstName", value)}
-                  onBlur={() => handleBlur("patientFirstName")}
-                />
-                <Field
-                  label="Apellido"
-                  name="patientLastName"
-                  required
-                  autoComplete="family-name"
-                  value={form.patientLastName}
-                  error={errors.patientLastName}
-                  onChange={(value) => update("patientLastName", value)}
-                  onBlur={() => handleBlur("patientLastName")}
-                />
-              </div>
-
-              <Field
-                label="DNI"
-                name="patientDni"
-                required
-                inputMode="numeric"
-                hint="Sin puntos ni espacios."
-                value={form.patientDni}
-                error={errors.patientDni}
-                onChange={(value) => update("patientDni", value)}
-                onBlur={() => handleBlur("patientDni")}
-              />
-
-              <fieldset
-                role="radiogroup"
-                aria-invalid={errors.patientCoverage ? true : undefined}
-                aria-describedby={errors.patientCoverage ? "patientCoverage-error" : undefined}
-              >
-                <legend className="text-[0.95rem] font-medium">Obra social</legend>
-                <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  {COVERAGES.map((coverage, index) => (
-                    <label
-                      key={coverage.value}
-                      className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-background px-3 py-3 text-[1rem] hover:border-accent"
-                    >
-                      <input
-                        // El primero lleva el id del grupo: es al que se le
-                        // manda el foco si el paciente no eligió ninguna.
-                        id={index === 0 ? "patientCoverage" : undefined}
-                        type="radio"
-                        name="patientCoverage"
-                        value={coverage.value}
-                        required
-                        checked={form.patientCoverage === coverage.value}
-                        onChange={() => update("patientCoverage", coverage.value)}
-                        className="h-4 w-4 accent-[var(--accent)]"
-                      />
-                      {coverage.label}
-                    </label>
-                  ))}
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+                  {selectedDay.slots.map((slot) => {
+                    const isSelected = slot.startsAt === selectedSlot?.startsAt;
+                    return (
+                      <button
+                        key={slot.startsAt}
+                        type="button"
+                        onClick={() => pickSlot(slot)}
+                        aria-pressed={isSelected}
+                        // Área de toque generosa: mucha gente reserva desde el teléfono.
+                        className={`border-2 px-3 py-4 text-[1.15rem] font-bold tabular-nums transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
+                          isSelected
+                            ? "border-accent bg-accent text-white"
+                            : "border-border bg-surface hover:border-accent"
+                        }`}
+                      >
+                        {slot.label}
+                        {showLocationName && !selectedDay.locationName && (
+                          <span
+                            className={`mt-0.5 block font-narrow text-[0.75rem] font-bold uppercase tracking-[0.1em] ${
+                              isSelected ? "text-white/85" : "text-accent"
+                            }`}
+                          >
+                            {byId.get(slot.locationId)?.name}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <FieldError id="patientCoverage-error" message={errors.patientCoverage} />
-              </fieldset>
 
-              <Field
-                label="Teléfono"
-                name="patientPhone"
-                type="tel"
-                required
-                autoComplete="tel"
-                hint="Para avisarte si surge algún cambio."
-                value={form.patientPhone}
-                error={errors.patientPhone}
-                onChange={(value) => update("patientPhone", value)}
-                onBlur={() => handleBlur("patientPhone")}
-              />
-
-              <div>
-                <label htmlFor="motivo" className="block text-[0.95rem] font-medium">
-                  Motivo de la consulta <span className="font-normal text-muted">(opcional)</span>
-                </label>
-                <textarea
-                  id="motivo"
-                  name="motivo"
-                  rows={2}
-                  maxLength={500}
-                  value={form.motivo}
-                  aria-describedby={`motivo-hint${errors.motivo ? " motivo-error" : ""}`}
-                  aria-invalid={errors.motivo ? true : undefined}
-                  onChange={(event) => update("motivo", event.target.value)}
-                  onBlur={() => handleBlur("motivo")}
-                  className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-[1rem]"
-                />
-                <p id="motivo-hint" className="mt-1 text-sm text-muted">
-                  Contanos solo si querés. Nos ayuda a preparar la consulta.
+                <p className="mt-4 text-[0.95rem] text-muted">
+                  Se puede reservar hasta {horizonDays} días para adelante. Para una fecha más
+                  lejana, llamanos.
                 </p>
-                <FieldError id="motivo-error" message={errors.motivo} />
               </div>
+            )}
+          </section>
+        ) : (
+          selectedSlot && (
+            <section aria-labelledby="datos-heading">
+              <StepHeading
+                step={3}
+                of={3}
+                headingRef={headingRef}
+                lead="Es lo último. No creás ninguna cuenta ni contraseña."
+              >
+                Tus datos
+              </StepHeading>
 
               {/*
-                Explicit consent, naming health data. The motivo field above is a
-                dato sensible under Ley 25.326 art. 2, so a generic "acepto los
-                términos" would not be valid consent for it.
+                `noValidate` apaga los globitos nativos del navegador: se ven
+                distintos en cada uno, no se pueden estilar y se van solos. Si nos
+                hacemos cargo de la validación, nos hacemos cargo entera. El
+                atributo `required` se queda igual, porque es lo que hace que un
+                lector de pantalla anuncie el campo como obligatorio.
               */}
-              <div>
-              <label className="flex items-start gap-3 text-[0.95rem]">
-                <input
-                  id="consent"
-                  type="checkbox"
-                  name="consent"
+              {/*
+                Sin panel blanco alrededor: el formulario son renglones sobre la
+                cartulina, y lo blanco son los campos. Dos planos blancos en una
+                misma pantalla contradicen la tarjeta apoyada.
+              */}
+              <form noValidate onSubmit={handleSubmit} className="mt-10 space-y-7 border-t-2 border-foreground pt-8">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field
+                    label="Nombre"
+                    name="patientFirstName"
+                    required
+                    autoComplete="given-name"
+                    value={form.patientFirstName}
+                    error={errors.patientFirstName}
+                    onChange={(value) => update("patientFirstName", value)}
+                    onBlur={() => handleBlur("patientFirstName")}
+                  />
+                  <Field
+                    label="Apellido"
+                    name="patientLastName"
+                    required
+                    autoComplete="family-name"
+                    value={form.patientLastName}
+                    error={errors.patientLastName}
+                    onChange={(value) => update("patientLastName", value)}
+                    onBlur={() => handleBlur("patientLastName")}
+                  />
+                </div>
+
+                <Field
+                  label="DNI"
+                  name="patientDni"
                   required
-                  aria-describedby={errors.consent ? "consent-error" : undefined}
-                  aria-invalid={errors.consent ? true : undefined}
-                  checked={form.consent}
-                  onChange={(event) => update("consent", event.target.checked)}
-                  className="mt-1 h-5 w-5 shrink-0 accent-[var(--accent)]"
+                  inputMode="numeric"
+                  hint="Sin puntos ni espacios."
+                  value={form.patientDni}
+                  error={errors.patientDni}
+                  onChange={(value) => update("patientDni", value)}
+                  onBlur={() => handleBlur("patientDni")}
                 />
-                <span>
-                  Autorizo a Podología Mitre a guardar mis datos de contacto y, si lo completé, el
-                  motivo de mi consulta —un dato de salud— con el fin de gestionar mi turno.{" "}
-                  <a href="/privacidad" target="_blank" className="text-accent underline">
-                    Ver cómo tratamos tus datos
-                  </a>
-                  .
-                </span>
-              </label>
-              <FieldError id="consent-error" message={errors.consent} />
-              </div>
 
-              {status.kind === "error" && !status.slotTaken && (
-                <Notice tone="danger" title="No pudimos guardar el turno">
-                  <p>{status.message}</p>
-                </Notice>
-              )}
+                <fieldset
+                  role="radiogroup"
+                  aria-invalid={errors.patientCoverage ? true : undefined}
+                  aria-describedby={errors.patientCoverage ? "patientCoverage-error" : undefined}
+                >
+                  <legend className="font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted">
+                    Obra social <span className="font-normal normal-case">(elegí una)</span>
+                  </legend>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {COVERAGES.map((coverage, index) => (
+                      <label
+                        key={coverage.value}
+                        className={`flex cursor-pointer items-center gap-3 border-2 bg-surface px-4 py-3.5 text-[1.05rem] font-bold transition-colors ${
+                          form.patientCoverage === coverage.value
+                            ? "border-accent text-accent"
+                            : "border-border hover:border-accent"
+                        }`}
+                      >
+                        <input
+                          // El primero lleva el id del grupo: es al que se le
+                          // manda el foco si el paciente no eligió ninguna.
+                          id={index === 0 ? "patientCoverage" : undefined}
+                          type="radio"
+                          name="patientCoverage"
+                          value={coverage.value}
+                          required
+                          checked={form.patientCoverage === coverage.value}
+                          onChange={() => update("patientCoverage", coverage.value)}
+                          className="casilla"
+                        />
+                        {coverage.label}
+                      </label>
+                    ))}
+                  </div>
+                  <FieldError id="patientCoverage-error" message={errors.patientCoverage} />
+                </fieldset>
 
-              <button
-                type="submit"
-                disabled={status.kind === "submitting"}
-                className="w-full rounded-lg bg-accent px-4 py-3.5 text-[1.05rem] font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
-              >
-                {status.kind === "submitting"
-                  ? "Confirmando…"
-                  : `Confirmar turno · ${selectedSlot.label}`}
-              </button>
-            </form>
-          </section>
-        )
-      )}
-    </div>
-  );
-}
+                <Field
+                  label="Teléfono"
+                  name="patientPhone"
+                  type="tel"
+                  required
+                  autoComplete="tel"
+                  hint="Para avisarte si surge algún cambio."
+                  value={form.patientPhone}
+                  error={errors.patientPhone}
+                  onChange={(value) => update("patientPhone", value)}
+                  onBlur={() => handleBlur("patientPhone")}
+                />
 
-function PractitionerHeader({ practitioner }: { practitioner: BookingPractitioner }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface-muted p-4">
-      <div>
-        <p className="text-sm text-muted">Tu turno es con</p>
-        <p className="text-[1.05rem] font-medium">{practitioner.name}</p>
-        {practitioner.title && (
-          <p className="text-[0.95rem] text-muted">{practitioner.title}</p>
+                <div>
+                  <label
+                    htmlFor="motivo"
+                    className="block font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted"
+                  >
+                    Motivo de la consulta <span className="font-normal normal-case">(opcional)</span>
+                  </label>
+                  <textarea
+                    id="motivo"
+                    name="motivo"
+                    rows={2}
+                    maxLength={500}
+                    value={form.motivo}
+                    aria-describedby={`motivo-hint${errors.motivo ? " motivo-error" : ""}`}
+                    aria-invalid={errors.motivo ? true : undefined}
+                    onChange={(event) => update("motivo", event.target.value)}
+                    onBlur={() => handleBlur("motivo")}
+                    className="mt-2 w-full border-2 border-border bg-surface px-3.5 py-3 text-[1.05rem]"
+                  />
+                  <p id="motivo-hint" className="mt-1.5 text-[0.95rem] text-muted">
+                    Contanos sólo si querés. Nos ayuda a preparar la consulta.
+                  </p>
+                  <FieldError id="motivo-error" message={errors.motivo} />
+                </div>
+
+                {/*
+                  Explicit consent, naming health data. The motivo field above is a
+                  dato sensible under Ley 25.326 art. 2, so a generic "acepto los
+                  términos" would not be valid consent for it.
+                */}
+                <div>
+                  <label className="flex cursor-pointer items-start gap-3 border-t border-border pt-5 text-[0.95rem] leading-relaxed">
+                    <input
+                      id="consent"
+                      type="checkbox"
+                      name="consent"
+                      required
+                      aria-describedby={errors.consent ? "consent-error" : undefined}
+                      aria-invalid={errors.consent ? true : undefined}
+                      checked={form.consent}
+                      onChange={(event) => update("consent", event.target.checked)}
+                      className="casilla mt-0.5"
+                    />
+                    <span>
+                      Autorizo a Podología Mitre a guardar mis datos de contacto y, si lo completé, el
+                      motivo de mi consulta —un dato de salud— con el fin de gestionar mi turno.{" "}
+                      <a
+                        href="/privacidad"
+                        target="_blank"
+                        className="font-bold text-accent underline underline-offset-4"
+                      >
+                        Ver cómo tratamos tus datos
+                      </a>
+                      .
+                    </span>
+                  </label>
+                  <FieldError id="consent-error" message={errors.consent} />
+                </div>
+
+                {status.kind === "error" && !status.slotTaken && (
+                  <Notice tone="danger" title="No pudimos guardar el turno">
+                    <p>{status.message}</p>
+                  </Notice>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={status.kind === "submitting"}
+                  className="w-full border-2 border-accent bg-accent px-5 py-4 text-[1.15rem] font-bold text-white transition-[background-color,transform] duration-100 hover:border-accent-hover hover:bg-accent-hover active:translate-y-0.5 active:scale-[0.995] disabled:opacity-60"
+                >
+                  {status.kind === "submitting"
+                    ? "Confirmando…"
+                    : `Confirmar turno · ${selectedSlot.label}`}
+                </button>
+              </form>
+            </section>
+          )
         )}
-      </div>
-      <Link
-        href="/turnos"
-        className="shrink-0 rounded-lg border border-border bg-surface px-4 py-2.5 text-[0.95rem] font-medium hover:border-accent"
-      >
-        Cambiar
-      </Link>
-    </div>
-  );
-}
-
-/** Dónde está parado el paciente y cuánto falta. */
-function Progress({ step }: { step: Step }) {
-  const current = step === "cuando" ? 1 : 2;
-
-  return (
-    <div>
-      <p className="text-sm font-semibold uppercase tracking-wide text-muted">
-        Paso {current} de 2
-      </p>
-      <div className="mt-2 flex gap-1.5" aria-hidden="true">
-        <span className="h-1 flex-1 rounded-full bg-accent" />
-        <span className={`h-1 flex-1 rounded-full ${current === 2 ? "bg-accent" : "bg-border"}`} />
-      </div>
+      </Counter>
     </div>
   );
 }
@@ -643,9 +708,12 @@ function Field({
 
   return (
     <div>
-      <label htmlFor={name} className="block text-[0.95rem] font-medium">
+      <label
+        htmlFor={name}
+        className="block font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted"
+      >
         {label}
-        {!required && <span className="font-normal text-muted"> (opcional)</span>}
+        {!required && <span className="font-normal normal-case"> (opcional)</span>}
       </label>
       <input
         id={name}
@@ -660,12 +728,12 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onBlur={onBlur}
-        className={`mt-1.5 w-full rounded-lg border bg-background px-3 py-2.5 text-[1rem] ${
+        className={`mt-2 w-full border-2 bg-surface px-3.5 py-3 text-[1.05rem] ${
           error ? "border-[color:var(--danger)]" : "border-border"
         }`}
       />
       {hint && (
-        <p id={hintId} className="mt-1 text-sm text-muted">
+        <p id={hintId} className="mt-1.5 text-[0.95rem] text-muted">
           {hint}
         </p>
       )}
@@ -690,33 +758,10 @@ function FieldError({ id, message }: { id: string; message?: string }) {
     <p
       id={id}
       aria-live="polite"
-      className={`text-sm text-[color:var(--danger)] ${message ? "mt-1" : ""}`}
+      className={`text-[0.95rem] font-bold text-[color:var(--danger)] ${message ? "mt-1.5" : ""}`}
     >
       {message ?? ""}
     </p>
-  );
-}
-
-function Notice({
-  tone,
-  title,
-  children,
-}: {
-  tone: "muted" | "danger" | "success";
-  title: string;
-  children: React.ReactNode;
-}) {
-  const toneClass = {
-    muted: "border-border bg-surface-muted",
-    danger: "border-[color:var(--danger)]/30 bg-[color:var(--danger)]/5",
-    success: "border-[color:var(--success)]/30 bg-[color:var(--success)]/5",
-  }[tone];
-
-  return (
-    <div role="status" className={`rounded-xl border p-5 ${toneClass}`}>
-      <p className="font-medium">{title}</p>
-      <div className="mt-1 text-[0.95rem] text-muted">{children}</div>
-    </div>
   );
 }
 
@@ -737,7 +782,7 @@ function Confirmation({
 
     Así que el mensaje lo manda el paciente. Resuelve dos cosas de una: le queda
     el turno y el enlace guardados en su propio WhatsApp, que es donde los va a
-    buscar, y a Rosa le llega el aviso del turno nuevo sin mirar el panel.
+    buscar, y al consultorio le llega el aviso del turno nuevo sin mirar el panel.
   */
   const absoluteCancelUrl =
     status.cancelUrl && typeof window !== "undefined"
@@ -752,48 +797,62 @@ function Confirmation({
     (absoluteCancelUrl ? ` Este es mi enlace por si necesito cancelar: ${absoluteCancelUrl}` : "");
 
   return (
-    <Notice tone="success" title="¡Listo! Tu turno quedó confirmado">
-      <p className="text-[1.05rem] text-foreground">
-        {capitalizeFirst(status.dayLabel)} a las {status.slotLabel}, con{" "}
-        {status.practitionerName}.
+    <div>
+      <h1 className="font-wide text-[length:clamp(1.75rem,6vw,2.6rem)] font-extrabold leading-[1.05] tracking-[-0.025em]">
+        Listo, te esperamos.
+      </h1>
+      <p className="mt-4 text-[1.2rem] leading-relaxed">
+        <strong className="font-bold text-[color:var(--success)]">Tu turno quedó confirmado:</strong>{" "}
+        {status.dayLabel} a las {status.slotLabel}, con {status.practitionerName}
+        {status.locationLine ? "." : "."}
       </p>
       {status.locationLine && (
-        <p className="mt-1 text-[1.05rem] font-medium text-foreground">{status.locationLine}</p>
+        <p className="mt-1 text-[1.2rem] font-bold">{status.locationLine}</p>
       )}
 
+      {/* La tarjeta con el sello vive al costado; acá va lo que hay que hacer con ella. */}
       {status.cancelUrl ? (
-        <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-          <p className="font-medium text-foreground">Guardá este enlace</p>
-          <p className="mt-1">
-            Es la única forma de cancelar el turno vos mismo. Sacale una captura o agregalo a
-            favoritos: no te lo vamos a poder mandar por otro lado.
+        <div className="mt-8 border-2 border-foreground bg-surface p-5 sm:p-6">
+          <h2 className="font-wide text-[1.35rem] font-extrabold tracking-[-0.02em]">
+            Guardá este enlace
+          </h2>
+          <p className="mt-2 leading-relaxed text-muted">
+            Es la única forma de cancelar el turno vos mismo. Sacale una captura o mandátelo por
+            WhatsApp: no te lo vamos a poder mandar por otro lado, porque el consultorio no envía
+            mails.
           </p>
-          <div className="mt-3">
+          <div className="mt-4">
             <CopyLink href={status.cancelUrl} />
           </div>
+
+          {clinicWhatsapp && (
+            <div className="mt-6 border-t border-border pt-5">
+              <a
+                href={whatsappLink(clinicWhatsapp, confirmationMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block border-2 border-accent bg-accent px-5 py-3.5 text-[1.05rem] font-bold text-white transition-[background-color,transform] duration-100 hover:border-accent-hover hover:bg-accent-hover active:translate-y-0.5"
+              >
+                Guardármelo en WhatsApp
+              </a>
+              <p className="mt-2.5 text-[0.95rem] leading-relaxed text-muted">
+                Te abre un mensaje con los datos del turno para mandarnos. Así te queda guardado en
+                el teléfono y nosotras nos enteramos.
+              </p>
+            </div>
+          )}
         </div>
       ) : null}
 
-      {clinicWhatsapp && (
-        <div className="mt-4">
-          <a
-            href={whatsappLink(clinicWhatsapp, confirmationMessage)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block rounded-lg bg-accent px-5 py-3 text-[1.05rem] font-medium text-white hover:bg-accent-hover"
-          >
-            Guardármelo en WhatsApp
-          </a>
-          <p className="mt-2 text-[0.95rem]">
-            Te abre un mensaje con los datos del turno para mandarnos. Así te queda guardado en tu
-            teléfono y nosotros nos enteramos.
-          </p>
-        </div>
-      )}
-
       {clinicPhone && (
-        <p className="mt-3">Si preferís, llamanos al {clinicPhone} y lo cancelamos nosotros.</p>
+        <p className="mt-6 text-muted">
+          Si preferís, llamanos al{" "}
+          <a href={`tel:${clinicPhone}`} className="font-bold text-accent underline underline-offset-4">
+            {clinicPhone}
+          </a>{" "}
+          y lo cancelamos nosotras.
+        </p>
       )}
-    </Notice>
+    </div>
   );
 }

@@ -67,6 +67,29 @@ export async function getPractitionerBySlug(
   return (data as unknown as PractitionerWithSpecialty) ?? null;
 }
 
+/**
+ * Un profesional por su id, esté activo o no.
+ *
+ * A diferencia de `getPractitionerBySlug`, acá no se filtra por `active`: un
+ * turno ya reservado tiene su profesional, y quien entra a cancelarlo necesita
+ * ver con quién era aunque esa persona ya no atienda.
+ */
+export async function getPractitionerById(
+  id: string,
+): Promise<PractitionerWithSpecialty | null> {
+  const supabase = createSupabaseAdminClient();
+
+  const { data, error } = await supabase
+    .from("practitioners")
+    .select(WITH_SPECIALTY)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(`No se pudo leer el profesional: ${error.message}`);
+
+  return (data as unknown as PractitionerWithSpecialty) ?? null;
+}
+
 /** Todas, activas o no. Para el panel. */
 export async function listSpecialties(): Promise<Specialty[]> {
   const supabase = createSupabaseAdminClient();

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-17T18:20:25+00:00",
+  "generatedAt": "2026-09-17T16:27:30-03:00",
   "title": "Design System: Podología Mitre",
   "extensions": {
     "colorMeta": {
@@ -126,7 +126,7 @@
       },
       "accent-soft": {
         "role": "primary",
-        "displayName": "Sello aguado",
+        "displayName": "Sello aguado (declarado, sin uso)",
         "canonical": "oklch(94.8% 0.019 263)",
         "tonalRamp": [
           "#070b13",
@@ -207,7 +207,11 @@
       },
       "headline": {
         "displayName": "Encabezado impreso",
-        "purpose": "Título de cada sección, sobre raya doble."
+        "purpose": "Título de cada sección del home, sobre raya doble."
+      },
+      "pregunta": {
+        "displayName": "Pregunta del mostrador",
+        "purpose": "Título de cada paso de la reserva y de los acuses; va solo, sin raya doble."
       },
       "title": {
         "displayName": "Título de renglón",
@@ -223,11 +227,11 @@
       },
       "label": {
         "displayName": "Rótulo de campo",
-        "purpose": "Rótulos de renglón de la tarjeta y letra chica del pie; nunca antetítulo."
+        "purpose": "Rótulos de renglón de la tarjeta, etiqueta de campo y legend de un grupo de opciones; nunca antetítulo."
       },
       "hand": {
         "displayName": "Birome",
-        "purpose": "Datos cortos completados a mano sobre un renglón."
+        "purpose": "Datos cortos completados a mano sobre un renglón; 1.25rem en la columna angosta, 1.05rem en la tira del teléfono."
       },
       "stamp": {
         "displayName": "Sello",
@@ -292,20 +296,20 @@
       "css": ".ds-btn-primary { display: inline-block; font-family: Archivo, sans-serif; background: var(--accent); color: #fff; border: 2px solid var(--accent); border-radius: 0; padding: 0.875rem 1.75rem; font-size: 1.15rem; font-weight: 700; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); } .ds-btn-primary:active { transform: translateY(2px) scale(0.985); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
     },
     {
-      "name": "Botón de contorno en tinta",
-      "kind": "button",
-      "refersTo": "button-outline-ink",
-      "description": "Alternativas impresas: llamar, WhatsApp, abrir en Google Maps.",
-      "html": "<a class=\"ds-btn-ink\" href=\"#\">Abrir en Google Maps</a>",
-      "css": ".ds-btn-ink { display: inline-block; font-family: Archivo, sans-serif; background: transparent; color: var(--foreground); border: 2px solid var(--foreground); border-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-btn-ink:hover { background: var(--foreground); color: var(--surface); } .ds-btn-ink:active { transform: translateY(2px) scale(0.985); } .ds-btn-ink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
-    },
-    {
       "name": "Botón de contorno de sello",
       "kind": "button",
       "refersTo": "button-outline-sello",
       "description": "Reservar con una profesional en particular.",
       "html": "<a class=\"ds-btn-sello\" href=\"#\">Sacar turno con Rosa</a>",
       "css": ".ds-btn-sello { display: inline-block; font-family: Archivo, sans-serif; background: transparent; color: var(--accent); border: 2px solid var(--accent); border-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-btn-sello:hover { background: var(--accent); color: #fff; } .ds-btn-sello:active { transform: translateY(2px) scale(0.985); } .ds-btn-sello:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip de día / horario",
+      "kind": "chip",
+      "refersTo": "chip-opcion",
+      "description": "Las opciones del paso 2: fichas impresas de 2px, llenas de tinta de sello cuando se eligen.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\" type=\"button\"><span class=\"ds-chip-day\">Jue 17</span><span class=\"ds-chip-note\">3 horarios</span><span class=\"ds-chip-sede\">Centro</span></button><button class=\"ds-chip\" aria-pressed=\"false\" type=\"button\"><span class=\"ds-chip-day\">Vie 18</span><span class=\"ds-chip-note\">4 horarios</span><span class=\"ds-chip-sede\">Centro</span></button><button class=\"ds-chip ds-chip-hora\" aria-pressed=\"false\" type=\"button\">17:00</button></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; font-family: Archivo, sans-serif; } .ds-chip { border: 2px solid var(--border); border-radius: 0; background: var(--surface); color: var(--foreground); padding: 0.75rem 1rem; text-align: center; cursor: pointer; transition: background-color 100ms, border-color 100ms, transform 100ms; } .ds-chip-day { display: block; font-variation-settings: \"wdth\" 80; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; } .ds-chip-note { display: block; font-size: 0.8rem; color: var(--muted); } .ds-chip-sede { display: block; margin-top: 0.125rem; font-variation-settings: \"wdth\" 80; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); } .ds-chip-hora { padding: 1rem 0.75rem; font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-chip:hover { border-color: var(--accent); } .ds-chip[aria-pressed=\"true\"] { background: var(--accent); border-color: var(--accent); color: #fff; } .ds-chip[aria-pressed=\"true\"] .ds-chip-note, .ds-chip[aria-pressed=\"true\"] .ds-chip-sede { color: rgb(255 255 255 / 0.85); } .ds-chip:active { transform: translateY(2px); } .ds-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
     },
     {
       "name": "Encabezado",
@@ -319,7 +323,7 @@
       "name": "Tarjeta de turno",
       "kind": "card",
       "refersTo": "card-turno",
-      "description": "Firma del sistema: la tarjetita apoyada, con renglones en birome, troquel, talón y sello.",
+      "description": "Firma del sistema: la misma tarjetita en el hero y en los cinco momentos del mostrador, con renglones en birome, renglón vacío que habla y sello al final.",
       "html": "<div class=\"ds-turno\"><div class=\"ds-turno-head\"><span>Podología Mitre</span><span class=\"ds-turno-mark\">Turno</span></div><dl><div class=\"ds-turno-line\"><dt>Con</dt><dd>Rosa o Bea</dd></div><div class=\"ds-turno-line\"><dt>Días</dt><dd>Lunes a sábado</dd></div><div class=\"ds-turno-line\"><dt>Día y hora</dt><dd class=\"ds-turno-empty\">los elegís vos</dd></div></dl><div class=\"ds-turno-troquel\"></div><dl class=\"ds-turno-talon\"><dt>Dónde</dt><dd>Bartolomé Mitre <b>496</b></dd></dl><div class=\"ds-stamp ds-turno-stamp\"><div><div>Turno online</div></div></div></div>",
       "css": ".ds-turno { position: relative; max-width: 28rem; font-family: Archivo, sans-serif; background: var(--surface); color: var(--foreground); transform: rotate(-2deg); box-shadow: 0 1px 1px rgb(25 29 39 / 0.08), 0 14px 28px -12px rgb(25 29 39 / 0.35); padding: 1.25rem 1.75rem 1.5rem; } .ds-turno-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 5px double var(--foreground); padding-bottom: 0.75rem; font-variation-settings: \"wdth\" 80; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; } .ds-turno-mark { color: var(--numerador); font-size: 0.875rem; letter-spacing: 0.12em; } .ds-turno dl { margin: 0; } .ds-turno-line { display: flex; align-items: flex-end; gap: 0.75rem; border-bottom: 1px solid var(--border); padding: 1rem 0 0.25rem; } .ds-turno dt { font-variation-settings: \"wdth\" 80; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); } .ds-turno-line dd { flex: 1; margin: 0; text-align: right; font-family: Kalam, cursive; font-weight: 700; font-size: 1.45rem; line-height: 2.1rem; color: var(--birome); } .ds-turno-line dd.ds-turno-empty { font-weight: 400; font-size: 1.05rem; color: var(--muted); } .ds-turno-troquel { height: 6px; margin: 1rem 0; background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px); background-size: 10px 6px; background-repeat: repeat-x; } .ds-turno-talon dd { margin: 0.25rem 0 0; font-size: 1.05rem; } .ds-turno-talon b { color: var(--numerador); font-variant-numeric: tabular-nums; } .ds-turno-stamp { position: absolute; right: 1rem; bottom: 1.25rem; }"
     },
@@ -332,39 +336,48 @@
       "css": ".ds-stamp { display: inline-block; color: var(--accent); mix-blend-mode: multiply; transform: rotate(-6deg); animation: ds-sellar 520ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both; } .ds-stamp > div { border: 3px solid currentColor; padding: 3px; } .ds-stamp > div > div { border: 1px solid currentColor; padding: 0.375rem 0.75rem; text-align: center; font-family: Archivo, sans-serif; font-variation-settings: \"wdth\" 80; text-transform: uppercase; line-height: 1.05; font-weight: 900; font-size: 1.35rem; letter-spacing: 0.04em; } .ds-stamp small { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; } @keyframes ds-sellar { 0% { opacity: 0.35; transform: rotate(-6deg) scale(1.35); } 60% { opacity: 1; transform: rotate(-6deg) scale(0.96); } 100% { opacity: 1; transform: rotate(-6deg) scale(1); } } @media (prefers-reduced-motion: reduce) { .ds-stamp { animation: none; } }"
     },
     {
+      "name": "Campo y casilla",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "El formulario del último paso: rótulo en versalitas, campo blanco de 2px sobre la cartulina, error con texto, y la casilla cuadrada que reemplaza al control redondo.",
+      "html": "<div class=\"ds-form\"><label class=\"ds-label\" for=\"ds-dni\">DNI</label><input class=\"ds-input\" id=\"ds-dni\" value=\"30111222\"><p class=\"ds-hint\">Sin puntos ni espacios.</p><label class=\"ds-label ds-label-top\" for=\"ds-tel\">Teléfono</label><input class=\"ds-input ds-input-error\" id=\"ds-tel\" aria-invalid=\"true\" value=\"\"><p class=\"ds-error\">Escribí un teléfono donde podamos avisarte.</p><label class=\"ds-opcion\"><input class=\"ds-casilla\" type=\"radio\" name=\"ds-os\" checked>IPS</label></div>",
+      "css": ".ds-form { font-family: Archivo, sans-serif; } .ds-label { display: block; font-variation-settings: \"wdth\" 80; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); } .ds-label-top { margin-top: 1.75rem; } .ds-input { margin-top: 0.5rem; width: 100%; border: 2px solid var(--border); border-radius: 0; background: var(--surface); color: var(--foreground); padding: 0.75rem 0.875rem; font: inherit; font-size: 1.05rem; } .ds-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-input-error { border-color: var(--danger); } .ds-hint { margin: 0.375rem 0 0; font-size: 0.95rem; color: var(--muted); } .ds-error { margin: 0.375rem 0 0; font-size: 0.95rem; font-weight: 700; color: var(--danger); } .ds-opcion { margin-top: 1.75rem; display: flex; align-items: center; gap: 0.75rem; border: 2px solid var(--accent); background: var(--surface); color: var(--accent); padding: 0.875rem 1rem; font-size: 1.05rem; font-weight: 700; cursor: pointer; } .ds-casilla { appearance: none; position: relative; width: 1.3rem; height: 1.3rem; flex-shrink: 0; border: 2px solid var(--foreground); border-radius: 0; background: var(--surface); cursor: pointer; } .ds-casilla:checked::after { content: \"\"; position: absolute; left: 0.3rem; top: 0.02rem; width: 0.4rem; height: 0.75rem; border: solid var(--birome); border-width: 0 3px 3px 0; transform: rotate(38deg); } .ds-casilla:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
+    },
+    {
+      "name": "Encabezado de paso y pendientes",
+      "kind": "custom",
+      "refersTo": "step-heading",
+      "description": "El paso se dice dentro de la frase, en negrita, y se repite en la lista numerada que se va tachando. Sin antetítulo ni píldora.",
+      "html": "<div class=\"ds-paso\"><h1 class=\"ds-pregunta\">¿Cuándo te queda cómodo?</h1><p class=\"ds-lead\"><strong>Paso 2 de 3.</strong> Los turnos duran 60 minutos. Elegí el día y después el horario que te quede cómodo.</p><ol class=\"ds-pendientes\"><li class=\"ds-hecho\"><span>1.</span><span>Elegir con quién</span></li><li class=\"ds-actual\"><span>2.</span><span>Elegir día y horario</span></li><li><span>3.</span><span>Dejar tus datos</span></li></ol></div>",
+      "css": ".ds-paso { font-family: Archivo, sans-serif; color: var(--foreground); } .ds-pregunta { margin: 0; font-variation-settings: \"wdth\" 118; font-weight: 800; font-size: clamp(1.75rem, 6vw, 2.6rem); line-height: 1.05; letter-spacing: -0.025em; } .ds-lead { margin: 0.75rem 0 0; max-width: 52ch; font-size: 1.1rem; line-height: 1.625; color: var(--muted); } .ds-lead strong { font-weight: 700; color: var(--foreground); } .ds-pendientes { list-style: none; margin: 2rem 0 0; padding: 0; } .ds-pendientes li { display: flex; gap: 0.75rem; padding-bottom: 0.5rem; font-size: 0.95rem; color: var(--muted); } .ds-pendientes li span:first-child { font-variation-settings: \"wdth\" 80; font-variant-numeric: tabular-nums; } .ds-hecho span:last-child { text-decoration: line-through; text-decoration-color: var(--muted); } .ds-actual { font-weight: 700; color: var(--foreground); }"
+    },
+    {
+      "name": "Aviso",
+      "kind": "custom",
+      "refersTo": "aviso-muted",
+      "description": "El estado del flujo en un recuadro de 2px: neutro sobre cartulina a la sombra, de error o de éxito con borde de color y fondo al 5%.",
+      "html": "<div class=\"ds-aviso ds-aviso-danger\" role=\"status\"><p class=\"ds-aviso-title\">Ese horario ya no está libre</p><div class=\"ds-aviso-body\">Elegí otro y seguimos: tus datos ya quedaron guardados.</div></div>",
+      "css": ".ds-aviso { border: 2px solid var(--border); border-radius: 0; background: var(--surface-muted); padding: 1.25rem; font-family: Archivo, sans-serif; color: var(--foreground); } .ds-aviso-title { margin: 0; font-size: 1.15rem; font-weight: 700; } .ds-aviso-body { margin-top: 0.375rem; line-height: 1.625; color: var(--muted); } .ds-aviso-danger { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 5%, transparent); } .ds-aviso-success { border-color: var(--success); background: color-mix(in srgb, var(--success) 5%, transparent); }"
+    },
+    {
       "name": "Título de sección con troquel",
       "kind": "custom",
       "refersTo": "section-heading",
       "description": "Apertura de cada sección: troquel a todo el ancho, título ancho y raya doble.",
       "html": "<section class=\"ds-section\"><div class=\"ds-troquel\"></div><h2 class=\"ds-heading\">Tratamientos</h2></section>",
       "css": ".ds-troquel { height: 6px; background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px); background-size: 10px 6px; background-repeat: repeat-x; } .ds-heading { font-family: Archivo, sans-serif; font-variation-settings: \"wdth\" 118; font-weight: 800; font-size: clamp(2rem, 7vw, 3.1rem); line-height: 1; letter-spacing: -0.025em; color: var(--foreground); border-bottom: 5px double var(--foreground); padding-bottom: 1rem; margin: 4rem 0 0; }"
-    },
-    {
-      "name": "Renglón de tratamiento",
-      "kind": "custom",
-      "refersTo": "treatment-row",
-      "description": "Fila de formulario con casilla impresa ya tildada en birome.",
-      "html": "<div class=\"ds-row\"><svg viewBox=\"0 0 30 30\" width=\"28\" height=\"28\" aria-hidden=\"true\"><rect x=\"2\" y=\"5\" width=\"21\" height=\"21\" fill=\"none\" stroke=\"var(--foreground)\" stroke-width=\"2\"/><path d=\"M6.5 15.5c2 1.4 3.6 3.2 5 5.6C15 13.6 20.2 7.4 27.5 2.5\" fill=\"none\" stroke=\"var(--birome)\" stroke-width=\"2.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><div><h3>Pie diabético</h3><p>Control y cuidado preventivo para personas con diabetes.</p></div></div>",
-      "css": ".ds-row { display: flex; gap: 1rem; padding: 1.5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-family: Archivo, sans-serif; } .ds-row svg { flex-shrink: 0; margin-top: 2px; } .ds-row h3 { margin: 0; font-size: 1.3rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; color: var(--foreground); } .ds-row p { margin: 0.375rem 0 0; max-width: 46ch; line-height: 1.625; color: var(--muted); }"
-    },
-    {
-      "name": "Pregunta frecuente",
-      "kind": "custom",
-      "refersTo": "faq-row",
-      "description": "details nativo como renglón de letra chica, con cruz en sello que gira al abrir.",
-      "html": "<details class=\"ds-faq\"><summary>¿Qué obras sociales atienden?<svg viewBox=\"0 0 20 20\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path d=\"M10 2.5v15M2.5 10h15\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"square\"/></svg></summary><p>IPS y OSUNSa.</p></details>",
-      "css": ".ds-faq { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-family: Archivo, sans-serif; } .ds-faq summary { display: flex; min-height: 3.5rem; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1rem 0; list-style: none; cursor: pointer; font-size: 1.05rem; font-weight: 600; color: var(--foreground); transition: color 150ms; } .ds-faq summary::-webkit-details-marker { display: none; } .ds-faq summary:hover { color: var(--accent); } .ds-faq summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-faq svg { flex-shrink: 0; color: var(--accent); transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-faq[open] svg { transform: rotate(45deg); } .ds-faq p { margin: -0.25rem 0 0; padding-bottom: 1.25rem; max-width: 62ch; line-height: 1.625; color: var(--muted); }"
     }
   ],
   "narrative": {
     "northStar": "La tarjetita de turno",
-    "overview": "El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma azul del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.\n\nLa densidad es la de un formulario: encabezados anchos y pesados subrayados con raya doble, renglones finos, letra chica legible a 17px de base. No hay fotos de ambiente ni tarjetas con íconos: la información real (con quién, qué días, dónde, qué obra social) se presenta escrita sobre la tarjeta, y eso es la ilustración. El movimiento es un solo gesto físico, el golpe del sello, y botones que se hunden al apretarlos.\n\nTema claro a propósito: se lee de día, en la calle, desde el teléfono. Se rechaza el sitio de clínica estándar: foto de stock, celeste genérico, tarjetas con íconos.",
+    "overview": "El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma azul del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.\n\nLa densidad es la de un formulario: encabezados anchos y pesados subrayados con raya doble, renglones finos, letra chica legible a 17px de base. No hay fotos de ambiente ni tarjetas con íconos: la información real (con quién, qué días, dónde, qué obra social) se presenta escrita sobre la tarjeta, y eso es la ilustración. El movimiento es un solo gesto físico, el golpe del sello, y botones que se hunden al apretarlos.\n\nSacar un turno es el mostrador: la misma tarjeta a un costado, armándose renglón por renglón, y una sola pregunta por vez del otro. La tarjeta no es un adorno del home, es el objeto que el paciente construye y se lleva. Tema claro a propósito: se lee de día, en la calle, desde el teléfono. Se rechaza el sitio de clínica estándar: foto de stock, celeste genérico, tarjetas con íconos.",
     "keyCharacteristics": [
       "Cartulina como suelo, tarjeta blanca como único plano elevado.",
       "Cuatro tintas con oficio fijo: imprenta, birome, sello, numerador.",
       "Una sola familia (Archivo) en tres anchos; Kalam sólo para lo escrito a mano.",
       "Esquinas vivas en todo el sitio; filetes, rayas dobles y troquel en lugar de sombras.",
-      "Un único golpe de sello animado por página; botones que se hunden como un sello."
+      "Un único golpe de sello animado por página; botones que se hunden como un sello.",
+      "En los flujos de varios pasos, el objeto que se arma queda siempre a la vista y la pantalla hace una pregunta por vez."
     ],
     "rules": [
       {
@@ -378,18 +391,28 @@
         "section": "colors"
       },
       {
+        "name": "The Estado Con Tinta Rule",
+        "body": "Rojo de aviso y verde confirmado son estados del flujo, no colores de la tarjeta: van en el texto, en un contorno de 2px o en un aviso de fondo tenue, y nunca se usan como relleno de un botón principal ni como fondo de una sección.",
+        "section": "colors"
+      },
+      {
         "name": "The Tres Anchos Rule",
         "body": "Ancha (wdth 118) para encabezados, normal para leer, angosta (wdth 80) para rótulos y sellos. Se aplica con `font-variation-settings`, nunca con `font-stretch`, que la cara variable ignora.",
         "section": "typography"
       },
       {
         "name": "The Birome Corta Rule",
-        "body": "Kalam sólo para datos cortos escritos sobre un renglón o una frase breve agregada a mano, y siempre a 1.05rem o más. Nunca texto corrido, botones, navegación ni rótulos.",
+        "body": "Kalam sólo para datos cortos escritos sobre un renglón o una frase breve agregada a mano, y siempre a 1rem o más. Nunca texto corrido, botones, navegación ni rótulos.",
         "section": "typography"
       },
       {
         "name": "The Rótulo Es Campo Rule",
-        "body": "Las versalitas angostas son el rótulo de un campo de la tarjeta (un `dt` junto a su dato) o letra chica impresa. Nunca van flotando encima de un título de sección como antetítulo.",
+        "body": "Las versalitas angostas son el rótulo de un campo o de un grupo de campos (un `dt` junto a su dato, un `label`, un `legend` arriba de sus opciones) o letra chica impresa. Nunca van flotando encima de un título como antetítulo.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paso En La Frase Rule",
+        "body": "El número de paso se dice dentro de la línea que sigue al título, en negrita («**Paso 2 de 3.** Los turnos duran 60 minutos…»), y se repite en la lista numerada al costado. Nunca como versalita encima del título ni como píldora.",
         "section": "typography"
       },
       {
@@ -398,32 +421,54 @@
         "section": "layout"
       },
       {
+        "name": "The Mostrador Rule",
+        "body": "En un flujo de varios pasos, lo que se está armando queda a la vista todo el tiempo —tarjeta al costado en escritorio, tira fija arriba en el teléfono— y la columna principal hace una sola pregunta por pantalla. Nada de esconder lo ya decidido ni de pedir todo junto en una pantalla larga.",
+        "section": "layout"
+      },
+      {
         "name": "The Tarjeta Apoyada Rule",
-        "body": "Una sombra por sitio, y es de la tarjeta. Cualquier otro plano se separa con un filete de 1px en tinta o con la tarjeta blanca sobre la cartulina, nunca con sombra ni con sombra dura desplazada.",
+        "body": "Una sombra por sitio, y es de la tarjeta. Cualquier otro plano se separa con un filete de 1px o 2px en tinta o con la tarjeta blanca sobre la cartulina, nunca con sombra ni con sombra dura desplazada.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Un Solo Blanco Rule",
+        "body": "En una misma pantalla hay a lo sumo un plano blanco grande. Por eso el formulario del último paso son renglones sobre la cartulina y lo blanco son los campos: un panel blanco alrededor de campos blancos contradice la tarjeta apoyada.",
         "section": "elevation"
       },
       {
         "name": "The Esquinas Vivas Rule",
-        "body": "Ningún botón, tarjeta, campo ni foco se redondea. El foco es un contorno de 2px en tinta de sello a 2px de distancia, sin radio, que sigue la esquina recta del elemento.",
+        "body": "Ningún botón, tarjeta, chip, campo, casilla ni foco se redondea. El foco es un contorno de 2px en tinta de sello a 2px de distancia, sin radio, que sigue la esquina recta del elemento.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Casilla Cuadrada Rule",
+        "body": "Toda casilla de verificación y toda opción única se dibujan con la utilidad `casilla`: cuadrado de 2px tildado en birome. El radio y el relleno redondo del control nativo son lo único del sitio que vendría con esquinas redondeadas, y por eso se reemplazan.",
         "section": "shapes"
       }
     ],
     "dos": [
       "**Do** tratar cada pantalla como una pieza impresa sobre cartulina (background) con, a lo sumo, una tarjeta blanca (surface) apoyada.",
       "**Do** separar secciones con la fila de troquel y abrir cada una con título ancho (wdth 118, 800) y raya doble de 5px en tinta.",
-      "**Do** escribir en birome (Kalam, birome) los datos reales que completan un renglón, a 1.05rem o más.",
+      "**Do** escribir en birome (Kalam, birome) los datos reales que completan un renglón, a 1rem o más.",
+      "**Do** dejar hablar al renglón vacío en birome suave («lo elegís vos», «tus datos») en lugar de poner un guión o dejarlo en blanco.",
       "**Do** poner las alturas de las direcciones en rojo numerador, en negrita y con cifras tabulares.",
-      "**Do** dar a cada botón borde de 2px, esquinas vivas y el hundimiento de 2px / 0.985 en 100ms.",
+      "**Do** dar a cada botón y a cada chip borde de 2px, esquinas vivas y el hundimiento de 2px / 0.985 en 100ms.",
+      "**Do** usar la utilidad `casilla` para toda casilla y toda opción única, y dejar el tilde en birome.",
+      "**Do** mantener a la vista lo ya decidido en un flujo de varios pasos: tarjeta al costado en escritorio, tira fija arriba en el teléfono, y una salida de texto para corregirlo.",
+      "**Do** decir el paso dentro de la frase que sigue al título, en negrita, y repetirlo en la lista numerada al costado.",
       "**Do** girar lo apoyado (tarjeta, foto, sellos) entre -1° y -9°, y dejar derecho todo lo impreso.",
       "**Do** reservar la animación `sellar` (520ms, cubic-bezier(0.16, 1, 0.3, 1), 380ms de espera) para un único sello por página, y dejarlo quieto con movimiento reducido."
     ],
     "donts": [
       "**Don't** usar foto de stock, celeste genérico de clínica ni tarjetas con íconos.",
-      "**Don't** redondear esquinas; `rounded-full` sólo para lo que es redondo de verdad.",
+      "**Don't** redondear esquinas; `rounded-full` sólo para las muescas del troquel de la tarjeta.",
+      "**Don't** dejar los controles redondos del navegador: la casilla es cuadrada y se tilda en birome.",
       "**Don't** agregar sombras fuera de la tarjeta de turno, ni sombras duras desplazadas.",
+      "**Don't** poner dos planos blancos grandes en la misma pantalla; los campos blancos van sobre la cartulina, sin panel.",
       "**Don't** usar Kalam para párrafos, botones, navegación o rótulos.",
-      "**Don't** usar rojo numerador para texto corrido, fondos o botones.",
-      "**Don't** poner antetítulos en versalitas encima de los títulos de sección; las versalitas son rótulos de campo.",
+      "**Don't** usar rojo numerador para texto corrido, fondos o botones, ni rojo de aviso / verde confirmado como relleno de un botón principal.",
+      "**Don't** poner antetítulos en versalitas encima de los títulos; las versalitas son rótulos de campo o de grupo de campos.",
+      "**Don't** marcar el avance con una píldora de pasos ni con una barra de progreso: el paso se lee en la frase y en la lista numerada.",
       "**Don't** simular grano, manchas ni bordes corridos en los sellos; la tinta es plana.",
       "**Don't** separar secciones con fondos alternados o bandas de color."
     ]

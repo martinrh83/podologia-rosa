@@ -5,7 +5,7 @@ import { BookingFlow, type BookingDay } from "@/components/booking-flow";
 import { getAvailability } from "@/lib/availability";
 import { listActiveLocations } from "@/lib/db/locations";
 import { getPractitionerBySlug, practitionerName } from "@/lib/db/practitioners";
-import { formatDay, formatShortDay, formatTime, toLocalDateKey } from "@/lib/format";
+import { formatCardDay, formatDay, formatShortDay, formatTime, toLocalDateKey } from "@/lib/format";
 
 // Availability changes on every booking, so this page must never be cached.
 export const dynamic = "force-dynamic";
@@ -66,6 +66,7 @@ export default async function AgendaProfesionalPage({ params }: PageProps<"/turn
       key,
       label: formatDay(slot.start),
       shortLabel: formatShortDay(slot.start),
+      cardLabel: formatCardDay(slot.start),
       locationName: null,
       slots: [],
     };
@@ -86,17 +87,10 @@ export default async function AgendaProfesionalPage({ params }: PageProps<"/turn
     day.locationName = ids.size === 1 ? (locationName.get([...ids][0]) ?? null) : null;
   }
 
+  // El h1 y el encabezado los pone el flujo: cambian con el paso, y el paso es
+  // lo que el paciente necesita leer arriba de todo.
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-      <header className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sacar un turno</h1>
-        <p className="mt-3 text-lg text-muted">
-          Son dos pasos y no hace falta crear una cuenta. Cada turno dura{" "}
-          {practitioner.slot_minutes} minutos.
-        </p>
-      </header>
-
-      <BookingFlow
+    <BookingFlow
         locations={locations.map((location) => ({
           id: location.id,
           name: location.name,
@@ -106,13 +100,13 @@ export default async function AgendaProfesionalPage({ params }: PageProps<"/turn
           id: practitioner.id,
           name: practitionerName(practitioner),
           title: practitioner.title,
+          slotMinutes: practitioner.slot_minutes,
         }}
         days={[...byDay.values()]}
         horizonDays={settings.horizon_days}
         clinicPhone={settings.phone}
         clinicWhatsapp={settings.whatsapp}
-        clinicName={settings.clinic_name}
-      />
-    </div>
+      clinicName={settings.clinic_name}
+    />
   );
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { cancelByToken } from "@/lib/booking";
 
@@ -32,5 +33,11 @@ export async function cancelTurno(
   revalidatePath("/turnos");
   revalidatePath("/admin");
 
-  return { status: "cancelled" };
+  /*
+    La página se vuelve a renderizar en el servidor apenas termina la acción, y
+    para entonces el turno ya está cancelado: sin esta marca el paciente cae en
+    "este turno ya no está activo", que es lo que ve alguien que abre un enlace
+    viejo, no un acuse de lo que acaba de hacer.
+  */
+  redirect(`/turnos/cancelar/${token}?listo=1`);
 }

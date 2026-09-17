@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import type { ScheduleRow } from "@/components/home/directions";
 import { Address } from "@/components/home/address";
-import { Stamp } from "@/components/home/stamp";
+import { Stamp } from "@/components/stamp";
 import { Logo } from "@/components/logo";
 import type { ClinicSettings, Location, PractitionerWithSpecialty } from "@/lib/db/types";
 import { whatsappLink } from "@/lib/format";

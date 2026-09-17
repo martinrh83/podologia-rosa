@@ -63,7 +63,7 @@
    * botón del encabezado, la ficha, las tarjetas, los formularios. Un solo
    * criterio, y se decide acá en vez de en cien clases: `rounded-lg` y
    * `rounded-xl` valen cero. `rounded-full` queda intacto para lo que sí es
-   * una píldora, como la barra de pasos de la reserva.
+   * redondo: hoy, las dos muescas del troquel de la tarjeta.
    *
    * Volver a redondear es borrar estas dos líneas.
    */
@@ -116,6 +116,34 @@ html {
   background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px);
   background-size: 10px 6px;
   background-repeat: repeat-x;
+}
+
+/*
+ * La casilla del formulario: un cuadrado de 2px que se tilda en birome, igual
+ * que las de Tratamientos en el home. Reemplaza al control redondo del
+ * navegador, que es lo único del sitio que vendría con esquinas redondeadas.
+ */
+@utility casilla {
+  appearance: none;
+  position: relative;
+  width: 1.3rem;
+  height: 1.3rem;
+  flex-shrink: 0;
+  border: 2px solid var(--foreground);
+  background: var(--surface);
+  cursor: pointer;
+
+  &:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.3rem;
+    top: 0.02rem;
+    width: 0.4rem;
+    height: 0.75rem;
+    border: solid var(--birome);
+    border-width: 0 3px 3px 0;
+    transform: rotate(38deg);
+  }
 }
 
 /*
