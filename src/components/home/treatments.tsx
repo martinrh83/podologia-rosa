@@ -34,11 +34,6 @@ export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
             </li>
           ))}
         </ul>
-
-        <p className="mt-6 max-w-2xl text-sm text-muted">
-          ¿No sabés cuál te corresponde? Sacá turno igual y lo vemos juntas. La duración
-          depende de con quién te atiendas; la ves al elegir profesional.
-        </p>
       </div>
     </section>
   );
