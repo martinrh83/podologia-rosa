@@ -74,13 +74,16 @@ where full_name = 'Secretaría'
 --
 -- Lo borró la migración 0016 porque era contenido inventado viviendo en una
 -- migración, y así llegaba a producción. Acá sí corresponde: `db reset` lo
--- repone en local, `db push` no lo toca, y en la nube el catálogo real lo carga
--- el consultorio desde /admin/servicios.
+-- repone en local y `db push` no lo toca. Ojo: /admin/servicios edita nombre y
+-- precio y activa o desactiva, pero no crea servicios ni edita descripciones.
 --
--- Los precios son de ejemplo. No los copies a producción: con la inflación, un
--- número escrito en un archivo del repo está mal a los dos meses — que es
--- exactamente la razón por la que los precios viven en la base y hay una
--- pantalla para editarlos.
+-- Los cuatro tratamientos que ofrece el consultorio. Las descripciones son un
+-- borrador para desarrollo: las reales se escriben desde el panel.
+--
+-- Sin precios: no se publican en el sitio, y un número escrito en un archivo
+-- del repo está mal a los dos meses con la inflación — que es exactamente la
+-- razón por la que los precios viven en la base y hay una pantalla para
+-- editarlos.
 --
 -- Idempotente, como el resto: sólo siembra si la tabla está vacía.
 -- `specialty_id` es NOT NULL desde 0006: los servicios cuelgan de una
@@ -90,10 +93,9 @@ insert into services (name, description, price, display_order, specialty_id)
 select s.name, s.description, s.price, s.display_order,
        (select id from specialties where name = 'Podología')
 from (values
-  ('Quiropodia',           'Tratamiento completo de callos, durezas y uñas.', 15000::numeric, 1),
-  ('Uñas encarnadas',      'Tratamiento y seguimiento de onicocriptosis.',    18000::numeric, 2),
-  ('Pie diabético',        'Control y cuidado preventivo especializado.',     20000::numeric, 3),
-  ('Verrugas plantares',   'Tratamiento de papilomas en la planta del pie.',  18000::numeric, 4),
-  ('Estudio de la pisada', 'Evaluación biomecánica y recomendaciones.',       25000::numeric, 5)
+  ('Consulta general', 'Revisión completa de tus pies y atención de lo que necesiten en el momento.', null::numeric, 1),
+  ('Onicocriptosis',   'Uña encarnada: alivio del dolor y la inflamación, y seguimiento hasta que crezca bien.', null::numeric, 2),
+  ('Pie diabético',    'Control y cuidado preventivo para personas con diabetes.', null::numeric, 3),
+  ('Ortonixia',        'Corrección de la curvatura de uñas que se encarnan una y otra vez.', null::numeric, 4)
 ) as s(name, description, price, display_order)
 where not exists (select 1 from services);

@@ -18,7 +18,11 @@ export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
       <div className="mx-auto max-w-5xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Tratamientos</h2>
 
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/*
+          Dos columnas y no tres: con cuatro tratamientos, tres dejaban uno suelto
+          abajo. Además son las mismas columnas que Profesionales y Cómo llegar.
+        */}
+        <ul className="mt-6 grid gap-6 sm:grid-cols-2">
           {services.map((service) => (
             <li key={service.id} className="rounded-xl border border-border bg-background p-5">
               <p className="text-[1.05rem] font-medium">{service.name}</p>
