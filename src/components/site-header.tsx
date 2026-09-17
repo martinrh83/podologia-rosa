@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Logo } from "@/components/logo";
 
@@ -32,6 +32,10 @@ export type NavItem = { href: string; label: string };
 export function SiteHeader({ nav }: { nav: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Mientras el scroll va hacia una sección elegida en el menú, el resaltado
+  // queda fijo en ella. Ver `pinSection`.
+  const pinned = useRef(false);
+  const pinTimer = useRef(0);
   const pathname = usePathname();
   const [lastPathname, setLastPathname] = useState(pathname);
 
@@ -51,14 +55,36 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
   }
 
   /**
-   * Qué sección se está mirando.
+   * Qué sección se está mirando: la última cuyo borde de arriba ya pasó un
+   * tercio de la pantalla.
    *
-   * `rootMargin` recorta la ventana de observación a una franja del medio de la
-   * pantalla: sin eso, dos secciones visibles a la vez se pelean el resaltado y
-   * el menú titila mientras uno scrollea.
+   * Era un `IntersectionObserver` con una franja del 45% al 55% de la pantalla,
+   * y tenía un borde geométrico: en pantallas altas la franja arrancaba tocando
+   * la primera sección. A 1920x1080 el hero termina en 592px y la franja llega
+   * a 594, así que el menú resaltaba "Tratamientos" sin haber scrolleado nada.
+   * Un observer sólo avisa cuando algo entra o sale, así que no alcanzaba con
+   * filtrar por posición en el aviso: la sección ya adentro no volvía a avisar.
    *
-   * Sólo corre donde hay secciones que observar. En /turnos o /privacidad no
-   * encuentra ninguna y no resalta nada, que es lo correcto.
+   * Un tercio y no la mitad: al elegir una sección del menú, su borde queda
+   * pegado abajo del encabezado, y con la mitad una sección corta como
+   * "Profesionales" dejaba pasar a la siguiente y el menú resaltaba otra. Y
+   * arriba de todo —el hero, que no es una sección del menú— no se resalta
+   * nada aunque la pantalla sea tan alta que la primera sección ya se vea.
+   * Son cuatro `getBoundingClientRect()` por frame como mucho.
+   *
+   * La excepción es el fondo de la página. La última sección es corta y con el
+   * scroll al máximo su borde puede no llegar nunca a la mitad: sin esto,
+   * "Preguntas frecuentes" no podría resaltarse. Si no hay más para bajar y se
+   * ve, gana ella.
+   *
+   * Lo que la posición no puede resolver es una sección elegida desde el menú
+   * que no llega a subir porque la página se termina: "Cómo llegar" y
+   * "Preguntas frecuentes" dejan la pantalla exactamente en el mismo lugar, el
+   * fondo. Para eso está `pinSection`: mientras dura ese scroll, manda lo que
+   * se eligió.
+   *
+   * Sólo corre donde hay secciones. En /turnos o /privacidad no encuentra
+   * ninguna y no resalta nada, que es lo correcto.
    */
   useEffect(() => {
     const ids = nav.map((item) => item.href.split("#")[1]).filter(Boolean);
@@ -71,37 +97,70 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
     // que es además el único momento en que puede cambiar la página.
     if (sections.length === 0) return;
 
-    // Se lleva la cuenta de TODAS las que están en la franja, no sólo de la
-    // última que entró. Dos cosas dependen de esto:
-    //
-    //   - Arriba de todo —el hero, que no es una sección del menú— no hay
-    //     ninguna en la franja y no se resalta nada. Marcando sólo al entrar,
-    //     quedaba pegado el último valor y el menú resaltaba "Cómo llegar"
-    //     estando en el tope de la página.
-    //   - Si dos se superponen gana la ÚLTIMA en orden del documento, que es la
-    //     que uno está entrando al bajar.
-    //
-    // Lo segundo no es un detalle teórico: la última sección es corta y queda
-    // cerca del fondo, así que con el scroll al máximo la franja toca a las dos
-    // últimas a la vez. Eligiendo la primera, "Preguntas frecuentes" no podía
-    // resaltarse nunca — no había forma de scrollear lo suficiente.
-    const visible = new Set<string>();
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const line = window.innerHeight / 3;
+      const last = sections[sections.length - 1];
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) visible.add(entry.target.id);
-          else visible.delete(entry.target.id);
-        }
-        const last = [...sections].reverse().find((section) => visible.has(section.id));
-        setActiveId(last?.id ?? null);
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
-    );
+      if (atBottom && last.getBoundingClientRect().top < window.innerHeight) {
+        setActiveId(last.id);
+        return;
+      }
+      if (window.scrollY < 1) {
+        setActiveId(null);
+        return;
+      }
+      const current = sections.findLast((section) => section.getBoundingClientRect().top <= line);
+      setActiveId(current?.id ?? null);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const onScroll = () => {
+      // Con una sección fijada, cada evento de scroll corre la liberación a
+      // 150ms: se suelta cuando el scroll deslizante termina, sin recalcular,
+      // y el próximo scroll de la persona vuelve a mandar.
+      if (pinned.current) {
+        window.clearTimeout(pinTimer.current);
+        pinTimer.current = window.setTimeout(() => (pinned.current = false), 150);
+        return;
+      }
+      schedule();
+    };
 
-    for (const section of sections) observer.observe(section);
-    return () => observer.disconnect();
+    // El primer cálculo también va por `requestAnimationFrame`: llamar a
+    // `update()` acá mismo sería un setState síncrono dentro del efecto, que
+    // `react-hooks/set-state-in-effect` prohíbe.
+    schedule();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", schedule);
+    };
   }, [nav, pathname]);
+
+  /**
+   * Resalta la sección elegida en el menú hasta que el scroll hacia ella
+   * termina.
+   *
+   * Si el link lleva a otra página (el menú desde /turnos apunta a `/#team`) la
+   * sección no está en este documento y no hay nada que fijar. El segundo
+   * de gracia cubre el caso en que no hay scroll —la sección ya estaba en su
+   * lugar— y entonces nunca llegaría el evento que la suelta.
+   */
+  function pinSection(href: string) {
+    const id = href.split("#")[1];
+    if (!id || !document.getElementById(id)) return;
+    setActiveId(id);
+    pinned.current = true;
+    window.clearTimeout(pinTimer.current);
+    pinTimer.current = window.setTimeout(() => (pinned.current = false), 1000);
+  }
 
   return (
     <header
@@ -125,6 +184,7 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => pinSection(item.href)}
                 aria-current={isActive ? "true" : undefined}
                 className={
                   isActive
@@ -186,7 +246,10 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      pinSection(item.href);
+                    }}
                     aria-current={isActive ? "true" : undefined}
                     className={`block border-b border-border py-3 text-[1.05rem] last:border-0 ${
                       isActive ? "font-medium text-accent" : "text-foreground"
