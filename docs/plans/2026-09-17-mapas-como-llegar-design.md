@@ -35,7 +35,7 @@ del link que se pasó para esa sede.
 `<Image>` de `next/image` con un `.svg` en `public/maps/`, no un SVG escrito
 dentro del componente:
 
-- **Peso del home.** Cada mapa pesa unos 20 a 40 KB. Dentro del componente
+- **Peso del home.** Cada mapa pesa unos 8 a 11 KB. Dentro del componente
   viajaría en el HTML de cada visita, aunque nadie baje hasta la sección. Como
   archivo aparte, el navegador lo guarda en caché.
 - **Carga diferida.** `<Image>` trae `loading="lazy"` por defecto.
@@ -83,9 +83,9 @@ Para cada una:
 
 1. Pide a la API Overpass de OpenStreetMap las calles (`highway`), las plazas
    (`leisure=park`), el agua (`natural=water`, `waterway`) y la costa, en un
-   recuadro de unos 600 × 400 m centrado en la sede.
+   recuadro de unos 960 × 640 m (7 cuadras por 5) centrado en la sede.
 2. Proyecta las coordenadas con Web Mercator a un `viewBox="0 0 600 400"` y las
-   redondea a un decimal.
+   redondea a un decimal. Cada unidad son 1,6 m.
 3. Escribe el SVG.
 
 La API es gratuita y compartida: un pedido por sede, con una pausa entre los
@@ -113,6 +113,9 @@ Tipografía `system-ui`: la imagen no puede cargar la fuente del sitio.
 
 Ajustes que salieron de verlo en el navegador:
 
+- **Zoom.** Con 600 × 400 m quedaba muy cerca: no se veían avenidas ni el río
+  para ubicarse. Con 960 × 640 m entran Entre Ríos en el Centro y la Costanera
+  en San José, con las calles más finas para que no se amontone.
 - **Tamaño.** En un teléfono la tarjeta mide unos 354 px, así que el mapa se ve
   a 0,6×. Los nombres van a 18 unidades (unos 11 px en el teléfono) y el pin a
   1,3×: con 14 unidades los nombres quedaban de 8 px.

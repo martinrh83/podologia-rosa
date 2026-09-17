@@ -43,8 +43,8 @@ const LOCATIONS = [
 
 const WIDTH = 600;
 const HEIGHT = 400;
-/** Metros de terreno por unidad del viewBox: 600 × 400 m, unas 4 cuadras por 3. */
-const METERS_PER_UNIT = 1;
+/** Metros de terreno por unidad del viewBox: 960 × 640 m, unas 7 cuadras por 5. */
+const METERS_PER_UNIT = 1.6;
 
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const USER_AGENT = "podologia-mitre-maps/1.0 (generación única de mapas estáticos)";
@@ -61,16 +61,16 @@ const COLORS = {
   pin: "#0055a4",
 };
 
-/** Ancho de cada tipo de calle, en unidades del viewBox (≈ metros). */
+/** Ancho de cada tipo de calle, en unidades del viewBox. */
 const ROAD_WIDTHS = {
-  trunk: 18,
-  primary: 16,
-  secondary: 15,
-  tertiary: 12,
-  unclassified: 10,
-  residential: 10,
-  living_street: 8,
-  pedestrian: 7,
+  trunk: 14,
+  primary: 13,
+  secondary: 12,
+  tertiary: 9,
+  unclassified: 8,
+  residential: 8,
+  living_street: 6,
+  pedestrian: 5,
 };
 const AVENUES = new Set(["trunk", "primary", "secondary"]);
 
@@ -81,7 +81,7 @@ const LABEL_SIZE = 18;
 // Proyección
 // ---------------------------------------------------------------------------
 
-/** Web Mercator local: alcanza y sobra para 600 m. */
+/** Web Mercator local: alcanza y sobra para menos de un kilómetro. */
 function projector({ lat, lon }) {
   const metersPerDegreeLat = 111_320;
   const metersPerDegreeLon = 111_320 * Math.cos((lat * Math.PI) / 180);
@@ -306,6 +306,9 @@ function rings(element, project) {
 const SHORT_NAMES = {
   "Antonio Balcarce": "Balcarce",
   "Avenida 20 de Junio": "Av. 20 de Junio",
+  "Avenida Costanera": "Av. Costanera",
+  "Avenida Entre Ríos": "Av. Entre Ríos",
+  "Coronel Jorge Vidt": "Cnel. Vidt",
   "Bernardino Rivadavia": "Rivadavia",
   "Diagonal 9 de Julio": "Diag. 9 de Julio",
   "Facundo de Zuviría": "Zuviría",
