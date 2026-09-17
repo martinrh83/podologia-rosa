@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { summarizeWeek } from "./week-summary";
+import { groupWeekByHours, summarizeWeek } from "./week-summary";
 
 const shift = (weekday: number, start_time: string, end_time: string) => ({
   weekday,
@@ -57,5 +57,47 @@ describe("summarizeWeek", () => {
 
   it("no inventa nada sin agenda cargada", () => {
     expect(summarizeWeek([])).toBeNull();
+  });
+});
+
+describe("groupWeekByHours", () => {
+  it("junta los días que atienden en las mismas franjas", () => {
+    const schedule = [
+      shift(1, "08:00:00", "12:00:00"),
+      shift(1, "16:00:00", "20:00:00"),
+      shift(2, "16:00:00", "20:00:00"),
+      shift(3, "08:00:00", "12:00:00"),
+      shift(3, "16:00:00", "20:00:00"),
+      shift(4, "16:00:00", "20:00:00"),
+      shift(5, "16:00:00", "20:00:00"),
+    ];
+
+    expect(groupWeekByHours(schedule)).toEqual([
+      { days: "Lunes y miércoles", hours: "de 8 a 12 y de 16 a 20 h" },
+      { days: "Martes, jueves y viernes", hours: "de 16 a 20 h" },
+    ]);
+  });
+
+  it("ordena los grupos por el primer día de la semana, que arranca el lunes", () => {
+    const schedule = [
+      shift(0, "09:00", "13:00"),
+      shift(6, "10:00", "14:00"),
+      shift(2, "09:00", "13:00"),
+    ];
+
+    expect(groupWeekByHours(schedule)).toEqual([
+      { days: "Martes y domingo", hours: "de 9 a 13 h" },
+      { days: "Sábado", hours: "de 10 a 14 h" },
+    ]);
+  });
+
+  it("cuenta una sola vez la franja que comparten dos profesionales", () => {
+    const schedule = [shift(6, "09:00", "13:00"), shift(6, "09:00", "13:00")];
+
+    expect(groupWeekByHours(schedule)).toEqual([{ days: "Sábado", hours: "de 9 a 13 h" }]);
+  });
+
+  it("devuelve una lista vacía sin agenda cargada", () => {
+    expect(groupWeekByHours([])).toEqual([]);
   });
 });
