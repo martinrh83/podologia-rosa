@@ -2,31 +2,24 @@ import Image from "next/image";
 
 import { mapForAddress, type LocationMap } from "@/lib/maps";
 import type { Location } from "@/lib/db/types";
-import { groupWeekByHours } from "@/lib/week-summary";
 
 export type ScheduleRow = { weekday: number; start_time: string; end_time: string; location_id: string };
 
 /**
- * Dónde queda cada sede y cuándo atiende: una tarjeta por sede.
+ * Dónde queda cada sede: una tarjeta por sede, con su mapa.
  *
- * Era `/como-llegar`. Los horarios NO están escritos acá: salen de
- * `weekly_schedule`, o sea de la agenda real de cada profesional. Por eso este
- * dato vive en una sola parte del sitio y no en el texto de las preguntas
- * frecuentes: el día que Rosa reorganice la semana desde el panel, esto se
- * actualiza solo y un texto fijo habría quedado mintiendo.
+ * Era `/como-llegar`.
  *
- * LOS HORARIOS VAN EN LA TARJETA DE SU SEDE
+ * SIN HORARIOS
  *
- *   Eran una tabla aparte, un día por fila, con el nombre de la sede repetido en
- *   cada una. Pero cada sede atiende en sus propios días: en la tarjeta se leen
- *   junto a la dirección, agrupados por horario, y en el teléfono ya no se
- *   parte "16:00 a / 20:00" en dos líneas. Es el detalle al que manda el
- *   "Ver horarios" del hero.
+ *   Estuvieron, primero como tabla y después dentro de cada tarjeta, y salieron:
+ *   esta sección contesta cómo llegar. Cuándo atienden lo resume el hero, y los
+ *   horarios reales se ven al sacar turno.
  *
  * SIN TELÉFONO NI WHATSAPP
  *
  *   Están en el hero como botones, que dicen qué hacen. Acá eran dos links
- *   sueltos entre las tarjetas y la tabla, con el número en crudo.
+ *   sueltos debajo de las tarjetas, con el número en crudo.
  *
  * EL MAPA
  *
@@ -49,13 +42,7 @@ export type ScheduleRow = { weekday: number; start_time: string; end_time: strin
  *   Cada mapa se busca por la dirección de la sede (`src/lib/maps.ts`). Una
  *   sede sin mapa —nueva, o que se mudó— muestra su tarjeta igual, sin él.
  */
-export function Directions({
-  locations,
-  schedule,
-}: {
-  locations: Location[];
-  schedule: ScheduleRow[];
-}) {
+export function Directions({ locations }: { locations: Location[] }) {
   const hasManyLocations = locations.length > 1;
 
   return (
@@ -68,9 +55,6 @@ export function Directions({
         >
           {locations.map((location) => {
             const map = mapForAddress(location.address);
-            const week = groupWeekByHours(
-              schedule.filter((row) => row.location_id === location.id),
-            );
             return (
               <li
                 key={location.id}
@@ -78,23 +62,12 @@ export function Directions({
               >
                 {map && <LocationMapImage map={map} href={location.map_url} />}
 
-                {/* flex-1 + mt-auto: los botones quedan alineados aunque una sede tenga más horarios. */}
+                {/* flex-1 + mt-auto: los botones quedan alineados aunque una dirección ocupe dos líneas. */}
                 <div className="flex flex-1 flex-col p-5">
                   {hasManyLocations && (
                     <h3 className="text-lg font-semibold tracking-tight">{location.name}</h3>
                   )}
                   <p className="text-[1.05rem] text-muted">{location.address}</p>
-
-                  {week.length > 0 && (
-                    <dl className="mt-4 space-y-2">
-                      {week.map((group) => (
-                        <div key={group.days}>
-                          <dt className="font-medium">{group.days}</dt>
-                          <dd className="tabular-nums text-muted">{group.hours}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  )}
 
                   {location.map_url && (
                     <div className="mt-auto pt-5">

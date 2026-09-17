@@ -8,7 +8,7 @@ export type WeekSummary = {
   /**
    * "de 9 a 18 h", sólo si TODOS los días atienden en las mismas franjas. Con
    * horarios distintos por día, una frase no alcanza para decirlo sin mentir:
-   * queda en null y el detalle vive en "Cómo llegar", con `groupWeekByHours`.
+   * queda en null y el hero muestra sólo los días.
    */
   hours: string | null;
 };
@@ -16,8 +16,8 @@ export type WeekSummary = {
 /**
  * La semana del consultorio en una línea, para el hero.
  *
- * Sale de `weekly_schedule`, igual que los horarios de "Cómo llegar": las dos
- * muestran el mismo dato y no pueden contradecirse.
+ * Sale de `weekly_schedule`, la agenda real de cada profesional: cuando Rosa
+ * reorganiza la semana desde el panel, esto se actualiza solo.
  *
  * Null si no hay agenda cargada: mejor no decir nada que decir "cerrado".
  */
@@ -31,30 +31,6 @@ export function summarizeWeek(schedule: ScheduleShift[]): WeekSummary | null {
     days: describeDays([...signatures.keys()]),
     hours: distinct.size === 1 ? describeShifts([...distinct][0].split(",")) : null,
   };
-}
-
-/**
- * La semana de una sede, agrupada por horario, para su tarjeta en "Cómo llegar":
- *
- *   Lunes y miércoles          de 8 a 12 y de 16 a 20 h
- *   Martes, jueves y viernes   de 16 a 20 h
- *
- * Es lo que `summarizeWeek` no puede decir en una línea cuando los horarios
- * cambian según el día. Los grupos van en el orden de la semana de Rosa, por su
- * primer día. Lista vacía sin agenda cargada.
- */
-export function groupWeekByHours(schedule: ScheduleShift[]): { days: string; hours: string }[] {
-  const daysBySignature = new Map<string, number[]>();
-  for (const [day, signature] of signaturesByDay(schedule)) {
-    const days = daysBySignature.get(signature) ?? [];
-    days.push(day);
-    daysBySignature.set(signature, days);
-  }
-
-  return [...daysBySignature].map(([signature, days]) => ({
-    days: describeDays(days),
-    hours: describeShifts(signature.split(",")),
-  }));
 }
 
 /**

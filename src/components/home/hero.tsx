@@ -13,8 +13,8 @@ import { summarizeWeek } from "@/lib/week-summary";
  * filas, no tarjetas sueltas: tres datos cortos en tres cajas competirían con
  * "Sacar turno", que es lo único que tiene que ganar la mirada.
  *
- * Dirección y días salen de la base, igual que en "Cómo llegar": las dos
- * muestran el mismo dato en la misma página y no pueden contradecirse. Las
+ * Dirección y días salen de la base. La dirección también está en "Cómo
+ * llegar": las dos la muestran en la misma página y no pueden contradecirse. Las
  * obras sociales van fijas porque no hay dónde cargarlas en el panel — y con
  * nombre: "trabajamos con obras sociales" a secas le promete cobertura a
  * alguien de una que no se atiende.
@@ -125,16 +125,8 @@ export function Hero({
             <dt className="text-sm text-muted">Cuándo</dt>
             <dd className="mt-1">
               <p className="text-[1.05rem] font-medium">{week.days}</p>
-              {week.hours ? (
-                <p className="mt-0.5 text-muted">{week.hours}</p>
-              ) : (
-                <a
-                  href="#directions"
-                  className="mt-0.5 inline-block underline decoration-accent/50 underline-offset-2 hover:text-accent hover:decoration-accent"
-                >
-                  Ver horarios
-                </a>
-              )}
+              {/* Con horarios distintos según el día, sólo los días: el detalle se ve al sacar turno. */}
+              {week.hours && <p className="mt-0.5 text-muted">{week.hours}</p>}
             </dd>
           </div>
         )}

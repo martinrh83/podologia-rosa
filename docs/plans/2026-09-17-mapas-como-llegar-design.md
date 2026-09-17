@@ -136,15 +136,19 @@ Queda afuera del estilo de Snazzy:
 ```
 Cómo llegar
 [tarjeta Centro]   [tarjeta San José]     ← sm:grid-cols-2, apiladas en teléfono
-Teléfono / WhatsApp │ Horarios            ← las dos columnas de hoy, sin cambios
 ```
+
+Al principio, debajo de las tarjetas seguían el teléfono, el WhatsApp y la tabla
+de horarios. Salieron los dos: el contacto ya está en el hero como botones, y los
+horarios no contestan cómo llegar. Cuándo atienden lo resume el hero y el detalle
+se ve al sacar turno.
 
 Cada tarjeta tiene borde `--border`, fondo `--surface` y esquinas rectas:
 
 1. El mapa, del ancho de la tarjeta, en proporción 3:2 y enlazado a `map_url`.
-2. El nombre de la sede, en mayúsculas y color de acento.
+2. El nombre de la sede, como `h3`.
 3. La dirección.
-4. El botón "Cómo llegar en Google Maps".
+4. El botón "Abrir en Google Maps".
 
 ### Casos límite
 

@@ -84,7 +84,7 @@ export default async function HomePage() {
 
       <Treatments services={services} />
       <Team practitioners={practitioners} />
-      <Directions locations={locations} schedule={schedule} />
+      <Directions locations={locations} />
       <Faq />
     </>
   );
