@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 /**
- * Calm clinical palette: warm neutrals rather than the cold blue-grey of most
- * medical sites, with a single French blue accent (azul Francia, the classic
- * flag blue #0055A4).
+ * Calm clinical palette: cool, barely-tinted neutrals with a single French blue
+ * accent (azul Francia, the classic flag blue #0055A4).
+ *
+ * The neutrals used to be warm (hues 26-40°), picked for the old teal accent.
+ * Next to a cold blue (209°) they read as a yellowish cast around every blue
+ * element, so they moved to the blue's side of the wheel. Still near-grey: the
+ * point is that they stop fighting the accent, not that the site turns blue.
+ *
+ *   foreground on background   16.5:1
+ *   muted on background         5.6:1   (6.0:1 on surface)
  *
  * The logo is painted in the accent too. It had its own light blue (#5bb4e0),
  * but at 2.3:1 on white its thin strokes barely showed, and next to the accent
@@ -16,12 +23,12 @@
  * than none, so the palette is defined once and painted explicitly.
  */
 :root {
-  --background: #faf9f7;
+  --background: #f5f7fa;
   --surface: #ffffff;
-  --surface-muted: #f2f0ec;
-  --foreground: #1c1917;
-  --muted: #6b625b;
-  --border: #e3ded7;
+  --surface-muted: #eef1f5;
+  --foreground: #15191e;
+  --muted: #5b6472;
+  --border: #d9dee5;
 
   --accent: #0055a4;
   --accent-hover: #004488;
@@ -45,6 +52,20 @@
   --color-success: var(--success);
 
   --font-sans: var(--font-sans-stack);
+
+  /*
+   * Esquinas rectas en todo el sitio, panel incluido.
+   *
+   * Los botones del hero pasaron a rectos y el resto seguía redondeado: el
+   * botón del encabezado, la ficha, las tarjetas, los formularios. Un solo
+   * criterio, y se decide acá en vez de en cien clases: `rounded-lg` y
+   * `rounded-xl` valen cero. `rounded-full` queda intacto para lo que sí es
+   * una píldora, como la barra de pasos de la reserva.
+   *
+   * Volver a redondear es borrar estas dos líneas.
+   */
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 }
 
 html {
@@ -58,11 +79,16 @@ body {
   color: var(--foreground);
 }
 
-/* Visible focus everywhere — keyboard and screen-reader users included. */
+/*
+ * Visible focus everywhere — keyboard and screen-reader users included.
+ *
+ * No `border-radius` here: it used to set 4px, which reshaped the focused
+ * element itself, so a square button turned rounded the moment it got focus.
+ * The outline already follows each element's own corners.
+ */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 /*
