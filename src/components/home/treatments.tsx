@@ -21,9 +21,9 @@ export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
   if (services.length === 0) return null;
 
   return (
-    <section id="treatments" className="scroll-mt-20">
+    <section id="treatments" className="scroll-mt-7">
       <div aria-hidden className="perforado h-1.5" />
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <SectionHeading>Tratamientos</SectionHeading>
 
         <ul className="mt-2 grid border-b border-border sm:grid-cols-2 sm:gap-x-12">

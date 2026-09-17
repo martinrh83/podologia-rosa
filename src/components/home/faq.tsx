@@ -20,9 +20,9 @@ export function Faq() {
   if (FAQ.length === 0) return null;
 
   return (
-    <section id="faq" className="scroll-mt-20">
+    <section id="faq" className="scroll-mt-7">
       <div aria-hidden className="perforado h-1.5" />
-      <div className="mx-auto max-w-6xl px-4 pb-8 pt-16 sm:px-6 sm:pt-24">
+      <div className="mx-auto max-w-6xl px-4 pb-8 pt-14 sm:px-6 sm:pt-20">
         <SectionHeading>Preguntas frecuentes</SectionHeading>
 
         {/*

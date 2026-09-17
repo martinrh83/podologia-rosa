@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/home/section-heading";
-import { Stamp } from "@/components/home/stamp";
+import { Stamp } from "@/components/stamp";
 import { practitionerName } from "@/lib/db/practitioners";
 import type { PractitionerWithSpecialty } from "@/lib/db/types";
 import { photoForPractitioner } from "@/lib/team-photos";
@@ -35,9 +35,9 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
   if (practitioners.length === 0) return null;
 
   return (
-    <section id="team" className="scroll-mt-20">
+    <section id="team" className="scroll-mt-7">
       <div aria-hidden className="perforado h-1.5" />
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <SectionHeading lead="Atendemos de a una persona por vez, sin apuro y con el tiempo suficiente para explicarte qué está pasando.">
           Profesionales
         </SectionHeading>

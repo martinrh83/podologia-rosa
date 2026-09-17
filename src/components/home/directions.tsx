@@ -55,9 +55,9 @@ export function Directions({ locations }: { locations: Location[] }) {
   const hasManyLocations = locations.length > 1;
 
   return (
-    <section id="directions" className="scroll-mt-20">
+    <section id="directions" className="scroll-mt-7">
       <div aria-hidden className="perforado h-1.5" />
-      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <SectionHeading>Cómo llegar</SectionHeading>
 
         <ul

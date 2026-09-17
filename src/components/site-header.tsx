@@ -145,17 +145,31 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
   }, [nav, pathname]);
 
   /**
-   * Resalta la sección elegida en el menú hasta que el scroll hacia ella
-   * termina.
+   * Lleva a la sección elegida y la deja resaltada hasta que ese scroll termina.
+   *
+   * EL SCROLL LO HACEMOS NOSOTROS, A PROPÓSITO
+   *
+   *   Tocar "Profesionales" estando ya en `/#team` no navega: la URL no cambia,
+   *   así que el router no hace nada y el navegador tampoco vuelve a saltar al
+   *   ancla. En la práctica, el que scrollea por el home y vuelve a tocar la
+   *   misma sección del menú ve que el link "no anda". Por eso movemos nosotros
+   *   la página con `scrollIntoView`, que además respeta el
+   *   `scroll-behavior: smooth` y la preferencia de movimiento reducido.
+   *
+   *   El `Link` sigue haciendo lo suyo: actualiza la URL, que es lo que permite
+   *   compartir `/#team`.
    *
    * Si el link lleva a otra página (el menú desde /turnos apunta a `/#team`) la
-   * sección no está en este documento y no hay nada que fijar. El segundo
-   * de gracia cubre el caso en que no hay scroll —la sección ya estaba en su
-   * lugar— y entonces nunca llegaría el evento que la suelta.
+   * sección no está en este documento: no hay nada que mover ni que fijar, y de
+   * la navegación se encarga el `Link`. El segundo de gracia cubre el caso en
+   * que no hay scroll —la sección ya estaba en su lugar— y entonces nunca
+   * llegaría el evento que la suelta.
    */
   function pinSection(href: string) {
     const id = href.split("#")[1];
-    if (!id || !document.getElementById(id)) return;
+    const section = id ? document.getElementById(id) : null;
+    if (!section) return;
+    section.scrollIntoView({ block: "start" });
     setActiveId(id);
     pinned.current = true;
     window.clearTimeout(pinTimer.current);
@@ -195,10 +209,10 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
                 href={item.href}
                 onClick={() => pinSection(item.href)}
                 aria-current={isActive ? "true" : undefined}
-                className={`text-[0.95rem] font-medium underline-offset-[6px] transition-colors ${
-                  isActive
-                    ? "text-accent underline decoration-2"
-                    : "text-muted hover:text-foreground"
+                // El hover se ve igual que la sección en la que uno está: el
+                // menú muestra de una sola forma "acá vas" y "acá estás".
+                className={`text-[0.95rem] font-medium underline-offset-[6px] transition-colors hover:text-accent hover:underline hover:decoration-2 ${
+                  isActive ? "text-accent underline decoration-2" : "text-muted"
                 }`}
               >
                 {item.label}
@@ -257,8 +271,8 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
                       pinSection(item.href);
                     }}
                     aria-current={isActive ? "true" : undefined}
-                    className={`block border-b border-border py-3.5 text-[1.05rem] font-medium last:border-0 ${
-                      isActive ? "text-accent" : "text-foreground"
+                    className={`block border-b border-border py-3.5 text-[1.05rem] font-medium underline-offset-[6px] last:border-0 hover:text-accent hover:underline hover:decoration-2 ${
+                      isActive ? "text-accent underline decoration-2" : "text-foreground"
                     }`}
                   >
                     {item.label}
