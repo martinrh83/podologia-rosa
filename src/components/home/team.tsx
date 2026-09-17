@@ -20,10 +20,20 @@ import { photoForPractitioner } from "@/lib/team-photos";
  *   Tratamientos y Cómo llegar ya son grillas de tarjetas; una tercera ponía a
  *   las profesionales al mismo nivel que un servicio. Acá lo que da confianza
  *   antes de una consulta de salud es ver a la persona, así que cada una es una
- *   fila con su retrato y su nombre en el negro fuerte del hero.
+ *   fila con su retrato.
  *
- *   El nombre queda por debajo del título de la sección en tamaño: en el mockup
- *   original le ganaba, y la jerarquía quedaba al revés.
+ *   El nombre va a 22 px en negrita, claramente por debajo de "Profesionales"
+ *   (25,5 px): a 32 px y 800 le ganaba al título de la sección y la jerarquía
+ *   quedaba al revés. Sigue pesando más que el nombre de una sede (19 px).
+ *
+ *   En escritorio el texto arranca a la altura del borde superior del retrato
+ *   en todas las filas: `grid-rows-[auto_1fr]` manda el alto que sobra a la
+ *   segunda fila. Repartido entre las dos, el nombre flotaba a una altura
+ *   distinta según hubiera bio o no.
+ *
+ *   El retrato es de 10rem mientras sean siluetas: a 13rem eran dos bloques
+ *   grises que no dicen nada y la sección pasaba el alto de una pantalla. Con
+ *   fotos reales se puede agrandar.
  *
  *   En el teléfono el retrato va chico al lado del nombre, y la bio y el botón
  *   debajo, a todo el ancho: apilado a tamaño completo, cada persona ocupaba una
@@ -51,7 +61,7 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
             return (
               <li
                 key={practitioner.id}
-                className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-5 gap-y-5 py-8 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-x-10"
+                className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-5 gap-y-5 py-8 sm:grid-cols-[10rem_minmax(0,1fr)] sm:grid-rows-[auto_1fr] sm:gap-x-10 sm:gap-y-4"
               >
                 <div className="relative aspect-[4/5] overflow-hidden bg-surface-muted sm:row-span-2">
                   <Image
@@ -59,13 +69,13 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
                     // La silueta no le dice nada a quien no la ve: el nombre está al lado.
                     alt={photo.isPlaceholder ? "" : `Foto de ${name}`}
                     fill
-                    sizes="(min-width: 640px) 13rem, 6.5rem"
+                    sizes="(min-width: 640px) 10rem, 6.5rem"
                     className="object-cover"
                   />
                 </div>
 
-                <div className="self-center sm:self-end">
-                  <h3 className="text-2xl font-extrabold leading-tight tracking-[-0.02em] sm:text-[1.9rem]">
+                <div className="self-center sm:self-start">
+                  <h3 className="text-[1.2rem] font-bold leading-tight tracking-tight sm:text-[1.3rem]">
                     {name}
                   </h3>
                   <p className="mt-1 text-muted">
@@ -74,8 +84,9 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
                 </div>
 
                 <div className="col-span-2 sm:col-span-1 sm:col-start-2">
+                  {/* 32rem ≈ 70 caracteres por línea. `60ch` daba 86: el "0" de Geist es más ancho que una letra promedio. */}
                   {practitioner.bio && (
-                    <p className="max-w-prose leading-relaxed">{practitioner.bio}</p>
+                    <p className="max-w-[32rem] leading-relaxed">{practitioner.bio}</p>
                   )}
                   <Link
                     href={`/turnos/${practitioner.slug}`}
