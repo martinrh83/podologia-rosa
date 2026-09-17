@@ -248,7 +248,7 @@ Una cartulina fría impresa con cuatro tintas, cada una con un solo oficio.
 - **Pregunta** (800, ancho 118, clamp(1.75rem, 6vw, 2.6rem), 1.05, -0.025em): el título de cada paso de la reserva, del acuse de confirmación y de cancelación. Es la pregunta que hace la pantalla y va sola, sin raya doble; los títulos internos de esas pantallas («Guardá este enlace», «¿No podés venir?») usan el mismo ancho a 1.35rem.
 - **Title** (700, 1.3rem, 1.25, -0.01em): nombre de cada tratamiento y textos de botón (1.05 a 1.15rem, 700).
 - **Body lead** (400, 1.15rem, subiendo a 1.2 o 1.3rem en el hero y en el acuse, 1.625): bajadas y la línea que sigue a cada pregunta, hasta 40 a 52ch.
-- **Body** (400, 1rem = 17px, 1.625): descripciones, biografías, ayudas de campo y respuestas, hasta 46 a 62ch. La letra chica de ayuda y de error va a 0.95rem.
+- **Body** (400, 1rem = 17px, 1.625): descripciones, biografías y ayudas de campo, hasta 46 a 62ch. Las respuestas del FAQ son la excepción: van a todo el ancho de la sección (~120ch a 1512px). La letra chica de ayuda y de error va a 0.95rem.
 - **Label** (600, ancho 80, 0.875rem, 0.1em, mayúsculas): los rótulos impresos de los renglones de la tarjeta («Con», «Días», «Día y hora»), la etiqueta de cada campo del formulario, el rótulo de un grupo de opciones (`legend`, «Día», «Horario», «Obra social») y la letra chica del pie. A 0.75rem en la tira fija del teléfono y en la sede de un chip.
 - **Hand** (Kalam 700, 1.45rem, 2.1rem de interlínea, birome): los datos completados en los renglones; 1.25rem / 1.9rem cuando la tarjeta va en la columna angosta del mostrador y 1.05rem en la tira del teléfono. Kalam 400 a 1rem en tinta suave para el renglón vacío, que habla («lo elegís vos», «tus datos») en vez de poner un guión.
 - **Stamp** (900, ancho 80, 1.2 a 1.35rem, 0.04em, mayúsculas): el texto dentro de un sello, con una segunda línea a 700 y 0.14 a 0.16em.
@@ -264,7 +264,7 @@ Una cartulina fría impresa con cuatro tintas, cada una con un solo oficio.
 
 ## Layout
 
-Una columna de formulario centrada de 72rem, con 1rem de margen en el teléfono y 1.5rem desde sm. Cada sección del home tiene 4rem de aire vertical, 6rem desde sm, y se separa de la anterior con una fila de troquel a todo el ancho. Las secciones arrancan con su título y raya doble, y el contenido se ordena en dos columnas desde sm (tratamientos, profesionales, sedes) para que el texto arranque en los mismos dos bordes en todo el home; las preguntas van a todo el ancho con las respuestas limitadas a 62ch.
+Una columna de formulario centrada de 72rem, con 1rem de margen en el teléfono y 1.5rem desde sm. Cada sección del home tiene 4rem de aire vertical, 6rem desde sm, y se separa de la anterior con una fila de troquel a todo el ancho. Las secciones arrancan con su título y raya doble, y el contenido se ordena en dos columnas desde sm (tratamientos, profesionales, sedes) para que el texto arranque en los mismos dos bordes en todo el home; las preguntas y sus respuestas van a todo el ancho, sin tope de medida: es la única prosa del sitio que no se limita, decidido a ojo porque cualquier tope dejaba media sección vacía a la derecha en pantallas grandes.
 
 El hero es de dos columnas desde lg (texto flexible y tarjeta de 25rem, 28rem desde xl); en el teléfono la tarjeta baja debajo del titular y la acción, que quedan visibles sin scroll. En el teléfono «Sacar turno» ocupa todo el ancho y llamar / WhatsApp van lado a lado.
 
@@ -345,7 +345,7 @@ Marco doble en tinta de sello (3px, 3px de aire, 1px), versalitas angostas, siem
 
 ### Renglones y listas
 - **Tratamientos:** filas separadas por renglón de 1px, 1.5rem de aire, con una casilla impresa ya tildada en birome (no es un control) y el nombre como title.
-- **Preguntas frecuentes:** `details` nativos a todo el ancho separados por renglón, pregunta en 600 a 1.05rem que pasa a sello en hover, cruz SVG en sello que gira 45° en 300ms al abrir.
+- **Preguntas frecuentes:** `details` nativos a todo el ancho separados por renglón, pregunta en 600 a 1.05rem que pasa a sello en hover, cruz SVG en sello que gira 45° en 300ms al abrir. La respuesta ocupa el mismo ancho que la pregunta, sin tope de medida.
 
 ### Croquis de sede
 SVG propio generado desde OpenStreetMap, impreso con la paleta de la cartulina: suelo cartulina a la sombra, calles casi blancas, avenidas tarjeta blanca, plazas y agua en azules grises, bordes color renglón, nombres en tinta con halo blanco y el pin en numerador.

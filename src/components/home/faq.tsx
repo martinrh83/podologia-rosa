@@ -10,8 +10,18 @@ import { FAQ } from "@/lib/faq";
  * home. Probamos el título en una columna a la izquierda y las preguntas a la
  * derecha: dejaba media sección vacía debajo del título.
  *
- * Lo único angosto es el texto de cada respuesta: a todo el ancho serían ~120
- * caracteres por línea; 60ch las deja en un largo de lectura.
+ * Las respuestas van al mismo ancho que las preguntas, sin tope de medida:
+ * DECISIÓN TOMADA A OJO Y A CONCIENCIA, no un descuido. El tope anterior
+ * (62ch, después el borde de la primera columna del home) dejaba media sección
+ * vacía a la derecha en pantallas grandes, y eso pesó más que el largo de
+ * línea. Antes de esto se probó componerlas en dos columnas como la letra chica
+ * del dorso de un impreso: llenaba el ancho sin estirar el renglón, pero las
+ * respuestas de tres líneas o menos quedaban partidas al medio.
+ *
+ * El costo está medido: a 1512px la línea mide ~120 caracteres, bastante más
+ * que el rango de 46 a 62ch que el sistema fija para cuerpo. Si alguna vez se
+ * revierte, el camino es el de las dos columnas, no volver a un tope suelto que
+ * no coincide con ningún borde del home.
  *
  * La letra chica del dorso: renglones finos a tamaño de lectura, debajo del
  * encabezado impreso.
@@ -47,7 +57,7 @@ export function Faq() {
                   <path d="M10 2.5v15M2.5 10h15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" />
                 </svg>
               </summary>
-              <p className="-mt-1 max-w-[62ch] pb-5 leading-relaxed text-muted">{item.answer}</p>
+              <p className="-mt-1 pb-5 leading-relaxed text-muted">{item.answer}</p>
             </details>
           ))}
         </div>
