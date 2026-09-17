@@ -16,11 +16,12 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: {
-    default: "Podología Mitre — Turnos online",
+    // "Salta" en el título: es lo que más pesa para "podología Salta".
+    default: "Podología Mitre Salta",
     template: "%s | Podología Mitre",
   },
   description:
-    "Consultorio de podología. Sacá tu turno online en menos de un minuto, sin llamar ni crear una cuenta.",
+    "Consultorio de podología en Salta Capital. Sacá tu turno online en menos de un minuto, sin llamar ni crear una cuenta.",
   // es-AR so search engines and screen readers get the right variety of Spanish.
   openGraph: {
     type: "website",

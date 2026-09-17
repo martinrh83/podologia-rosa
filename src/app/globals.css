@@ -86,9 +86,18 @@ body {
  * element itself, so a square button turned rounded the moment it got focus.
  * The outline already follows each element's own corners.
  */
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/*
+ * Sin el triángulo por defecto de <details>: las preguntas frecuentes dibujan su
+ * propio ícono. `list-none` lo saca en Chrome y Firefox, pero el Safari viejo de
+ * iPhone sólo lo esconde con este pseudo-elemento.
+ */
+summary::-webkit-details-marker {
+  display: none;
 }
 
 /*
