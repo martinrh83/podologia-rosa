@@ -63,3 +63,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# impeccable (skill de diseño): se commitean DESIGN.md, PRODUCT.md, el
+# `design.json` y los briefs de `surfaces/`. Lo demás es de cada máquina o de
+# cada sesión: config local, caché del hook, las respuestas de las páginas de
+# decisión y las capturas de revisión.
+/.impeccable/config.local.json
+/.impeccable/hook.cache.json
+/.impeccable/questions
+/.impeccable/review

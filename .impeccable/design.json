@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-17T13:23:21.769Z",
+  "title": "Design System: Podología Mitre",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Cartulina",
+        "canonical": "oklch(93.3% 0.012 240)",
+        "tonalRamp": [
+          "#070c10",
+          "#1d2227",
+          "#353b40",
+          "#50565b",
+          "#6c7378",
+          "#98a0a5",
+          "#caced1",
+          "#ebeff2"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Tarjeta blanca",
+        "canonical": "oklch(99.1% 0.002 248)",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#212222",
+          "#3a3b3b",
+          "#545556",
+          "#717272",
+          "#9d9e9f",
+          "#cdcece",
+          "#eeeeef"
+        ]
+      },
+      "surface-muted": {
+        "role": "neutral",
+        "displayName": "Cartulina a la sombra",
+        "canonical": "oklch(89.8% 0.015 242)",
+        "tonalRamp": [
+          "#060c11",
+          "#1b2328",
+          "#343c42",
+          "#4e575d",
+          "#6a737a",
+          "#96a0a7",
+          "#c9ced2",
+          "#eaeff3"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Tinta de imprenta",
+        "canonical": "oklch(23.1% 0.020 268)",
+        "tonalRamp": [
+          "#080b14",
+          "#1d212c",
+          "#363a45",
+          "#505561",
+          "#6c717e",
+          "#999eac",
+          "#cbced5",
+          "#ebeef6"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Tinta suave",
+        "canonical": "oklch(44.8% 0.034 263)",
+        "tonalRamp": [
+          "#050b19",
+          "#192232",
+          "#313b4c",
+          "#4b5569",
+          "#677286",
+          "#949fb4",
+          "#c8ced9",
+          "#e9effa"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Renglón impreso",
+        "canonical": "oklch(80.2% 0.020 246)",
+        "tonalRamp": [
+          "#050c13",
+          "#1a232b",
+          "#323c45",
+          "#4c5760",
+          "#68737d",
+          "#94a0ab",
+          "#c8cfd4",
+          "#e9eff5"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Tinta de sello",
+        "canonical": "oklch(41.4% 0.153 280)",
+        "tonalRamp": [
+          "#0f0049",
+          "#1d0067",
+          "#302686",
+          "#4845a7",
+          "#6263c8",
+          "#8c91fb",
+          "#c3c9ff",
+          "#e3eaff"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Sello cargado",
+        "canonical": "oklch(34.9% 0.136 279)",
+        "tonalRamp": [
+          "#0c0042",
+          "#1b0a5f",
+          "#2f2b7e",
+          "#47499e",
+          "#6266bf",
+          "#8d94f1",
+          "#c3cafa",
+          "#e4ebff"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Sello aguado",
+        "canonical": "oklch(92.2% 0.023 289)",
+        "tonalRamp": [
+          "#0b0914",
+          "#21202c",
+          "#3a3946",
+          "#545362",
+          "#71707f",
+          "#9d9cac",
+          "#cdcdd5",
+          "#eeedf6"
+        ]
+      },
+      "birome": {
+        "role": "secondary",
+        "displayName": "Azul birome",
+        "canonical": "oklch(43.5% 0.182 265)",
+        "tonalRamp": [
+          "#0b0057",
+          "#030076",
+          "#092897",
+          "#2149b8",
+          "#3b68da",
+          "#6598ff",
+          "#b1cdff",
+          "#d1eeff"
+        ]
+      },
+      "numerador": {
+        "role": "tertiary",
+        "displayName": "Rojo numerador",
+        "canonical": "oklch(52.4% 0.170 29)",
+        "tonalRamp": [
+          "#390000",
+          "#5a0000",
+          "#7c0000",
+          "#9e1612",
+          "#c13d32",
+          "#f66e5e",
+          "#ffb9ae",
+          "#ffdace"
+        ]
+      },
+      "danger": {
+        "role": "error",
+        "displayName": "Rojo de aviso",
+        "canonical": "oklch(49.1% 0.135 25)",
+        "tonalRamp": [
+          "#310000",
+          "#510000",
+          "#710812",
+          "#922d2d",
+          "#b34c48",
+          "#e67a74",
+          "#f7bdb8",
+          "#ffded8"
+        ]
+      },
+      "success": {
+        "role": "success",
+        "displayName": "Verde confirmado",
+        "canonical": "oklch(47.1% 0.095 158)",
+        "tonalRamp": [
+          "#001500",
+          "#002e0d",
+          "#004926",
+          "#176540",
+          "#39825c",
+          "#68b188",
+          "#b5d8c2",
+          "#d5f9e2"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Titular de afiche",
+        "purpose": "Sólo el titular del hero; Archivo ancha 800."
+      },
+      "headline": {
+        "displayName": "Encabezado impreso",
+        "purpose": "Título de cada sección, sobre raya doble."
+      },
+      "title": {
+        "displayName": "Título de renglón",
+        "purpose": "Nombre de tratamiento y textos de botón."
+      },
+      "body-lead": {
+        "displayName": "Bajada",
+        "purpose": "Bajadas del hero y de sección."
+      },
+      "body": {
+        "displayName": "Texto",
+        "purpose": "Descripciones, biografías, respuestas."
+      },
+      "label": {
+        "displayName": "Rótulo de campo",
+        "purpose": "Rótulos de renglón de la tarjeta y letra chica del pie; nunca antetítulo."
+      },
+      "hand": {
+        "displayName": "Birome",
+        "purpose": "Datos cortos completados a mano sobre un renglón."
+      },
+      "stamp": {
+        "displayName": "Sello",
+        "purpose": "Texto dentro de un sello de goma."
+      }
+    },
+    "shadows": [
+      {
+        "name": "tarjeta-apoyada",
+        "value": "0 1px 1px rgb(25 29 39 / 0.08), 0 14px 28px -12px rgb(25 29 39 / 0.35)",
+        "purpose": "Única sombra del sitio: la tarjeta de turno del hero."
+      }
+    ],
+    "motion": [
+      {
+        "name": "sellar",
+        "value": "520ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both",
+        "purpose": "El golpe del sello de la tarjeta del hero, una vez al cargar; quieto con movimiento reducido."
+      },
+      {
+        "name": "hundir",
+        "value": "100ms; transform: translateY(2px) scale(0.985)",
+        "purpose": "Botones al apretarlos, como un sello."
+      },
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Curva de salida del sello y del giro de la cruz de las preguntas (300ms)."
+      },
+      {
+        "name": "scroll-anclas",
+        "value": "scroll-behavior: smooth",
+        "purpose": "Salto a secciones desde el menú; auto con movimiento reducido."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs-stack",
+        "value": "390px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Sacar turno",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "La acción de reservar: bloque en tinta de sello, una por vista.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Sacar turno</a>",
+      "css": ".ds-btn-primary { display: inline-block; font-family: Archivo, sans-serif; background: var(--accent); color: #fff; border: 2px solid var(--accent); border-radius: 0; padding: 0.875rem 1.75rem; font-size: 1.15rem; font-weight: 700; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); } .ds-btn-primary:active { transform: translateY(2px) scale(0.985); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón de contorno en tinta",
+      "kind": "button",
+      "refersTo": "button-outline-ink",
+      "description": "Alternativas impresas: llamar, WhatsApp, abrir en Google Maps.",
+      "html": "<a class=\"ds-btn-ink\" href=\"#\">Abrir en Google Maps</a>",
+      "css": ".ds-btn-ink { display: inline-block; font-family: Archivo, sans-serif; background: transparent; color: var(--foreground); border: 2px solid var(--foreground); border-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-btn-ink:hover { background: var(--foreground); color: var(--surface); } .ds-btn-ink:active { transform: translateY(2px) scale(0.985); } .ds-btn-ink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón de contorno de sello",
+      "kind": "button",
+      "refersTo": "button-outline-sello",
+      "description": "Reservar con una profesional en particular.",
+      "html": "<a class=\"ds-btn-sello\" href=\"#\">Sacar turno con Rosa</a>",
+      "css": ".ds-btn-sello { display: inline-block; font-family: Archivo, sans-serif; background: transparent; color: var(--accent); border: 2px solid var(--accent); border-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-btn-sello:hover { background: var(--accent); color: #fff; } .ds-btn-sello:active { transform: translateY(2px) scale(0.985); } .ds-btn-sello:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
+    },
+    {
+      "name": "Encabezado",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Encabezado fijo sobre cartulina con filete de tinta, marca en versalitas angostas y Sacar turno siempre visible.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\">Podología Mitre</a><nav class=\"ds-nav-links\"><a href=\"#\">Tratamientos</a><a href=\"#\" aria-current=\"true\">Profesionales</a><a href=\"#\">Cómo llegar</a></nav><a class=\"ds-nav-cta\" href=\"#\">Sacar turno</a></header>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 1.5rem; font-family: Archivo, sans-serif; background: color-mix(in srgb, var(--background) 95%, transparent); border-bottom: 2px solid var(--foreground); padding: 0.75rem 1.5rem; } .ds-nav-brand { font-variation-settings: \"wdth\" 80; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 1.15rem; color: var(--foreground); text-decoration: none; } .ds-nav-links { margin-left: auto; display: flex; gap: 1.5rem; } .ds-nav-links a { color: var(--muted); font-size: 0.95rem; font-weight: 500; text-decoration: none; text-underline-offset: 6px; transition: color 150ms; } .ds-nav-links a:hover { color: var(--foreground); } .ds-nav-links a[aria-current] { color: var(--accent); text-decoration: underline; text-decoration-thickness: 2px; } .ds-nav-links a:focus-visible, .ds-nav-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-nav-cta { background: var(--accent); color: #fff; border: 2px solid var(--accent); padding: 0.5rem 1rem; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-nav-cta:hover { background: var(--accent-hover); border-color: var(--accent-hover); } .ds-nav-cta:active { transform: translateY(2px) scale(0.985); }"
+    },
+    {
+      "name": "Tarjeta de turno",
+      "kind": "card",
+      "refersTo": "card-turno",
+      "description": "Firma del sistema: la tarjetita apoyada, con renglones en birome, troquel, talón y sello.",
+      "html": "<div class=\"ds-turno\"><div class=\"ds-turno-head\"><span>Podología Mitre</span><span class=\"ds-turno-mark\">Turno</span></div><dl><div class=\"ds-turno-line\"><dt>Con</dt><dd>Rosa o Bea</dd></div><div class=\"ds-turno-line\"><dt>Días</dt><dd>Lunes a sábado</dd></div><div class=\"ds-turno-line\"><dt>Día y hora</dt><dd class=\"ds-turno-empty\">los elegís vos</dd></div></dl><div class=\"ds-turno-troquel\"></div><dl class=\"ds-turno-talon\"><dt>Dónde</dt><dd>Bartolomé Mitre <b>496</b></dd></dl><div class=\"ds-stamp ds-turno-stamp\"><div><div>Turno online</div></div></div></div>",
+      "css": ".ds-turno { position: relative; max-width: 28rem; font-family: Archivo, sans-serif; background: var(--surface); color: var(--foreground); transform: rotate(-2deg); box-shadow: 0 1px 1px rgb(25 29 39 / 0.08), 0 14px 28px -12px rgb(25 29 39 / 0.35); padding: 1.25rem 1.75rem 1.5rem; } .ds-turno-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 5px double var(--foreground); padding-bottom: 0.75rem; font-variation-settings: \"wdth\" 80; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; } .ds-turno-mark { color: var(--numerador); font-size: 0.875rem; letter-spacing: 0.12em; } .ds-turno dl { margin: 0; } .ds-turno-line { display: flex; align-items: flex-end; gap: 0.75rem; border-bottom: 1px solid var(--border); padding: 1rem 0 0.25rem; } .ds-turno dt { font-variation-settings: \"wdth\" 80; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); } .ds-turno-line dd { flex: 1; margin: 0; text-align: right; font-family: Kalam, cursive; font-weight: 700; font-size: 1.45rem; line-height: 2.1rem; color: var(--birome); } .ds-turno-line dd.ds-turno-empty { font-weight: 400; font-size: 1.05rem; color: var(--muted); } .ds-turno-troquel { height: 6px; margin: 1rem 0; background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px); background-size: 10px 6px; background-repeat: repeat-x; } .ds-turno-talon dd { margin: 0.25rem 0 0; font-size: 1.05rem; } .ds-turno-talon b { color: var(--numerador); font-variant-numeric: tabular-nums; } .ds-turno-stamp { position: absolute; right: 1rem; bottom: 1.25rem; }"
+    },
+    {
+      "name": "Sello",
+      "kind": "custom",
+      "refersTo": "stamp",
+      "description": "Sello de goma: marco doble en tinta de sello, versalitas angostas, siempre girado.",
+      "html": "<div class=\"ds-stamp\"><div><div>Rosa Completar<small>Podóloga</small></div></div></div>",
+      "css": ".ds-stamp { display: inline-block; color: var(--accent); mix-blend-mode: multiply; transform: rotate(-6deg); animation: ds-sellar 520ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both; } .ds-stamp > div { border: 3px solid currentColor; padding: 3px; } .ds-stamp > div > div { border: 1px solid currentColor; padding: 0.375rem 0.75rem; text-align: center; font-family: Archivo, sans-serif; font-variation-settings: \"wdth\" 80; text-transform: uppercase; line-height: 1.05; font-weight: 900; font-size: 1.35rem; letter-spacing: 0.04em; } .ds-stamp small { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; } @keyframes ds-sellar { 0% { opacity: 0.35; transform: rotate(-6deg) scale(1.35); } 60% { opacity: 1; transform: rotate(-6deg) scale(0.96); } 100% { opacity: 1; transform: rotate(-6deg) scale(1); } } @media (prefers-reduced-motion: reduce) { .ds-stamp { animation: none; } }"
+    },
+    {
+      "name": "Título de sección con troquel",
+      "kind": "custom",
+      "refersTo": "section-heading",
+      "description": "Apertura de cada sección: troquel a todo el ancho, título ancho y raya doble.",
+      "html": "<section class=\"ds-section\"><div class=\"ds-troquel\"></div><h2 class=\"ds-heading\">Tratamientos</h2></section>",
+      "css": ".ds-troquel { height: 6px; background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px); background-size: 10px 6px; background-repeat: repeat-x; } .ds-heading { font-family: Archivo, sans-serif; font-variation-settings: \"wdth\" 118; font-weight: 800; font-size: clamp(2rem, 7vw, 3.1rem); line-height: 1; letter-spacing: -0.025em; color: var(--foreground); border-bottom: 5px double var(--foreground); padding-bottom: 1rem; margin: 4rem 0 0; }"
+    },
+    {
+      "name": "Renglón de tratamiento",
+      "kind": "custom",
+      "refersTo": "treatment-row",
+      "description": "Fila de formulario con casilla impresa ya tildada en birome.",
+      "html": "<div class=\"ds-row\"><svg viewBox=\"0 0 30 30\" width=\"28\" height=\"28\" aria-hidden=\"true\"><rect x=\"2\" y=\"5\" width=\"21\" height=\"21\" fill=\"none\" stroke=\"var(--foreground)\" stroke-width=\"2\"/><path d=\"M6.5 15.5c2 1.4 3.6 3.2 5 5.6C15 13.6 20.2 7.4 27.5 2.5\" fill=\"none\" stroke=\"var(--birome)\" stroke-width=\"2.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><div><h3>Pie diabético</h3><p>Control y cuidado preventivo para personas con diabetes.</p></div></div>",
+      "css": ".ds-row { display: flex; gap: 1rem; padding: 1.5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-family: Archivo, sans-serif; } .ds-row svg { flex-shrink: 0; margin-top: 2px; } .ds-row h3 { margin: 0; font-size: 1.3rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; color: var(--foreground); } .ds-row p { margin: 0.375rem 0 0; max-width: 46ch; line-height: 1.625; color: var(--muted); }"
+    },
+    {
+      "name": "Pregunta frecuente",
+      "kind": "custom",
+      "refersTo": "faq-row",
+      "description": "details nativo como renglón de letra chica, con cruz en sello que gira al abrir.",
+      "html": "<details class=\"ds-faq\"><summary>¿Qué obras sociales atienden?<svg viewBox=\"0 0 20 20\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path d=\"M10 2.5v15M2.5 10h15\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"square\"/></svg></summary><p>IPS y OSUNSa.</p></details>",
+      "css": ".ds-faq { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-family: Archivo, sans-serif; } .ds-faq summary { display: flex; min-height: 3.5rem; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1rem 0; list-style: none; cursor: pointer; font-size: 1.05rem; font-weight: 600; color: var(--foreground); transition: color 150ms; } .ds-faq summary::-webkit-details-marker { display: none; } .ds-faq summary:hover { color: var(--accent); } .ds-faq summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-faq svg { flex-shrink: 0; color: var(--accent); transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-faq[open] svg { transform: rotate(45deg); } .ds-faq p { margin: -0.25rem 0 0; padding-bottom: 1.25rem; max-width: 62ch; line-height: 1.625; color: var(--muted); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La tarjetita de turno",
+    "overview": "El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma violeta del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.\n\nLa densidad es la de un formulario: encabezados anchos y pesados subrayados con raya doble, renglones finos, letra chica legible a 17px de base. No hay fotos de ambiente ni tarjetas con íconos: la información real (con quién, qué días, dónde, qué obra social) se presenta escrita sobre la tarjeta, y eso es la ilustración. El movimiento es un solo gesto físico, el golpe del sello, y botones que se hunden al apretarlos.\n\nTema claro a propósito: se lee de día, en la calle, desde el teléfono. Se rechaza el sitio de clínica estándar: foto de stock, celeste genérico, tarjetas con íconos.",
+    "keyCharacteristics": [
+      "Cartulina como suelo, tarjeta blanca como único plano elevado.",
+      "Cuatro tintas con oficio fijo: imprenta, birome, sello, numerador.",
+      "Una sola familia (Archivo) en tres anchos; Kalam sólo para lo escrito a mano.",
+      "Esquinas vivas en todo el sitio; filetes, rayas dobles y troquel en lugar de sombras.",
+      "Un único golpe de sello animado por página; botones que se hunden como un sello."
+    ],
+    "rules": [
+      {
+        "name": "The Cuatro Tintas Rule",
+        "body": "Cada tinta tiene un oficio y no presta servicio en otro: imprenta para lo impreso, birome para lo escrito a mano, sello para marca y acción, numerador para números y la marca de turno. Un párrafo en birome o un botón en rojo rompen la tarjeta.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numerador Escaso Rule",
+        "body": "El rojo aparece en cifras cortas, nunca en texto corrido ni en fondos; si una pantalla tiene más de un puñado de toques rojos, sobra alguno.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tres Anchos Rule",
+        "body": "Ancha (wdth 118) para encabezados, normal para leer, angosta (wdth 80) para rótulos y sellos. Se aplica con `font-variation-settings`, nunca con `font-stretch`, que la cara variable ignora.",
+        "section": "typography"
+      },
+      {
+        "name": "The Birome Corta Rule",
+        "body": "Kalam sólo para datos cortos escritos sobre un renglón o una frase breve agregada a mano, y siempre a 1.05rem o más. Nunca texto corrido, botones, navegación ni rótulos.",
+        "section": "typography"
+      },
+      {
+        "name": "The Rótulo Es Campo Rule",
+        "body": "Las versalitas angostas son el rótulo de un campo de la tarjeta (un `dt` junto a su dato) o letra chica impresa. Nunca van flotando encima de un título de sección como antetítulo.",
+        "section": "typography"
+      },
+      {
+        "name": "The Troquel Rule",
+        "body": "Las secciones se separan con la línea perforada (puntos de 1.6px en color renglón, cada 10px, 6px de alto), y con nada más: ni fondos alternados, ni bandas de color. El pie arranca con el mismo troquel.",
+        "section": "layout"
+      },
+      {
+        "name": "The Tarjeta Apoyada Rule",
+        "body": "Una sombra por sitio, y es de la tarjeta. Cualquier otro plano se separa con un filete de 1px en tinta o con la tarjeta blanca sobre la cartulina, nunca con sombra ni con sombra dura desplazada.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Esquinas Vivas Rule",
+        "body": "Ningún botón, tarjeta, campo ni foco se redondea. El foco es un contorno de 2px en tinta de sello a 2px de distancia, sin radio, que sigue la esquina recta del elemento.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** tratar cada pantalla como una pieza impresa sobre cartulina (background) con, a lo sumo, una tarjeta blanca (surface) apoyada.",
+      "**Do** separar secciones con la fila de troquel y abrir cada una con título ancho (wdth 118, 800) y raya doble de 5px en tinta.",
+      "**Do** escribir en birome (Kalam, birome) los datos reales que completan un renglón, a 1.05rem o más.",
+      "**Do** poner las alturas de las direcciones en rojo numerador, en negrita y con cifras tabulares.",
+      "**Do** dar a cada botón borde de 2px, esquinas vivas y el hundimiento de 2px / 0.985 en 100ms.",
+      "**Do** girar lo apoyado (tarjeta, foto, sellos) entre -1° y -9°, y dejar derecho todo lo impreso.",
+      "**Do** reservar la animación `sellar` (520ms, cubic-bezier(0.16, 1, 0.3, 1), 380ms de espera) para un único sello por página, y dejarlo quieto con movimiento reducido."
+    ],
+    "donts": [
+      "**Don't** usar foto de stock, celeste genérico de clínica ni tarjetas con íconos.",
+      "**Don't** redondear esquinas; `rounded-full` sólo para lo que es redondo de verdad.",
+      "**Don't** agregar sombras fuera de la tarjeta de turno, ni sombras duras desplazadas.",
+      "**Don't** usar Kalam para párrafos, botones, navegación o rótulos.",
+      "**Don't** usar rojo numerador para texto corrido, fondos o botones.",
+      "**Don't** poner antetítulos en versalitas encima de los títulos de sección; las versalitas son rótulos de campo.",
+      "**Don't** simular grano, manchas ni bordes corridos en los sellos; la tinta es plana.",
+      "**Don't** separar secciones con fondos alternados o bandas de color."
+    ]
+  }
+}

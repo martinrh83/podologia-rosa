@@ -1,38 +1,38 @@
 @import "tailwindcss";
 
 /**
- * Calm clinical palette: cool, barely-tinted neutrals with a single French blue
- * accent (azul Francia, the classic flag blue #0055A4).
+ * La tarjetita de turno.
  *
- * The neutrals used to be warm (hues 26-40°), picked for the old teal accent.
- * Next to a cold blue (209°) they read as a yellowish cast around every blue
- * element, so they moved to the blue's side of the wheel. Still near-grey: the
- * point is that they stop fighting the accent, not that the site turns blue.
+ * El sitio está impreso como la tarjeta que te dan en el mostrador: cartulina
+ * celeste grisácea, una tinta casi negra para lo impreso, azul birome para lo
+ * que se completa a mano, violeta de sello para la marca y la acción, y el rojo
+ * del numerador sólo para números y marcas.
  *
- *   foreground on background   16.5:1
- *   muted on background         5.6:1   (6.0:1 on surface)
+ *   tinta sobre cartulina       13.9:1
+ *   tinta suave sobre cartulina  6.2:1   (7.3:1 sobre la tarjeta blanca)
+ *   sello sobre cartulina        7.5:1   blanco sobre sello 9.2:1
+ *   birome sobre la tarjeta      8.1:1
+ *   numerador sobre la tarjeta   5.2:1   (sobre la cartulina, sólo en tamaño grande)
  *
- * The logo is painted in the accent too. It had its own light blue (#5bb4e0),
- * but at 2.3:1 on white its thin strokes barely showed, and next to the accent
- * it read as a second, unrelated blue. One blue for the whole brand. It clears
- * AA with room to spare: white on a button 7.4:1, accent text on the page 7.0:1
- * and on `--accent-soft` 6.5:1.
+ * Los nombres viejos (`background`, `accent`…) se quedan: /turnos y el panel los
+ * usan, y así heredan la cartulina y el sello sin tocar su estructura.
  *
- * Committed to a light theme on purpose. A clinic site is read in daylight, often
- * outdoors, frequently by older patients — a half-tuned dark mode would be worse
- * than none, so the palette is defined once and painted explicitly.
+ * Tema claro a propósito: se lee de día, muchas veces en la calle.
  */
 :root {
-  --background: #f5f7fa;
-  --surface: #ffffff;
-  --surface-muted: #eef1f5;
-  --foreground: #15191e;
-  --muted: #5b6472;
-  --border: #d9dee5;
+  --background: #e2eaf0; /* cartulina */
+  --surface: #fbfcfd; /* la tarjeta blanca */
+  --surface-muted: #d5dfe7; /* cartulina a la sombra */
+  --foreground: #191d27; /* tinta de imprenta */
+  --muted: #4b5568; /* tinta suave */
+  --border: #b4c0cb; /* renglón impreso */
 
-  --accent: #0055a4;
-  --accent-hover: #004488;
-  --accent-soft: #e8f2f9;
+  --accent: #3f3a9b; /* tinta de sello */
+  --accent-hover: #2f2b7e;
+  --accent-soft: #e4e3f4;
+
+  --birome: #1d44b3;
+  --numerador: #b8342a;
 
   --danger: #9f3a38;
   --success: #1f6b46;
@@ -48,10 +48,13 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
+  --color-birome: var(--birome);
+  --color-numerador: var(--numerador);
   --color-danger: var(--danger);
   --color-success: var(--success);
 
   --font-sans: var(--font-sans-stack);
+  --font-hand: var(--font-hand-stack);
 
   /*
    * Esquinas rectas en todo el sitio, panel incluido.
@@ -77,6 +80,61 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
+  caret-color: var(--birome);
+}
+
+/* Lo que el navegador dibuja solo también va impreso. */
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+html {
+  scrollbar-color: var(--muted) var(--surface-muted);
+  accent-color: var(--accent);
+}
+
+/*
+ * Archivo tiene eje de ancho (62–125). Ancha para los titulares, que tienen que
+ * leerse como el encabezado impreso de la tarjeta; angosta para los rótulos.
+ * `font-variation-settings` y no `font-stretch`: la cara variable de next/font
+ * no declara el rango de ancho y el navegador lo ignoraría.
+ */
+@utility font-wide {
+  font-variation-settings: "wdth" 118;
+}
+
+@utility font-narrow {
+  font-variation-settings: "wdth" 80;
+}
+
+/*
+ * El troquel: una fila de agujeros, como la línea por donde se corta el talón.
+ * Puntos del color del renglón, repetidos en x.
+ */
+@utility perforado {
+  background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px);
+  background-size: 10px 6px;
+  background-repeat: repeat-x;
+}
+
+/*
+ * El golpe del sello: cae un poco grande y se asienta. Una sola vez; con
+ * movimiento reducido la regla de abajo lo deja directamente apoyado.
+ */
+@keyframes sellar {
+  0% {
+    opacity: 0.35;
+    transform: var(--sello-giro) scale(1.35);
+  }
+  60% {
+    opacity: 1;
+    transform: var(--sello-giro) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: var(--sello-giro) scale(1);
+  }
 }
 
 /*
