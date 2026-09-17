@@ -49,18 +49,16 @@ export default async function HomePage() {
     medicalSpecialty: "Podiatric",
     // Con una sede va `address`; con varias, cada una es un `location`. Es lo
     // que hace que Google pueda mostrar la más cercana al que busca.
-    ...(locations.length === 1 && {
-      address: { "@type": "PostalAddress", streetAddress: locations[0].address },
-    }),
+    ...(locations.length === 1 && { address: postalAddress(locations[0].address) }),
     ...(locations.length > 1 && {
       location: locations.map((row) => ({
         "@type": "Place",
         name: row.name,
-        address: { "@type": "PostalAddress", streetAddress: row.address },
+        address: postalAddress(row.address),
       })),
     }),
     ...(settings.phone && { telephone: settings.phone }),
-    areaServed: "AR",
+    areaServed: { "@type": "City", name: "Salta" },
     // Cada profesional, con su propia agenda como URL. Es lo que permite que
     // una búsqueda por nombre propio caiga en la página donde se le saca turno.
     ...(practitioners.length > 0 && {
@@ -108,4 +106,22 @@ export default async function HomePage() {
       <Faq />
     </>
   );
+}
+
+/**
+ * La dirección con la ciudad, la provincia y el país como datos aparte: es lo
+ * que usa Google para ubicar el consultorio en búsquedas como "podología Salta".
+ *
+ * En el panel la dirección se carga como texto ("Bartolomé Mitre 496, Salta"):
+ * la calle es lo que va antes de la primera coma. Todas las sedes están en
+ * Salta Capital; una en otra ciudad pediría guardar la ciudad en `locations`.
+ */
+function postalAddress(address: string) {
+  return {
+    "@type": "PostalAddress",
+    streetAddress: address.split(",")[0].trim(),
+    addressLocality: "Salta",
+    addressRegion: "Salta",
+    addressCountry: "AR",
+  };
 }
