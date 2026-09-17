@@ -25,7 +25,8 @@ export function Treatments({ services }: { services: ServiceWithSpecialty[] }) {
         <ul className="mt-6 grid gap-6 sm:grid-cols-2">
           {services.map((service) => (
             <li key={service.id} className="rounded-xl border border-border bg-background p-5">
-              <p className="text-[1.05rem] font-medium">{service.name}</p>
+              {/* h3 y 19 px semibold, como las sedes en Cómo llegar: a 17,9 px y 500 el nombre casi no se distinguía de la descripción. */}
+              <h3 className="text-lg font-semibold tracking-tight">{service.name}</h3>
               {service.description && (
                 <p className="mt-1 text-[0.95rem] leading-relaxed text-muted">
                   {service.description}

@@ -71,13 +71,33 @@ export default async function HomePage() {
         url: `${siteUrl()}/turnos/${practitioner.slug}`,
       })),
     }),
+    // Los tratamientos, para búsquedas como "pie diabético Salta". Va como
+    // catálogo de ofertas y no como `availableService`: esa propiedad sólo vale
+    // en MedicalClinic, Hospital y Physician, y acá el tipo es MedicalBusiness.
+    // Sin precio, igual que en la página.
+    ...(services.length > 0 && {
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Tratamientos",
+        itemListElement: services.map((service) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: service.name,
+            ...(service.description && { description: service.description }),
+          },
+        })),
+      },
+    }),
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // `<` escapado: nombres y descripciones salen de la base, y un "</script>"
+        // en uno de ellos cerraría esta etiqueta antes de tiempo.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
       <Hero settings={settings} locations={locations} schedule={schedule} />
