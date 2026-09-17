@@ -1,4 +1,7 @@
+import Image from "next/image";
+
 import { whatsappLink } from "@/lib/format";
+import { mapForAddress } from "@/lib/maps";
 import type { ClinicSettings, Location } from "@/lib/db/types";
 
 const WEEKDAY_NAMES = [
@@ -24,21 +27,24 @@ export type ScheduleRow = { weekday: number; start_time: string; end_time: strin
  *
  * EL MAPA
  *
- *   Va a ser una imagen estática, diseñada una vez y servida desde nuestro
+ *   Un SVG por sede en `public/maps/`, generado una vez con datos de
+ *   OpenStreetMap por `scripts/generate-maps.mjs` y servido desde nuestro
  *   dominio: sin JavaScript de terceros, sin cookies y sin que ningún proveedor
  *   de mapas se entere de quién visita el sitio. El home sigue siendo 100%
  *   server component.
  *
  *   Se descarta el iframe de Google —le cuenta cada visita a Google antes de
- *   que nadie acepte nada, y tenemos página de privacidad— y también Leaflet,
- *   que resolvería el estilo pero cuesta un componente cliente y ~45 KB para
- *   algo que en un teléfono se toca una vez para abrir la app de mapas.
+ *   que nadie acepte nada, y tenemos página de privacidad—, también Leaflet,
+ *   que cuesta un componente cliente y ~45 KB para algo que en un teléfono se
+ *   toca una vez para abrir la app de mapas, y las imágenes de Snazzy Maps:
+ *   son mapas de Google, y sus condiciones no permiten servirlas desde acá.
  *
- *   Mientras no exista la imagen, la sección funciona igual: dirección, el link
- *   "Ver en el mapa" que ya se edita desde el panel, contacto y horarios.
+ *   Va como archivo y no escrito dentro del componente para que no viaje en el
+ *   HTML de cada visita: el navegador lo pide recién cerca de la sección y lo
+ *   guarda en caché. `<Image>` sirve un `.svg` tal cual, sin optimizarlo.
  *
- *   Con más de una sede esto pide un campo en `locations` en vez de un archivo
- *   commiteado. Hoy hay una.
+ *   Cada mapa se busca por la dirección de la sede (`src/lib/maps.ts`). Una
+ *   sede sin mapa —nueva, o que se mudó— muestra su tarjeta igual, sin él.
  */
 export function Directions({
   settings,
@@ -69,11 +75,16 @@ export function Directions({
       <div className="mx-auto max-w-5xl px-4 py-14">
         <h2 className="text-2xl font-semibold tracking-tight">Cómo llegar</h2>
 
-        <div className="mt-6 grid gap-8 sm:grid-cols-2">
-          <div>
-            <ul className="space-y-4">
-              {locations.map((location) => (
-                <li key={location.id}>
+        <ul className={`mt-6 grid gap-6 ${hasManyLocations ? "sm:grid-cols-2" : "sm:max-w-[calc(50%-0.75rem)]"}`}>
+          {locations.map((location) => {
+            const map = mapForAddress(location.address);
+            return (
+              <li
+                key={location.id}
+                className="flex flex-col rounded-xl border border-border bg-background"
+              >
+                {map && <LocationMapImage map={map} href={location.map_url} />}
+                <div className="p-5">
                   {hasManyLocations && (
                     <p className="text-sm font-semibold uppercase tracking-wide text-accent">
                       {location.name}
@@ -85,17 +96,21 @@ export function Directions({
                       href={location.map_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-block rounded-lg border border-accent px-4 py-2.5 text-[0.95rem] font-medium text-accent hover:bg-accent hover:text-white"
+                      className="mt-3 inline-block rounded-lg border border-accent px-4 py-2.5 text-[0.95rem] font-medium text-accent hover:bg-accent hover:text-white"
                     >
                       Cómo llegar en Google Maps
                     </a>
                   )}
-                </li>
-              ))}
-            </ul>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
 
+        <div className="mt-10 grid gap-8 sm:grid-cols-2">
+          <div>
             {settings.phone && (
-              <p className="mt-5 text-[1.05rem]">
+              <p className="text-[1.05rem]">
                 <a href={`tel:${settings.phone}`} className="text-accent underline">
                   {settings.phone}
                 </a>
@@ -150,5 +165,34 @@ export function Directions({
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Tocar el mapa hace lo mismo que el botón: abre Google Maps. Sin `map_url`, el
+ * mapa queda como imagen suelta.
+ */
+function LocationMapImage({
+  map,
+  href,
+}: {
+  map: { src: string; alt: string };
+  href: string | null;
+}) {
+  const image = (
+    <Image
+      src={map.src}
+      alt={map.alt}
+      width={600}
+      height={400}
+      sizes="(min-width: 640px) 50vw, 100vw"
+      className="h-auto w-full border-b border-border"
+    />
+  );
+  if (!href) return image;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="block">
+      {image}
+    </a>
   );
 }

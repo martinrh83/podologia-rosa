@@ -111,6 +111,17 @@ página. El sitio tiene un solo tema claro, así que no hace falta más.
 
 Tipografía `system-ui`: la imagen no puede cargar la fuente del sitio.
 
+Ajustes que salieron de verlo en el navegador:
+
+- **Tamaño.** En un teléfono la tarjeta mide unos 354 px, así que el mapa se ve
+  a 0,6×. Los nombres van a 18 unidades (unos 11 px en el teléfono) y el pin a
+  1,3×: con 14 unidades los nombres quedaban de 8 px.
+- **Nombres cortos.** OSM trae el nombre completo ("José Valentín de Olavarría",
+  "Bernardino Rivadavia"). El script tiene una tabla `SHORT_NAMES` con el nombre
+  como se dice en Salta, que es como figura en las direcciones.
+- **Las calles de la sede primero.** Su nombre se ubica antes que el resto y
+  prueba varias posiciones a lo largo de la calle: en el medio está el pin.
+
 Queda afuera del estilo de Snazzy:
 
 - **Hospitales y otros puntos de interés.** Compiten con el pin; para ubicarse
