@@ -33,33 +33,49 @@ export function Hero({
   schedule: ScheduleRow[];
 }) {
   const week = summarizeWeek(schedule);
+  const secondaryButton = `border border-muted/50 bg-surface px-5 py-3.5 text-center text-[1.05rem] font-bold transition-colors hover:border-accent ${
+    settings.phone && settings.whatsapp ? "" : "col-span-2"
+  }`;
 
   return (
     <section className="mx-auto grid max-w-5xl gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center lg:gap-14">
       <div>
-        <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        <p className="text-sm font-medium uppercase tracking-[0.06em] text-muted sm:tracking-[0.12em]">
+          Consultorio de podología · Salta
+        </p>
+        {/*
+          El interletrado negativo se ajusta con el tamaño: a 64px -0.035em
+          compacta bien, pero a los 37-40px del teléfono las letras de
+          "Cuidamos" casi se tocaban.
+        */}
+        <h1 className="mt-4 text-[length:clamp(1.9rem,9.8vw,2.3rem)] font-extrabold leading-[1.02] tracking-[-0.02em] sm:text-6xl sm:tracking-[-0.035em] lg:text-5xl xl:text-6xl">
           Cuidamos tus pies,
           <br />
           <span className="text-accent">sin vueltas.</span>
         </h1>
-        <p className="mt-5 max-w-xl text-lg text-muted">
+        {/* 17px en el teléfono: a 19px quedaban 31 caracteres por línea y cuatro líneas. */}
+        <p className="mt-6 max-w-xl text-base text-foreground sm:text-lg">
           Consultorio de podología. Sacá tu turno online en menos de un minuto: sin llamar, sin
           esperar, y sin crear ninguna cuenta.
         </p>
 
-        <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+        {/*
+          En el teléfono, "Sacar turno" ocupa todo el ancho y las dos
+          alternativas van lado a lado con el texto corto. Apiladas, las tres
+          pesaban lo mismo y se comían 200px antes de la ficha. Si sólo hay una
+          de las dos, ocupa el ancho entero.
+        */}
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
           <Link
             href="/turnos"
-            className="rounded-lg bg-accent px-6 py-3.5 text-center text-[1.05rem] font-medium text-white hover:bg-accent-hover"
+            className="col-span-2 border border-accent bg-accent px-5 py-3.5 text-center text-[1.05rem] font-bold text-white transition-colors hover:border-accent-hover hover:bg-accent-hover"
           >
             Sacar turno
           </Link>
           {settings.phone && (
-            <a
-              href={`tel:${settings.phone}`}
-              className="rounded-lg border border-border bg-surface px-6 py-3.5 text-center text-[1.05rem] hover:border-accent"
-            >
-              Llamar al consultorio
+            <a href={`tel:${settings.phone}`} className={secondaryButton}>
+              <span className="sm:hidden">Llamar</span>
+              <span className="hidden sm:inline">Llamar al consultorio</span>
             </a>
           )}
           {settings.whatsapp && (
@@ -70,7 +86,7 @@ export function Hero({
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-border bg-surface px-6 py-3.5 text-center text-[1.05rem] hover:border-accent"
+              className={secondaryButton}
             >
               WhatsApp
             </a>
@@ -112,7 +128,10 @@ export function Hero({
               {week.hours ? (
                 <p className="mt-0.5 text-muted">{week.hours}</p>
               ) : (
-                <a href="#directions" className="mt-0.5 inline-block text-accent underline">
+                <a
+                  href="#directions"
+                  className="mt-0.5 inline-block underline decoration-accent/50 underline-offset-2 hover:text-accent hover:decoration-accent"
+                >
                   Ver horarios
                 </a>
               )}

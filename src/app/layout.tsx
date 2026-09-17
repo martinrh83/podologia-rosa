@@ -16,8 +16,8 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: {
-    default: "Podología Rosa — Turnos online",
-    template: "%s | Podología Rosa",
+    default: "Podología Mitre — Turnos online",
+    template: "%s | Podología Mitre",
   },
   description:
     "Consultorio de podología. Sacá tu turno online en menos de un minuto, sin llamar ni crear una cuenta.",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_AR",
-    siteName: "Podología Rosa",
+    siteName: "Podología Mitre",
   },
 };
 
@@ -88,7 +88,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
         <footer className="mt-16 border-t border-border bg-surface">
           <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} Podología Rosa</p>
+            <p>© {new Date().getFullYear()} Podología Mitre</p>
             <Link href="/privacidad" className="hover:text-foreground">
               Privacidad y datos personales
             </Link>
