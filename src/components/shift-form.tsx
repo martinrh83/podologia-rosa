@@ -2,10 +2,12 @@
 
 import { useActionState, useState } from "react";
 
-import { addShift, type ScheduleState } from "@/app/actions/schedule";
+import { addShift } from "@/app/actions/schedule";
+import { IDLE } from "@/app/actions/state";
+import { ActionResult } from "@/components/admin/action-result";
+import { SubmitButton } from "@/components/admin/buttons";
+import { SelectField, TextField } from "@/components/admin/fields";
 import { WEEKDAYS } from "@/lib/weekdays";
-
-const INITIAL: ScheduleState = { status: "idle" };
 
 /**
  * Alta de una franja horaria.
@@ -24,7 +26,7 @@ export function ShiftForm({
   practitionerId: string;
   locations: ShiftFormLocation[];
 }) {
-  const [state, formAction, isPending] = useActionState(addShift, INITIAL);
+  const [state, formAction] = useActionState(addShift, IDLE);
 
   const [weekday, setWeekday] = useState("1");
   const [locationId, setLocationId] = useState(locations[0]?.id ?? "");
@@ -44,115 +46,65 @@ export function ShiftForm({
   }
 
   return (
-    <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
+    <form action={formAction}>
       {/* De quién es la franja: lo define el selector de arriba de la pantalla. */}
       <input type="hidden" name="practitionerId" value={practitionerId} />
 
-      <div className="flex flex-wrap items-end gap-3">
-        {locations.length > 1 && (
-          <div>
-            <label htmlFor="locationId" className="block text-sm font-medium">
-              Sede
-            </label>
-            <select
-              id="locationId"
-              name="locationId"
-              value={locationId}
-              onChange={(event) => setLocationId(event.target.value)}
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            >
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {locations.length <= 1 && (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {locations.length > 1 ? (
+          <SelectField
+            id="locationId"
+            label="Sede"
+            value={locationId}
+            onChange={(event) => setLocationId(event.target.value)}
+          >
+            {locations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name}
+              </option>
+            ))}
+          </SelectField>
+        ) : (
           <input type="hidden" name="locationId" value={locationId} />
         )}
 
-        <div>
-          <label htmlFor="weekday" className="block text-sm font-medium">
-            Día
-          </label>
-          <select
-            id="weekday"
-            name="weekday"
-            value={weekday}
-            onChange={(event) => setWeekday(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          >
-            {WEEKDAYS.map((day) => (
-              <option key={day.value} value={day.value}>
-                {day.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="startTime" className="block text-sm font-medium">
-            Desde
-          </label>
-          <input
-            id="startTime"
-            name="startTime"
-            type="time"
-            required
-            value={startTime}
-            onChange={(event) => setStartTime(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="endTime" className="block text-sm font-medium">
-            Hasta
-          </label>
-          <input
-            id="endTime"
-            name="endTime"
-            type="time"
-            required
-            value={endTime}
-            onChange={(event) => setEndTime(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+        <SelectField
+          id="weekday"
+          label="Día"
+          value={weekday}
+          onChange={(event) => setWeekday(event.target.value)}
+          // Sin sede que elegir, el día ocupa su lugar y la fila queda pareja.
+          className={locations.length > 1 ? "" : "col-span-2"}
         >
-          {isPending ? "Guardando…" : "Agregar"}
-        </button>
+          {WEEKDAYS.map((day) => (
+            <option key={day.value} value={day.value}>
+              {day.label}
+            </option>
+          ))}
+        </SelectField>
+
+        <TextField
+          id="startTime"
+          label="Desde"
+          type="time"
+          required
+          value={startTime}
+          onChange={(event) => setStartTime(event.target.value)}
+        />
+        <TextField
+          id="endTime"
+          label="Hasta"
+          type="time"
+          required
+          value={endTime}
+          onChange={(event) => setEndTime(event.target.value)}
+        />
       </div>
 
-      <FormMessage state={state} saved="Listo, la franja ya está cargada." />
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <SubmitButton>Agregar franja</SubmitButton>
+        <ActionResult state={state} saved="Listo, la franja ya está cargada." />
+      </div>
     </form>
   );
-}
-
-/** El resultado de la última acción. Vacío mientras no haya pasado nada. */
-export function FormMessage({ state, saved }: { state: ScheduleState; saved: string }) {
-  if (state.status === "error") {
-    return (
-      <p role="alert" className="mt-3 text-[0.95rem] text-[color:var(--danger)]">
-        {state.message}
-      </p>
-    );
-  }
-
-  if (state.status === "saved") {
-    return (
-      <p role="status" className="mt-3 text-[0.95rem] text-[color:var(--success)]">
-        {saved}
-      </p>
-    );
-  }
-
-  return null;
 }

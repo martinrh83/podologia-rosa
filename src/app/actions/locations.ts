@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -12,8 +13,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
  * no debería ser un deploy.
  */
 
-export type LocationState = { status: "idle" | "saved" | "error"; message?: string };
-
 function revalidateLocations() {
   for (const path of ["/", "/turnos", "/admin/sedes", "/admin/agenda"]) {
     revalidatePath(path);
@@ -21,9 +20,9 @@ function revalidateLocations() {
 }
 
 export async function createLocation(
-  _previous: LocationState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<LocationState> {
+): Promise<ActionState> {
   await requireStaff();
 
   const name = String(formData.get("name") ?? "").trim();
@@ -55,7 +54,10 @@ export async function createLocation(
   return { status: "saved" };
 }
 
-export async function updateLocation(formData: FormData): Promise<void> {
+export async function updateLocation(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
@@ -63,16 +65,25 @@ export async function updateLocation(formData: FormData): Promise<void> {
   const address = String(formData.get("address") ?? "").trim();
   const mapUrl = String(formData.get("mapUrl") ?? "").trim();
 
-  if (!id || name.length < 2 || address.length < 5) return;
-  if (mapUrl && !/^https?:\/\//i.test(mapUrl)) return;
+  if (!id) return { status: "error", message: "No encontramos la sede. Recargá la página." };
+  if (name.length < 2) {
+    return { status: "error", message: "Poné un nombre para distinguirla. Ej: Centro." };
+  }
+  if (address.length < 5) return { status: "error", message: "Completá la dirección." };
+  if (mapUrl && !/^https?:\/\//i.test(mapUrl)) {
+    return { status: "error", message: "El enlace del mapa tiene que empezar con https://" };
+  }
 
   const supabase = createSupabaseAdminClient();
-  await supabase
+  const { error } = await supabase
     .from("locations")
     .update({ name, address, map_url: mapUrl || null })
     .eq("id", id);
 
+  if (error) return { status: "error", message: "No pudimos guardar los cambios. Probá de nuevo." };
+
   revalidateLocations();
+  return { status: "saved" };
 }
 
 /**

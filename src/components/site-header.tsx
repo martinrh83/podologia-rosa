@@ -8,6 +8,9 @@ import { Logo } from "@/components/logo";
 
 export type NavItem = { href: string; label: string };
 
+/** Estable entre renders: el efecto del resaltado depende de la lista. */
+const NO_NAV: NavItem[] = [];
+
 /**
  * El encabezado del sitio.
  *
@@ -29,7 +32,7 @@ export type NavItem = { href: string; label: string };
  * sola página, poder saltar entre secciones sin volver arriba es la mitad de la
  * gracia.
  */
-export function SiteHeader({ nav }: { nav: NavItem[] }) {
+export function SiteHeader({ nav: siteNav }: { nav: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   // Mientras el scroll va hacia una sección elegida en el menú, el resaltado
@@ -38,6 +41,11 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
   const pinTimer = useRef(0);
   const pathname = usePathname();
   const [lastPathname, setLastPathname] = useState(pathname);
+
+  // En el panel el menú del home y «Sacar turno» son ruido: el personal carga
+  // los turnos desde «Nuevo turno», y el panel tiene su propio menú.
+  const inPanel = pathname.startsWith("/admin");
+  const nav = inPanel ? NO_NAV : siteNav;
 
   // Cambiar de página cierra el menú y apaga el resaltado. Sin esto el menú
   // queda abierto sobre la página nueva —el componente no se desmonta al
@@ -222,12 +230,14 @@ export function SiteHeader({ nav }: { nav: NavItem[] }) {
         </nav>
 
         {/* El sello: se hunde un píxel al apretarlo. */}
-        <Link
-          href="/turnos"
-          className="ml-auto flex min-h-11 items-center whitespace-nowrap border-2 border-accent bg-accent px-3 text-[0.9rem] max-[359px]:px-2.5 max-[359px]:text-[0.85rem] font-bold text-white transition-[background-color,transform] duration-100 hover:border-accent-hover hover:bg-accent-hover active:translate-y-0.5 active:scale-[0.985] sm:px-4 sm:text-[0.95rem] lg:ml-0"
-        >
-          Sacar turno
-        </Link>
+        {!inPanel && (
+          <Link
+            href="/turnos"
+            className="ml-auto flex min-h-11 items-center whitespace-nowrap border-2 border-accent bg-accent px-3 text-[0.9rem] max-[359px]:px-2.5 max-[359px]:text-[0.85rem] font-bold text-white transition-[background-color,transform] duration-100 hover:border-accent-hover hover:bg-accent-hover active:translate-y-0.5 active:scale-[0.985] sm:px-4 sm:text-[0.95rem] lg:ml-0"
+          >
+            Sacar turno
+          </Link>
+        )}
 
         {/* Teléfono */}
         {nav.length > 0 && (

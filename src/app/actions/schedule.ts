@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { shiftsOverlap } from "@/lib/shifts";
 import { localDayRangeFromKey } from "@/lib/slots";
@@ -19,8 +20,6 @@ function revalidateSchedule() {
   revalidatePath("/turnos");
 }
 
-export type ScheduleState = { status: "idle" | "saved" | "error"; message?: string };
-
 /**
  * Add one shift. Two rows on the same weekday express a split shift.
  *
@@ -29,9 +28,9 @@ export type ScheduleState = { status: "idle" | "saved" | "error"; message?: stri
  * sin una sola palabra de explicación.
  */
 export async function addShift(
-  _previous: ScheduleState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<ScheduleState> {
+): Promise<ActionState> {
   await requireStaff();
 
   const practitionerId = String(formData.get("practitionerId") ?? "");
@@ -133,9 +132,9 @@ export async function removeShift(formData: FormData): Promise<void> {
  * to see and call those people, not have them silently vanish.
  */
 export async function addBlock(
-  _previous: ScheduleState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<ScheduleState> {
+): Promise<ActionState> {
   await requireStaff();
 
   const fromKey = String(formData.get("from") ?? "");
@@ -195,23 +194,32 @@ export async function removeBlock(formData: FormData): Promise<void> {
 }
 
 /** Update a service's name and price. Prices live in the DB because of inflation. */
-export async function updateService(formData: FormData): Promise<void> {
+export async function updateService(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const rawPrice = String(formData.get("price") ?? "").trim();
 
-  if (!id || !name) return;
+  if (!id) return { status: "error", message: "No encontramos el servicio. Recargá la página." };
+  if (!name) return { status: "error", message: "El nombre no puede quedar vacío." };
 
   const price = rawPrice === "" ? null : Number(rawPrice);
-  if (price !== null && (Number.isNaN(price) || price < 0)) return;
+  if (price !== null && (Number.isNaN(price) || price < 0)) {
+    return { status: "error", message: "El precio tiene que ser un número, sin puntos ni signos." };
+  }
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("services").update({ name, price }).eq("id", id);
+  const { error } = await supabase.from("services").update({ name, price }).eq("id", id);
+
+  if (error) return { status: "error", message: "No pudimos guardar los cambios. Probá de nuevo." };
 
   revalidatePath("/admin/servicios");
   revalidatePath("/");
+  return { status: "saved" };
 }
 
 export async function toggleService(formData: FormData): Promise<void> {

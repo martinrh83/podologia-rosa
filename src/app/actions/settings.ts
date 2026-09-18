@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { normalizePhone } from "@/lib/booking-schema";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-
-export type SettingsState = { status: "idle" | "saved" | "error"; message?: string };
 
 /**
  * Datos de contacto del consultorio.
@@ -20,9 +19,9 @@ export type SettingsState = { status: "idle" | "saved" | "error"; message?: stri
  * existe. Se siguen cambiando en la base, a propósito.
  */
 export async function updateClinicSettings(
-  _previous: SettingsState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<SettingsState> {
+): Promise<ActionState> {
   await requireStaff();
 
   const clinicName = String(formData.get("clinicName") ?? "").trim();

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { createBooking } from "@/lib/booking";
 import { bookingSchema } from "@/lib/booking-schema";
@@ -38,21 +39,14 @@ export async function updateStatus(formData: FormData): Promise<void> {
  * `audience: "admin"` lifts the 15-day horizon and the per-contact cap, which is
  * what makes "te espero en un mes" work.
  */
-export async function createAdminBooking(formData: FormData): Promise<void> {
+export async function createAdminBooking(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const practitionerId = String(formData.get("practitionerId") ?? "");
-
-  // Volver al formulario con el profesional y el día que ya estaban elegidos:
-  // sin esto, un error manda al secretario de vuelta al principio con el
-  // paciente esperando del otro lado del mostrador.
-  const back = (message: string): never => {
-    const params = new URLSearchParams({ error: message });
-    if (practitionerId) params.set("profesional", practitionerId);
-    const fecha = String(formData.get("fecha") ?? "");
-    if (fecha) params.set("fecha", fecha);
-    redirect(`/admin/nuevo?${params}`);
-  };
+  const fecha = String(formData.get("fecha") ?? "");
 
   const parsed = bookingSchema.safeParse({
     practitionerId,
@@ -66,17 +60,28 @@ export async function createAdminBooking(formData: FormData): Promise<void> {
     consent: true,
   });
 
+  // Un error vuelve como estado y no como redirección: antes volvía a la
+  // página con el mensaje en la URL y el formulario vacío, y con el paciente
+  // esperando del otro lado del mostrador había que tipear todo de nuevo.
   if (!parsed.success) {
-    return back(parsed.error.issues[0].message);
+    return { status: "error", message: parsed.error.issues[0].message };
   }
 
   const result = await createBooking(parsed.data, { audience: "admin" });
 
   if (!result.ok) {
-    return back(result.message);
+    return { status: "error", message: result.message };
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/manana");
   revalidatePath("/turnos");
-  redirect("/admin?creado=1");
+
+  // De vuelta al mismo profesional y al mismo día, con el aviso de que quedó:
+  // el turno puede ser para dentro de un mes y en «Hoy» no aparecería. Va la
+  // hora y no el paciente: un nombre en la URL queda en el historial.
+  const params = new URLSearchParams({ guardado: parsed.data.startsAt });
+  if (practitionerId) params.set("profesional", practitionerId);
+  if (fecha) params.set("fecha", fecha);
+  redirect(`/admin/nuevo?${params}`);
 }

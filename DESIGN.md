@@ -37,6 +37,13 @@ typography:
     lineHeight: 1.05
     letterSpacing: "-0.025em"
     fontVariation: "\"wdth\" 118"
+  panel-title:
+    fontFamily: "Archivo, sans-serif"
+    fontSize: "2.1rem"
+    fontWeight: 800
+    lineHeight: 1.05
+    letterSpacing: "-0.025em"
+    fontVariation: "\"wdth\" 118"
   title:
     fontFamily: "Archivo, sans-serif"
     fontSize: "1.3rem"
@@ -179,6 +186,25 @@ components:
     textColor: "{colors.muted}"
   nav-link-active:
     textColor: "{colors.accent}"
+  panel-tab:
+    backgroundColor: "transparent"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.none}"
+    height: "3rem"
+  panel-tab-active:
+    backgroundColor: "{colors.accent}"
+    textColor: "#ffffff"
+  panel-button-sm:
+    backgroundColor: "transparent"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.none}"
+    padding: "0.375rem 0.875rem"
+    height: "2.5rem"
+  panel-motivo:
+    backgroundColor: "{colors.surface-muted}"
+    textColor: "{colors.foreground}"
+    rounded: "{rounded.none}"
+    padding: "0.625rem 0.875rem"
 ---
 
 # Design System: Podología Mitre
@@ -193,6 +219,8 @@ La densidad es la de un formulario: encabezados anchos y pesados subrayados con 
 
 Sacar un turno es el mostrador: la misma tarjeta a un costado, armándose renglón por renglón, y una sola pregunta por vez del otro. La tarjeta no es un adorno del home, es el objeto que el paciente construye y se lleva. Tema claro a propósito: se lee de día, en la calle, desde el teléfono. Se rechaza el sitio de clínica estándar: foto de stock, celeste genérico, tarjetas con íconos.
 
+El panel del personal (`/admin`) es la misma hoja en clave de trabajo: mismas tintas, misma letra, bordes de 2px y renglones, pero sin birome ni sellos. Ahí nadie está construyendo una tarjeta: se busca un turno por la hora, se carga otro con el paciente enfrente y se corrige un precio desde el teléfono, con una mano. La marca vive en los detalles; lo que manda es poder leer la lista de un vistazo y no tocar nada por error.
+
 **Key Characteristics:**
 - Cartulina como suelo, tarjeta blanca como único plano elevado.
 - Cuatro tintas con oficio fijo: imprenta, birome, sello, numerador.
@@ -200,6 +228,7 @@ Sacar un turno es el mostrador: la misma tarjeta a un costado, armándose rengl�
 - Esquinas vivas en todo el sitio; filetes, rayas dobles y troquel en lugar de sombras.
 - Un único golpe de sello animado por página; botones que se hunden como un sello.
 - En los flujos de varios pasos, el objeto que se arma queda siempre a la vista y la pantalla hace una pregunta por vez.
+- En el panel, la misma hoja sin adornos: escala fija, renglones en vez de tarjetas, y lo que no tiene vuelta atrás se confirma en el lugar.
 
 ## Colors
 
@@ -246,7 +275,8 @@ Una cartulina fría impresa con cuatro tintas, cada una con un solo oficio.
 - **Display** (800, ancho 118, clamp(2.35rem, 10.5vw, 5.5rem); desde lg clamp(3.5rem, 6.2vw, 5.5rem), 0.95, -0.03em): sólo el titular del hero, a escala de afiche. Su segunda línea puede ir en birome (Kalam 700, 1.12em, girada -2°).
 - **Headline** (800, ancho 118, clamp(2rem, 7vw, 3.1rem), 1, -0.025em): el título de cada sección del home, con raya doble de 5px debajo. Los títulos de tarjeta de sede usan el mismo ancho a clamp(1.35rem, 4.5vw, 1.6rem).
 - **Pregunta** (800, ancho 118, clamp(1.75rem, 6vw, 2.6rem), 1.05, -0.025em): el título de cada paso de la reserva, del acuse de confirmación y de cancelación. Es la pregunta que hace la pantalla y va sola, sin raya doble; los títulos internos de esas pantallas («Guardá este enlace», «¿No podés venir?») usan el mismo ancho a 1.35rem.
-- **Title** (700, 1.3rem, 1.25, -0.01em): nombre de cada tratamiento y textos de botón (1.05 a 1.15rem, 700).
+- **Título de panel** (800, ancho 118, 1.75rem en el teléfono y 2.1rem desde sm, 1.05, -0.025em): el título de cada pantalla de `/admin`, con raya doble de 5px debajo como los del home, pero a escala fija: en una herramienta el título no crece con la ventana. Los títulos internos («Agregar profesional», «Días que no se atiende») van en el mismo ancho a 1.3rem.
+- **Title** (700, 1.3rem, 1.25, -0.01em): nombre de cada tratamiento, de cada ficha de una lista del panel y textos de botón (0.95 a 1.15rem, 700).
 - **Body lead** (400, 1.15rem, subiendo a 1.2 o 1.3rem en el hero y en el acuse, 1.625): bajadas y la línea que sigue a cada pregunta, hasta 40 a 52ch.
 - **Body** (400, 1rem = 17px, 1.625): descripciones, biografías y ayudas de campo, hasta 46 a 62ch. Las respuestas del FAQ son la excepción: van a todo el ancho de la sección (~120ch a 1512px). La letra chica de ayuda y de error va a 0.95rem.
 - **Label** (600, ancho 80, 0.875rem, 0.1em, mayúsculas): los rótulos impresos de los renglones de la tarjeta («Con», «Días», «Día y hora»), la etiqueta de cada campo del formulario, el rótulo de un grupo de opciones (`legend`, «Día», «Horario», «Obra social») y la letra chica del pie. A 0.75rem en la tira fija del teléfono y en la sede de un chip.
@@ -269,6 +299,8 @@ Una columna de formulario centrada de 72rem, con 1rem de margen en el teléfono 
 El hero es de dos columnas desde lg (texto flexible y tarjeta de 25rem, 28rem desde xl); en el teléfono la tarjeta baja debajo del titular y la acción, que quedan visibles sin scroll. En el teléfono «Sacar turno» ocupa todo el ancho y llamar / WhatsApp van lado a lado.
 
 El mostrador (todo el camino de sacar y cancelar un turno) es una grilla propia dentro del mismo ancho: desde lg, una columna fija de 21rem con la tarjeta y lo que falta, pegada a 6rem del borde superior, y al lado la columna de la pregunta con 3.5rem de canal. Debajo de lg no hay dos columnas: la tarjeta entera desaparece y queda una tira fija con lo ya elegido, pegada a 3.4rem del techo (justo debajo del encabezado del sitio), y la pregunta ocupa la pantalla. Los días se envuelven en varias filas desde sm y en el teléfono se corren con el dedo, con una línea que dice cuántos hay; los horarios van en grilla de 3 columnas, 4 desde sm y 5 desde lg. El encabezado es fijo, con la cartulina al 95% y desenfoque, y se cierra con un filete de 2px en tinta. La base tipográfica es 17px (106.25%), así que todas las medidas en rem escalan con ella. Lo girado que asoma (sellos, tarjeta) se recorta con `overflow-x: clip` en el main.
+
+El panel es una columna de 48rem (1rem de margen en el teléfono, 1.5rem desde sm) debajo del mismo encabezado del sitio, que en `/admin` pierde el menú y «Sacar turno». Arriba va el menú de dos filas; cada pantalla abre con su título y raya doble y sigue con listas que arrancan con una raya de 2px en tinta y se separan con renglones de 1px. Los formularios de alta van al final, detrás de otra raya de 2px y 3.5rem de aire. Los campos cortos van de a dos desde sm; en Agenda, el día y las dos horas de una franja van de a cuatro.
 
 ### Named Rules
 **The Troquel Rule.** Las secciones se separan con la línea perforada (puntos de 1.6px en color renglón, cada 10px, 6px de alto), y con nada más: ni fondos alternados, ni bandas de color. El pie arranca con el mismo troquel.
@@ -306,8 +338,9 @@ Bloques de tinta y contornos impresos que se hunden como un sello al apretarlos.
 - **Hover / Active:** hover pasa a sello cargado; al apretar baja 2px (y escala a 0.995 el de ancho completo) en 100ms. Foco con el contorno de sello de 2px.
 - **Contorno en tinta:** borde de 2px en tinta, texto en tinta; hover llena de tarjeta blanca (hero: llamar, WhatsApp) o de tinta con texto blanco (Abrir en Google Maps).
 - **Contorno de sello:** borde de 2px en sello, texto en sello; hover llena de sello con texto blanco. Para «Sacar turno con …» y para el «Ver horarios» de cada renglón de profesional, que se llena cuando el mouse está sobre el renglón entero.
-- **Contorno de aviso:** borde y texto en rojo de aviso, ancho completo; hover llena de rojo con texto blanco. Sólo para cancelar un turno, la única acción destructiva del sitio.
-- **Enlace de texto:** para volver atrás sin peso («Cambiar de profesional», «Cambiar día y hora», «Cambiar»): texto en tinta suave a 0.95rem subrayado en color renglón a 4px de distancia, que pasa a tinta al hover. No es un botón y no lleva borde.
+- **Contorno de aviso:** borde y texto en rojo de aviso; hover llena de rojo con texto blanco. En el sitio, a ancho completo, sólo para cancelar un turno. En el panel, en tamaño chico, es siempre el segundo paso de una confirmación en línea («Sí, cancelar», «Sí, quitar», «Sí, dar de baja»): nunca aparece de entrada.
+- **Enlace de texto:** para volver atrás sin peso («Cambiar de profesional», «Cambiar día y hora», «Cambiar»): texto en tinta suave a 0.95rem subrayado en color renglón a 4px de distancia, que pasa a tinta al hover. No es un botón y no lleva borde. En el panel es también lo que abre una acción que se confirma («Cancelar turno», «Quitar», «Dar de baja», «Ocultar de la página»), lo que se deshace («Volver a activar») y «Salir».
+- **Tamaño chico del panel:** los mismos contornos a 0.95rem, 0.375rem x 0.875rem y 2.5rem de alto mínimo, para las acciones que se repiten en cada renglón de una lista. «Guardar cambios» de una ficha es contorno de sello; cambiar el estado de un turno («Marcar atendido», «No vino») es contorno en tinta que se llena de tinta; «Recordar por WhatsApp» es el único bloque lleno de la fila.
 
 ### Chips
 Las opciones de día y de horario son fichas impresas, no píldoras.
@@ -329,7 +362,7 @@ Las opciones de día y de horario son fichas impresas, no píldoras.
 - **Formulario:** se abre con una raya de 2px en tinta a todo el ancho y respira con 1.75rem entre campos; los campos cortos van de a dos desde sm. Sin panel blanco alrededor.
 
 ### Navigation
-Encabezado fijo sobre cartulina al 95% con filete inferior de 2px en tinta. Marca a la izquierda: isotipo en sello y nombre en versalitas angostas 800. En escritorio los enlaces van en Archivo 500 a 0.95rem en tinta suave, tinta en hover, y el activo en sello subrayado a 2px con 6px de separación. «Sacar turno» siempre visible a la derecha. En el teléfono un botón de dos barras que se cruzan abre una lista de renglones a 1.05rem con el activo en sello; debajo de 390px el nombre se apila en dos líneas.
+Encabezado fijo sobre cartulina al 95% con filete inferior de 2px en tinta. Marca a la izquierda: isotipo en sello y nombre en versalitas angostas 800. En escritorio los enlaces van en Archivo 500 a 0.95rem en tinta suave, tinta en hover, y el activo en sello subrayado a 2px con 6px de separación. «Sacar turno» siempre visible a la derecha. En el teléfono un botón de dos barras que se cruzan abre una lista de renglones a 1.05rem con el activo en sello; debajo de 390px el nombre se apila en dos líneas. En `/admin` el encabezado queda sólo con la marca: el menú del home y «Sacar turno» son ruido para el personal.
 
 ### Mostrador (firma)
 Las piezas compartidas por los tres pasos, la confirmación y la cancelación.
@@ -339,6 +372,17 @@ Las piezas compartidas por los tres pasos, la confirmación y la cancelación.
 - **Tira del teléfono:** barra fija bajo el encabezado del sitio, cartulina al 95% con desenfoque y renglón de 1px abajo; muestra sólo los renglones ya completados (rótulo en versalitas de 0.75rem, dato en birome a 1.05rem) y, si hace falta, un enlace de texto para corregir.
 - **Elegir con quién:** filas de la hoja, no tarjetas: renglones de 1px donde el nombre va en ancho 800 (clamp(1.4rem, 5vw, 1.9rem)), la letra chica debajo en tinta suave y el botón de contorno de sello a la derecha; el renglón entero es el enlace y se llena al hover.
 - **Fecha de renglón:** en la tarjeta la fecha se escribe siempre en la forma corta («jue 17 sept»), sin punto ni coma, porque es la única que entra en un renglón.
+
+### Panel
+Las piezas de `/admin`. Mismo vocabulario que el sitio, sin birome ni sellos.
+- **Menú de dos filas:** arriba, lo de todos los días (Hoy · Mañana · Nuevo turno) en tres pestañas del mismo ancho, de 3rem de alto, borde de 2px en tinta sobre la cartulina y texto 700 a 0.9rem (1.05rem desde sm); la activa, bloque lleno en tinta de sello con `aria-current="page"`; hover llena de tarjeta blanca. Abajo, la configuración (Agenda, Profesionales, Especialidades, Sedes, Precios, Consultorio) como enlaces del menú del sitio, y «Salir» como enlace de texto al final. En el teléfono esa fila se parte en dos en vez de correrse con el dedo. Cierra con un filete de 2px en tinta.
+- **Filtro por profesional:** fichas de 2px como las de la reserva, 2.75rem de alto, 700 a 0.95rem; la elegida llena de sello. Son enlaces, así cada filtro es una URL.
+- **Fila de turno:** un renglón de la hoja, no una tarjeta. La hora en ancho 800 a 1.6rem con cifras tabulares, que es por lo que se busca; al lado la profesional en sello y la sede en versalita angosta. El estado se escribe sólo cuando no es «reservado», a la derecha, en 700: «Atendido» en verde confirmado, «No vino» en tinta, «Cancelado» en rojo de aviso. Debajo, «Apellido, Nombre» en 1.15rem 700 y la letra chica en tinta suave (DNI, obra social, teléfono subrayado como enlace). El motivo va en un bloque de cartulina a la sombra, sin borde. Las acciones en una sola fila que se parte donde haga falta: primero hablarle al paciente, después marcar cómo terminó, y «Cancelar turno» último, como texto.
+- **Ficha de una lista** (profesional, sede, precio, especialidad): nombre en title a la izquierda, su baja o reactivación como enlace de texto a la derecha, y la letra chica debajo. Lo dado de baja no se atenúa entero: el nombre va tachado en tinta suave y la letra chica lo dice en negrita («De baja: no aparece en el sitio»). Los campos van debajo, y cada ficha guarda sola, con su resultado al lado del botón.
+- **Confirmación en línea:** lo que no tiene vuelta atrás se pide dos veces sin modal. El primer toque cambia el enlace por la pregunta en 700 («¿Cancelar el turno de las 19:00?»), el contorno de aviso chico («Sí, cancelar») y un «No» de texto. La confirmación toma el foco; Escape y «No» vuelven atrás y devuelven el foco.
+- **Resultado de una acción:** un párrafo `aria-live` que existe siempre, vacío mientras no pase nada; en 700 a 0.95rem, verde confirmado para «Guardado.» y rojo de aviso para el error. El «Guardado.» se borra en cuanto se vuelve a tocar un campo de esa ficha. Mientras guarda, el botón dice «Guardando…».
+- **Nuevo turno:** los horarios son las mismas fichas de la reserva, en grilla de 3, 4 y 5 columnas, con la sede debajo de la hora cuando hay dos; ninguno viene elegido. La obra social, con la casilla cuadrada. El único bloque lleno de la pantalla es «Guardar turno · 16:00», a todo el ancho. Al guardar, un aviso de éxito dice el día y la hora, y el formulario vuelve vacío.
+- **Campos:** los del sitio, con una corrección: el `<select>` nativo se fija a la altura de los campos de texto (3.31rem), que si no queda 6px más bajo al lado de ellos.
 
 ### Sello
 Marco doble en tinta de sello (3px, 3px de aire, 1px), versalitas angostas, siempre girado y con `mix-blend-multiply` para que la tinta se asiente sobre lo de abajo. Tinta plana, sin grano simulado: se reconoce por la forma y se lee entero. Es HTML, no imagen. Cae una sola vez por página, con la animación `sellar`: en el home sobre la tarjeta del hero, en el mostrador sólo al final («Confirmado» en tinta de sello, «Cancelado» en rojo de aviso, ambos a -8°). En profesionales, el nombre dentro del sello es el título de la ficha.
@@ -363,6 +407,7 @@ SVG propio generado desde OpenStreetMap, impreso con la paleta de la cartulina: 
 - **Do** mantener a la vista lo ya decidido en un flujo de varios pasos: tarjeta al costado en escritorio, tira fija arriba en el teléfono, y una salida de texto para corregirlo.
 - **Do** decir el paso dentro de la frase que sigue al título, en negrita, y repetirlo en la lista numerada al costado.
 - **Do** girar lo apoyado (tarjeta, foto, sellos) entre -1° y -9°, y dejar derecho todo lo impreso.
+- **Do** en el panel, pedir en el lugar la confirmación de lo que no tiene vuelta atrás, y que cada formulario diga «Guardando…» y después «Guardado.» o el error.
 - **Do** reservar la animación `sellar` (520ms, cubic-bezier(0.16, 1, 0.3, 1), 380ms de espera) para un único sello por página, y dejarlo quieto con movimiento reducido.
 
 ### Don't:
@@ -377,3 +422,4 @@ SVG propio generado desde OpenStreetMap, impreso con la paleta de la cartulina: 
 - **Don't** marcar el avance con una píldora de pasos ni con una barra de progreso: el paso se lee en la frase y en la lista numerada.
 - **Don't** simular grano, manchas ni bordes corridos en los sellos; la tinta es plana.
 - **Don't** separar secciones con fondos alternados o bandas de color.
+- **Don't** llevar la birome, los sellos ni los títulos que crecen con la ventana al panel; ni abrir un modal para confirmar algo que se puede preguntar en el mismo renglón.

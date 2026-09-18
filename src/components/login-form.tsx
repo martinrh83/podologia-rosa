@@ -3,55 +3,32 @@
 import { useActionState } from "react";
 
 import { login, type LoginState } from "@/app/actions/auth";
+import { SubmitButton } from "@/components/admin/buttons";
+import { TextField } from "@/components/admin/fields";
 
 export function LoginForm({ next }: { next: string }) {
-  const [state, formAction, isPending] = useActionState(login, {} as LoginState);
+  const [state, formAction] = useActionState(login, {} as LoginState);
 
   return (
-    <form action={formAction} className="space-y-4 rounded-xl border border-border bg-surface p-6">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="next" value={next} />
 
-      <div>
-        <label htmlFor="email" className="block text-[0.95rem] font-medium">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autoComplete="username"
-          className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-        />
-      </div>
+      <TextField id="email" label="Email" type="email" required autoComplete="username" />
+      <TextField
+        id="password"
+        label="Contraseña"
+        type="password"
+        required
+        autoComplete="current-password"
+      />
 
-      <div>
-        <label htmlFor="password" className="block text-[0.95rem] font-medium">
-          Contraseña
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          autoComplete="current-password"
-          className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-        />
-      </div>
+      <p aria-live="polite" className="text-[0.95rem] font-bold text-[color:var(--danger)]">
+        {state.error ?? ""}
+      </p>
 
-      {state.error && (
-        <p role="alert" className="text-[0.95rem] text-[color:var(--danger)]">
-          {state.error}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isPending}
-        className="w-full rounded-lg bg-accent px-4 py-3 font-medium text-white hover:bg-accent-hover disabled:opacity-60"
-      >
-        {isPending ? "Entrando…" : "Entrar"}
-      </button>
+      <SubmitButton block pendingLabel="Entrando…">
+        Entrar
+      </SubmitButton>
     </form>
   );
 }

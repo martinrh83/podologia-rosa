@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageHeading } from "@/components/admin/page-heading";
 import { AppointmentCard } from "@/components/appointment-card";
 import { PractitionerFilter } from "@/components/practitioner-filter";
 import { getClinicSettings } from "@/lib/availability";
@@ -45,14 +46,11 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
 
   return (
     <div>
-      <h2 className="mb-1 text-2xl font-semibold tracking-tight">
-        {capitalizeFirst(formatDay(tomorrow))}
-      </h2>
-      <p className="mb-5 text-muted">
+      <PageHeading title={capitalizeFirst(formatDay(tomorrow))}>
         {appointments.length === 0
           ? "No hay turnos para mañana."
           : "Tocá cada botón para mandar el recordatorio por WhatsApp."}
-      </p>
+      </PageHeading>
 
       <PractitionerFilter
         practitioners={practitioners}
@@ -60,32 +58,34 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
         basePath="/admin/manana"
       />
 
-      <ul className="space-y-3">
-        {appointments.map((appointment) => (
-          <AppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            siteUrl={base}
-            showPractitioner={!practitionerId}
-            showLocation={locations.length > 1}
-            reminderMessage={
-              `Hola ${appointment.patient_first_name}! Te recordamos tu turno de mañana ` +
-              `a las ${formatTime(appointment.starts_at)}` +
-              // Con dos agendas, saber con quién es el turno importa tanto como
-              // la hora: el paciente eligió a una de las dos.
-              (appointment.practitioner
-                ? ` con ${appointment.practitioner.first_name} ${appointment.practitioner.last_name}`
-                : "") +
-              ` en ${settings.clinic_name}` +
-              (locations.length > 1 && appointment.location
-                ? ` (sede ${appointment.location.name})`
-                : "") +
-              `. ` +
-              `Si no podés venir, avisanos así lo liberamos. ¡Gracias!`
-            }
-          />
-        ))}
-      </ul>
+      {appointments.length > 0 && (
+        <ul className="border-t-2 border-foreground">
+          {appointments.map((appointment) => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              siteUrl={base}
+              showPractitioner={!practitionerId}
+              showLocation={locations.length > 1}
+              reminderMessage={
+                `Hola ${appointment.patient_first_name}! Te recordamos tu turno de mañana ` +
+                `a las ${formatTime(appointment.starts_at)}` +
+                // Con dos agendas, saber con quién es el turno importa tanto como
+                // la hora: el paciente eligió a una de las dos.
+                (appointment.practitioner
+                  ? ` con ${appointment.practitioner.first_name} ${appointment.practitioner.last_name}`
+                  : "") +
+                ` en ${settings.clinic_name}` +
+                (locations.length > 1 && appointment.location
+                  ? ` (sede ${appointment.location.name})`
+                  : "") +
+                `. ` +
+                `Si no podés venir, avisanos así lo liberamos. ¡Gracias!`
+              }
+            />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

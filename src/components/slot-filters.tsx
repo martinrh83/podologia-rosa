@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition } from "react";
 
+import { FIELD, Label, SELECT } from "@/components/admin/fields";
+
 /** Cuánto se espera después de la última tecla antes de ir a buscar horarios. */
 const DEBOUNCE_MS = 400;
 
@@ -65,17 +67,15 @@ export function SlotFilters({ practitioners, practitionerId, dateKey }: Props) {
   }
 
   return (
-    <div className="mb-6 flex flex-wrap items-end gap-3" aria-busy={isPending}>
+    <div className="mb-4 grid gap-x-4 gap-y-2 sm:grid-cols-2" aria-busy={isPending}>
       {practitioners.length > 1 && (
         <div>
-          <label htmlFor="profesional" className="block text-[0.95rem] font-medium">
-            Profesional
-          </label>
+          <Label htmlFor="profesional">Profesional</Label>
           <select
             id="profesional"
             value={practitionerId}
             onChange={(event) => go({ profesional: event.target.value })}
-            className="mt-1.5 rounded-lg border border-border bg-background px-3 py-2.5"
+            className={`mt-2 ${SELECT}`}
           >
             {practitioners.map((row) => (
               <option key={row.id} value={row.id}>
@@ -86,10 +86,8 @@ export function SlotFilters({ practitioners, practitionerId, dateKey }: Props) {
         </div>
       )}
 
-      <div>
-        <label htmlFor="fecha" className="block text-[0.95rem] font-medium">
-          Fecha
-        </label>
+      <div className="max-sm:mt-2">
+        <Label htmlFor="fecha">Fecha</Label>
         <input
           id="fecha"
           ref={dateInput}
@@ -102,13 +100,13 @@ export function SlotFilters({ practitioners, practitionerId, dateKey }: Props) {
             if (!value) return;
             timer.current = setTimeout(() => go({ fecha: value }), DEBOUNCE_MS);
           }}
-          className="mt-1.5 rounded-lg border border-border bg-background px-3 py-2.5"
+          className={`mt-2 ${FIELD}`}
         />
       </div>
 
-      {/* Ocupa lugar siempre, así la fila no salta al aparecer. */}
-      <p className="pb-2.5 text-[0.95rem] text-muted" aria-live="polite">
-        {isPending ? "Buscando horarios…" : " "}
+      {/* Ocupa lugar siempre, así la grilla no salta al aparecer. */}
+      <p className="min-h-6 text-[0.95rem] text-muted sm:col-span-2" aria-live="polite">
+        {isPending ? "Buscando horarios…" : ""}
       </p>
     </div>
   );

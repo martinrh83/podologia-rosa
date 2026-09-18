@@ -2,10 +2,11 @@
 
 import { useActionState, useState } from "react";
 
-import { addBlock, type ScheduleState } from "@/app/actions/schedule";
-import { FormMessage } from "@/components/shift-form";
-
-const INITIAL: ScheduleState = { status: "idle" };
+import { addBlock } from "@/app/actions/schedule";
+import { IDLE } from "@/app/actions/state";
+import { ActionResult } from "@/components/admin/action-result";
+import { SubmitButton } from "@/components/admin/buttons";
+import { SelectField, TextField } from "@/components/admin/fields";
 
 export type BlockFormOption = { id: string; name: string };
 
@@ -17,7 +18,7 @@ export function BlockForm({
   practitioners: BlockFormOption[];
   locations: BlockFormOption[];
 }) {
-  const [state, formAction, isPending] = useActionState(addBlock, INITIAL);
+  const [state, formAction] = useActionState(addBlock, IDLE);
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -39,103 +40,74 @@ export function BlockForm({
   }
 
   return (
-    <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
-      <div className="flex flex-wrap items-end gap-3">
-        {locations.length > 1 && (
-          <div>
-            <label htmlFor="blockLocation" className="block text-sm font-medium">
-              En qué sede
-            </label>
-            <select
-              id="blockLocation"
-              name="locationId"
-              value={locationId}
-              onChange={(event) => setLocationId(event.target.value)}
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            >
-              <option value="">Todas</option>
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+    <form action={formAction} className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <SelectField
+          id="blockPractitioner"
+          name="practitionerId"
+          label="Para quién"
+          value={practitionerId}
+          onChange={(event) => setPractitionerId(event.target.value)}
+          className={locations.length > 1 ? "" : "sm:col-span-2"}
+        >
+          <option value="">Todos los profesionales</option>
+          {practitioners.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </SelectField>
 
-        <div>
-          <label htmlFor="blockPractitioner" className="block text-sm font-medium">
-            Para quién
-          </label>
-          <select
-            id="blockPractitioner"
-            name="practitionerId"
-            value={practitionerId}
-            onChange={(event) => setPractitionerId(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
+        {locations.length > 1 && (
+          <SelectField
+            id="blockLocation"
+            name="locationId"
+            label="En qué sede"
+            value={locationId}
+            onChange={(event) => setLocationId(event.target.value)}
           >
-            <option value="">Todos los profesionales</option>
-            {practitioners.map((row) => (
-              <option key={row.id} value={row.id}>
-                {row.name}
+            <option value="">Todas las sedes</option>
+            {locations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name}
               </option>
             ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="from" className="block text-sm font-medium">
-            Desde
-          </label>
-          <input
-            id="from"
-            name="from"
-            type="date"
-            required
-            value={from}
-            onChange={(event) => setFrom(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="to" className="block text-sm font-medium">
-            Hasta <span className="font-normal text-muted">(incluido)</span>
-          </label>
-          <input
-            id="to"
-            name="to"
-            type="date"
-            required
-            value={to}
-            onChange={(event) => setTo(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <div className="grow">
-          <label htmlFor="reason" className="block text-sm font-medium">
-            Motivo <span className="font-normal text-muted">(opcional)</span>
-          </label>
-          <input
-            id="reason"
-            name="reason"
-            value={reason}
-            onChange={(event) => setReason(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover disabled:opacity-60"
-        >
-          {isPending ? "Guardando…" : "Bloquear"}
-        </button>
+          </SelectField>
+        )}
       </div>
 
-      <FormMessage state={state} saved="Listo, esos días ya no se pueden reservar." />
+      <div className="grid grid-cols-2 gap-4">
+        <TextField
+          id="from"
+          label="Desde"
+          type="date"
+          required
+          value={from}
+          onChange={(event) => setFrom(event.target.value)}
+        />
+        <TextField
+          id="to"
+          label="Hasta (incluido)"
+          type="date"
+          required
+          value={to}
+          onChange={(event) => setTo(event.target.value)}
+        />
+      </div>
+
+      <TextField
+        id="reason"
+        label="Motivo"
+        optional
+        hint="Para acordarte después. No lo ven los pacientes."
+        value={reason}
+        onChange={(event) => setReason(event.target.value)}
+      />
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+        <SubmitButton>Cerrar esos días</SubmitButton>
+        <ActionResult state={state} saved="Listo, esos días ya no se pueden reservar." />
+      </div>
     </form>
   );
 }

@@ -7,13 +7,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   Counter,
   PASOS,
-  Notice,
   Pendientes,
   StepHeading,
   TurnoCard,
   TurnoStrip,
   type TurnoLine,
 } from "@/components/booking/counter";
+import { Notice } from "@/components/notice";
 import { CopyLink } from "@/components/copy-link";
 import {
   EMPTY_FORM,

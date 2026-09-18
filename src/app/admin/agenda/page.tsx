@@ -2,14 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { removeBlock, removeShift } from "@/app/actions/schedule";
+import { ConfirmAction } from "@/components/admin/buttons";
+import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
 import { BlockForm } from "@/components/block-form";
+import { Notice } from "@/components/notice";
 import { PractitionerFilter } from "@/components/practitioner-filter";
 import { ShiftForm } from "@/components/shift-form";
 import { requireStaff } from "@/lib/auth";
 import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import type { ScheduleBlock, WeeklyScheduleRow } from "@/lib/db/types";
-import { capitalizeFirst, formatDay } from "@/lib/format";
+import { capitalizeFirst, formatDay, toLocalDateKey } from "@/lib/format";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { weekdayLabel } from "@/lib/weekdays";
 
@@ -63,130 +66,138 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
   if (!practitioner) {
     return (
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Agenda</h2>
-        <p className="mt-3 text-muted">
-          Primero hay que cargar un profesional.{" "}
-          <Link href="/admin/profesionales" className="text-accent underline">
-            Cargá el primero
+        <PageHeading title="Agenda" />
+        <Notice tone="muted" title="Todavía no hay profesionales">
+          Los horarios son de cada una. Cargá la primera en{" "}
+          <Link href="/admin/profesionales" className="font-bold text-accent underline underline-offset-4">
+            Profesionales
           </Link>
           .
-        </p>
+        </Notice>
       </div>
     );
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-16">
       <section>
-        <h2 className="text-2xl font-semibold tracking-tight">Horarios de atención</h2>
-        <p className="mt-1 text-muted">
+        <PageHeading title="Horarios de atención">
           Si atiende mañana y tarde, cargá dos franjas para el mismo día.
-        </p>
+        </PageHeading>
 
-        <div className="mt-4">
-          <PractitionerFilter
-            practitioners={practitioners}
-            selected={practitioner.id}
-            basePath="/admin/agenda"
-            allowAll={false}
-          />
-        </div>
-
-        <ul className="mt-2 space-y-2">
-          {schedule.map((row) => (
-            <li
-              key={row.id}
-              className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3"
-            >
-              <span>
-                <strong>{weekdayLabel(row.weekday)}</strong>{" "}
-                <span className="tabular-nums text-muted">
-                  {row.start_time.slice(0, 5)} a {row.end_time.slice(0, 5)}
-                </span>
-                {locations.length > 1 && (
-                  <span className="ml-2 text-[0.9rem] text-accent">
-                    {locationName.get(row.location_id)}
-                  </span>
-                )}
-              </span>
-              <form action={removeShift}>
-                <input type="hidden" name="id" value={row.id} />
-                <button type="submit" className="text-sm text-muted hover:text-[color:var(--danger)]">
-                  Quitar
-                </button>
-              </form>
-            </li>
-          ))}
-          {schedule.length === 0 && (
-            <li className="rounded-lg border border-border bg-surface-muted p-4 text-muted">
-              {practitionerName(practitioner)} no tiene horarios cargados, así que nadie puede
-              sacarle turno.
-            </li>
-          )}
-        </ul>
-
-        <ShiftForm practitionerId={practitioner.id} locations={locationOptions} />
-      </section>
-
-      <section>
-        <h2 className="text-2xl font-semibold tracking-tight">Días que no se atiende</h2>
-        <p className="mt-1 text-muted">
-          Vacaciones, feriados, o cualquier día suelto. Dejá los dos desplegables en
-          &laquo;todos&raquo; para cerrar el consultorio entero.
-        </p>
-
-        <ul className="mt-5 space-y-2">
-          {blocks.map((block) => (
-            <li
-              key={block.id}
-              className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3"
-            >
-              <span>
-                <span className="font-medium">
-                  {block.practitioner_id
-                    ? (nameById.get(block.practitioner_id) ?? "—")
-                    : "Todos"}
-                  {locations.length > 1 && (
-                    <span className="text-accent">
-                      {" · "}
-                      {block.location_id ? locationName.get(block.location_id) : "todas las sedes"}
-                    </span>
-                  )}
-                </span>
-                {" · "}
-                {capitalizeFirst(formatDay(block.starts_at))}
-                {" — "}
-                {/* ends_at is the exclusive midnight after the last day. */}
-                {capitalizeFirst(formatDay(new Date(new Date(block.ends_at).getTime() - 1)))}
-                {block.reason && <span className="text-muted"> · {block.reason}</span>}
-              </span>
-              <form action={removeBlock}>
-                <input type="hidden" name="id" value={block.id} />
-                <button type="submit" className="text-sm text-muted hover:text-[color:var(--danger)]">
-                  Quitar
-                </button>
-              </form>
-            </li>
-          ))}
-          {blocks.length === 0 && (
-            <li className="rounded-lg border border-border bg-surface-muted p-4 text-muted">
-              No hay cierres cargados.
-            </li>
-          )}
-        </ul>
-
-        <BlockForm
-          practitioners={practitioners.map((row) => ({
-            id: row.id,
-            name: practitionerName(row),
-          }))}
-          locations={locationOptions}
+        <PractitionerFilter
+          practitioners={practitioners}
+          selected={practitioner.id}
+          basePath="/admin/agenda"
+          allowAll={false}
         />
 
-        <p className="mt-3 text-sm text-muted">
-          Bloquear un rango no cancela los turnos que ya estaban reservados ahí. Revisá la agenda de
-          esos días y avisales vos.
+        {schedule.length === 0 ? (
+          <Notice tone="muted" title={`${practitionerName(practitioner)} no tiene horarios`}>
+            Así nadie puede sacarle turno. Cargá la primera franja acá abajo.
+          </Notice>
+        ) : (
+          <ul className="border-t-2 border-foreground">
+            {schedule.map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border py-3"
+              >
+                <p className="flex flex-wrap items-baseline gap-x-3">
+                  <strong className="w-24 font-bold">{weekdayLabel(row.weekday)}</strong>
+                  <span className="tabular-nums">
+                    {row.start_time.slice(0, 5)} a {row.end_time.slice(0, 5)}
+                  </span>
+                  {locations.length > 1 && (
+                    <span className="font-narrow text-sm font-bold uppercase tracking-[0.08em] text-accent">
+                      {locationName.get(row.location_id)}
+                    </span>
+                  )}
+                </p>
+                <ConfirmAction
+                  action={removeShift}
+                  fields={{ id: row.id }}
+                  label="Quitar"
+                  question="¿Quitar esta franja?"
+                  confirmLabel="Sí, quitar"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-10">
+          <SectionHeading>Agregar franja</SectionHeading>
+          <div className="mt-5">
+            <ShiftForm practitionerId={practitioner.id} locations={locationOptions} />
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t-2 border-foreground pt-6">
+        <SectionHeading>Días que no se atiende</SectionHeading>
+        <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
+          Vacaciones, feriados o cualquier día suelto. Dejá «Todos los profesionales»
+          {locations.length > 1 && " y «Todas las sedes»"} para cerrar el consultorio entero.
         </p>
+
+        {blocks.length === 0 ? (
+          <p className="mt-5 text-muted">No hay cierres cargados.</p>
+        ) : (
+          <ul className="mt-5 border-t border-foreground">
+            {blocks.map((block) => {
+              // ends_at is the exclusive midnight after the last day.
+              const lastDay = new Date(new Date(block.ends_at).getTime() - 1);
+              const sameDay = toLocalDateKey(block.starts_at) === toLocalDateKey(lastDay);
+
+              return (
+                <li
+                  key={block.id}
+                  className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-border py-3.5"
+                >
+                  <div className="min-w-0">
+                    <p className="font-bold">
+                      {capitalizeFirst(formatDay(block.starts_at))}
+                      {!sameDay && <> al {formatDay(lastDay)}</>}
+                    </p>
+                    <p className="mt-0.5 text-[0.95rem] text-muted">
+                      {block.practitioner_id
+                        ? (nameById.get(block.practitioner_id) ?? "—")
+                        : "Todos los profesionales"}
+                      {locations.length > 1 &&
+                        ` · ${block.location_id ? locationName.get(block.location_id) : "todas las sedes"}`}
+                      {block.reason && ` · ${block.reason}`}
+                    </p>
+                  </div>
+                  <ConfirmAction
+                    action={removeBlock}
+                    fields={{ id: block.id }}
+                    label="Quitar"
+                    question="¿Volver a abrir esos días?"
+                    confirmLabel="Sí, quitar"
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        <div className="mt-10">
+          <SectionHeading as="h3">Cerrar días</SectionHeading>
+          <div className="mt-5">
+            <BlockForm
+              practitioners={practitioners.map((row) => ({
+                id: row.id,
+                name: practitionerName(row),
+              }))}
+              locations={locationOptions}
+            />
+          </div>
+          <p className="mt-4 max-w-[52ch] text-[0.95rem] leading-relaxed text-muted">
+            Cerrar un rango no cancela los turnos que ya estaban reservados ahí. Revisá la agenda
+            de esos días y avisales vos.
+          </p>
+        </div>
       </section>
     </div>
   );

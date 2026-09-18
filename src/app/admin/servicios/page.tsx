@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
-import { toggleService, updateService } from "@/app/actions/schedule";
+import { toggleService } from "@/app/actions/schedule";
+import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
+import { EditServiceForm } from "@/components/admin/edit-forms";
+import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
+import { RecordList, RecordRow } from "@/components/admin/record-row";
 import { requireStaff } from "@/lib/auth";
 import type { ServiceWithSpecialty } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +22,11 @@ export const dynamic = "force-dynamic";
  * Prices live in the database precisely so this screen exists: with Argentine
  * inflation a hardcoded price list is wrong within two months, and Rosa should
  * not need a deploy — or you — to fix it.
+ *
+ * Los precios son de referencia interna y no se publican (PRODUCT.md): el sitio
+ * muestra sólo el nombre de cada tratamiento. La bajada decía lo contrario
+ * —que los cambios se veían al instante y que un precio vacío mostraba
+ * «Consultar»— y eso ya no era cierto.
  */
 export default async function AdminServiciosPage() {
   await requireStaff();
@@ -40,78 +49,51 @@ export default async function AdminServiciosPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold tracking-tight">Servicios y precios</h2>
-      <p className="mt-1 text-muted">
-        Los cambios se ven en el sitio al instante. Dejá el precio vacío para mostrar
-        &laquo;Consultar&raquo;.
-      </p>
+      <PageHeading title="Servicios y precios">
+        Los precios son de referencia para el consultorio: no se publican, se informan en la
+        consulta. El nombre sí aparece en Tratamientos, en la página.
+      </PageHeading>
 
-      <div className="mt-6 space-y-8">
+      <div className="space-y-12">
         {[...groups.entries()].map(([specialty, items]) => (
           <section key={specialty}>
             {showHeadings && (
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
-                {specialty}
-              </h3>
+              <div className="mb-4">
+                <SectionHeading>{specialty}</SectionHeading>
+              </div>
             )}
 
-            <ul className="space-y-3">
-            {items.map((service) => (
-              <li
-                key={service.id}
-                className={`rounded-xl border border-border bg-surface p-4 ${
-                  service.active ? "" : "opacity-60"
-                }`}
-              >
-                <form action={updateService} className="flex flex-wrap items-end gap-3">
-                  <input type="hidden" name="id" value={service.id} />
+            <RecordList>
+              {items.map((service) => {
+                const fields = { id: service.id, active: String(service.active) };
 
-                  <div className="grow">
-                    <label htmlFor={`name-${service.id}`} className="block text-sm font-medium">
-                      Nombre
-                    </label>
-                    <input
-                      id={`name-${service.id}`}
-                      name="name"
-                      defaultValue={service.name}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor={`price-${service.id}`} className="block text-sm font-medium">
-                      Precio
-                    </label>
-                    <input
-                      id={`price-${service.id}`}
-                      name="price"
-                      type="number"
-                      min="0"
-                      step="100"
-                      inputMode="numeric"
-                      defaultValue={service.price ?? ""}
-                      className="mt-1 w-32 rounded-lg border border-border bg-background px-3 py-2.5 tabular-nums"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover"
+                return (
+                  <RecordRow
+                    key={service.id}
+                    title={service.name}
+                    heading={showHeadings ? "h3" : "h2"}
+                    inactive={service.active ? undefined : "Oculto: no aparece en la página"}
+                    action={
+                      service.active ? (
+                        <ConfirmAction
+                          action={toggleService}
+                          fields={fields}
+                          label="Ocultar de la página"
+                          question="¿Sacarlo de Tratamientos?"
+                          confirmLabel="Sí, ocultar"
+                        />
+                      ) : (
+                        <InlineAction action={toggleService} fields={fields}>
+                          Mostrar en la página
+                        </InlineAction>
+                      )
+                    }
                   >
-                    Guardar
-                  </button>
-                </form>
-
-                <form action={toggleService} className="mt-2">
-                  <input type="hidden" name="id" value={service.id} />
-                  <input type="hidden" name="active" value={String(service.active)} />
-                  <button type="submit" className="text-sm text-muted hover:text-foreground">
-                    {service.active ? "Ocultar del sitio" : "Mostrar en el sitio"}
-                  </button>
-                </form>
-              </li>
-            ))}
-            </ul>
+                    <EditServiceForm service={service} />
+                  </RecordRow>
+                );
+              })}
+            </RecordList>
           </section>
         ))}
       </div>

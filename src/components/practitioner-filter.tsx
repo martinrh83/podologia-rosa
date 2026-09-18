@@ -39,7 +39,7 @@ export function PractitionerFilter({
   ];
 
   return (
-    <div className="mb-5 flex flex-wrap gap-2">
+    <div className="mb-6 flex flex-wrap gap-2">
       {options.map((option) => {
         const isSelected = option.id === selected;
         return (
@@ -47,7 +47,8 @@ export function PractitionerFilter({
             key={option.id ?? "todas"}
             href={option.id ? `${basePath}?profesional=${option.id}` : basePath}
             aria-current={isSelected ? "page" : undefined}
-            className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+            // Las mismas fichas que los días y horarios de la reserva.
+            className={`flex min-h-11 items-center border-2 px-4 text-[0.95rem] font-bold transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
               isSelected
                 ? "border-accent bg-accent text-white"
                 : "border-border bg-surface hover:border-accent"

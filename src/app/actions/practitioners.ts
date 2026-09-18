@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { RESERVED_SLUGS, slugify } from "@/lib/slug";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -13,8 +14,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
  * criterio que ya rige los horarios y los precios.
  */
 
-export type PractitionerState = { status: "idle" | "saved" | "error"; message?: string };
-
 function revalidatePractitioners() {
   // `/sitemap.xml` también: lista una URL por profesional, así que dar de alta
   // o de baja a alguien lo cambia. Ahora que no se renderiza por visita, si no
@@ -25,9 +24,9 @@ function revalidatePractitioners() {
 }
 
 export async function createPractitioner(
-  _previous: PractitionerState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<PractitionerState> {
+): Promise<ActionState> {
   await requireStaff();
 
   const firstName = String(formData.get("firstName") ?? "").trim();
@@ -86,7 +85,10 @@ export async function createPractitioner(
  * y que Google indexó. Corregir un apellido mal escrito no debería romper el link
  * que el consultorio mandó la semana pasada.
  */
-export async function updatePractitioner(formData: FormData): Promise<void> {
+export async function updatePractitioner(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
@@ -95,11 +97,18 @@ export async function updatePractitioner(formData: FormData): Promise<void> {
   const title = String(formData.get("title") ?? "").trim();
   const slotMinutes = Number(formData.get("slotMinutes"));
 
-  if (!id || firstName.length < 2 || lastName.length < 2) return;
-  if (!Number.isInteger(slotMinutes) || slotMinutes <= 0) return;
+  // Los mismos mensajes que el alta. Antes cada rechazo era un `return` mudo:
+  // la página se recargaba con el dato viejo y nadie decía por qué.
+  if (!id) return { status: "error", message: "No encontramos a quién editar. Recargá la página." };
+  if (firstName.length < 2 || lastName.length < 2) {
+    return { status: "error", message: "Completá el nombre y el apellido." };
+  }
+  if (!Number.isInteger(slotMinutes) || slotMinutes <= 0) {
+    return { status: "error", message: "La duración del turno tiene que ser un número de minutos." };
+  }
 
   const supabase = createSupabaseAdminClient();
-  await supabase
+  const { error } = await supabase
     .from("practitioners")
     .update({
       first_name: firstName,
@@ -109,7 +118,10 @@ export async function updatePractitioner(formData: FormData): Promise<void> {
     })
     .eq("id", id);
 
+  if (error) return { status: "error", message: "No pudimos guardar los cambios. Probá de nuevo." };
+
   revalidatePractitioners();
+  return { status: "saved" };
 }
 
 /**
@@ -152,9 +164,9 @@ export async function toggleSpecialty(formData: FormData): Promise<void> {
 }
 
 export async function createSpecialty(
-  _previous: PractitionerState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<PractitionerState> {
+): Promise<ActionState> {
   await requireStaff();
 
   const name = String(formData.get("name") ?? "").trim();

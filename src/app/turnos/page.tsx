@@ -4,12 +4,12 @@ import Link from "next/link";
 import {
   Counter,
   PASOS,
-  Notice,
   Pendientes,
   StepHeading,
   TurnoCard,
   type TurnoLine,
 } from "@/components/booking/counter";
+import { Notice } from "@/components/notice";
 import { getClinicSettings } from "@/lib/availability";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import type { PractitionerWithSpecialty } from "@/lib/db/types";

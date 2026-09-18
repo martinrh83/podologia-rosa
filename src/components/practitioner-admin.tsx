@@ -2,19 +2,18 @@
 
 import { useActionState, useState } from "react";
 
-import {
-  createPractitioner,
-  createSpecialty,
-  type PractitionerState,
-} from "@/app/actions/practitioners";
-
-const INITIAL: PractitionerState = { status: "idle" };
+import { createPractitioner, createSpecialty } from "@/app/actions/practitioners";
+import { IDLE } from "@/app/actions/state";
+import { ActionResult } from "@/components/admin/action-result";
+import { SubmitButton } from "@/components/admin/buttons";
+import { SelectField, TextField } from "@/components/admin/fields";
+import { Notice } from "@/components/notice";
 
 export type SpecialtyOption = { id: string; name: string };
 
 /** Alta de un profesional. Controlado por el mismo motivo que el resto del panel. */
 export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOption[] }) {
-  const [state, formAction, isPending] = useActionState(createPractitioner, INITIAL);
+  const [state, formAction] = useActionState(createPractitioner, IDLE);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -35,83 +34,76 @@ export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOpt
 
   if (specialties.length === 0) {
     return (
-      <p className="mt-4 rounded-xl border border-border bg-surface-muted p-4 text-muted">
-        Cargá primero una especialidad.
-      </p>
+      <Notice tone="muted" title="Falta una especialidad">
+        Cada profesional pertenece a una. Cargá la primera en Especialidades.
+      </Notice>
     );
   }
 
   return (
-    <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field id="firstName" label="Nombre" value={firstName} onChange={setFirstName} />
-        <Field id="lastName" label="Apellido" value={lastName} onChange={setLastName} />
-      </div>
-
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <Field
-          id="title"
-          label="Título"
-          hint="Cómo se muestra debajo del nombre. Ej: Podóloga · MP 1234"
-          value={title}
-          onChange={setTitle}
+    <form action={formAction} className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField
+          id="firstName"
+          label="Nombre"
+          required
+          value={firstName}
+          onChange={(event) => setFirstName(event.target.value)}
         />
-
-        <div>
-          <label htmlFor="specialtyId" className="block text-sm font-medium">
-            Especialidad
-          </label>
-          <select
-            id="specialtyId"
-            name="specialtyId"
-            value={specialtyId}
-            onChange={(event) => setSpecialtyId(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-          >
-            {specialties.map((specialty) => (
-              <option key={specialty.id} value={specialty.id}>
-                {specialty.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <TextField
+          id="lastName"
+          label="Apellido"
+          required
+          value={lastName}
+          onChange={(event) => setLastName(event.target.value)}
+        />
       </div>
 
-      <div className="mt-3">
-        <label htmlFor="slotMinutes" className="block text-sm font-medium">
-          Duración del turno
-        </label>
-        <input
+      <div className="grid gap-4 sm:grid-cols-2">
+        <SelectField
+          id="specialtyId"
+          label="Especialidad"
+          value={specialtyId}
+          onChange={(event) => setSpecialtyId(event.target.value)}
+        >
+          {specialties.map((specialty) => (
+            <option key={specialty.id} value={specialty.id}>
+              {specialty.name}
+            </option>
+          ))}
+        </SelectField>
+        <TextField
           id="slotMinutes"
-          name="slotMinutes"
+          label="Turno (min)"
           type="number"
           min="5"
           step="5"
           inputMode="numeric"
+          hint="Cada profesional puede tener la suya."
           value={slotMinutes}
           onChange={(event) => setSlotMinutes(event.target.value)}
-          className="mt-1 w-32 rounded-lg border border-border bg-background px-3 py-2.5 tabular-nums"
         />
-        <p className="mt-1 text-sm text-muted">
-          En minutos. Cada profesional puede tener la suya.
-        </p>
       </div>
 
-      <Result state={state} saved="Listo, ya se puede sacarle turno." />
+      <TextField
+        id="title"
+        label="Título"
+        optional
+        hint="Se ve debajo del nombre. Ej: Podóloga · MP 1234"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+      />
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="mt-3 rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover disabled:opacity-60"
-      >
-        {isPending ? "Guardando…" : "Agregar profesional"}
-      </button>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+        <SubmitButton>Agregar profesional</SubmitButton>
+        <ActionResult state={state} saved="Listo, ya se le puede sacar turno." />
+      </div>
     </form>
   );
 }
 
 export function NewSpecialtyForm() {
-  const [state, formAction, isPending] = useActionState(createSpecialty, INITIAL);
+  const [state, formAction] = useActionState(createSpecialty, IDLE);
   const [name, setName] = useState("");
 
   const [lastResult, setLastResult] = useState(state);
@@ -121,87 +113,21 @@ export function NewSpecialtyForm() {
   }
 
   return (
-    <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
+    <form action={formAction}>
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grow">
-          <label htmlFor="name" className="block text-sm font-medium">
-            Nombre
-          </label>
-          <input
-            id="name"
-            name="name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover disabled:opacity-60"
-        >
-          {isPending ? "Guardando…" : "Agregar"}
-        </button>
+        <TextField
+          id="name"
+          label="Nombre"
+          required
+          className="min-w-[14rem] grow"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+        />
+        <SubmitButton>Agregar</SubmitButton>
       </div>
-
-      <Result state={state} saved="Especialidad cargada." />
+      <div className="mt-2">
+        <ActionResult state={state} saved="Especialidad cargada." />
+      </div>
     </form>
-  );
-}
-
-function Result({ state, saved }: { state: PractitionerState; saved: string }) {
-  if (state.status === "error") {
-    return (
-      <p role="alert" className="mt-3 text-[0.95rem] text-[color:var(--danger)]">
-        {state.message}
-      </p>
-    );
-  }
-
-  if (state.status === "saved") {
-    return (
-      <p role="status" className="mt-3 text-[0.95rem] text-[color:var(--success)]">
-        {saved}
-      </p>
-    );
-  }
-
-  return null;
-}
-
-function Field({
-  id,
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  hint?: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const hintId = hint ? `${id}-hint` : undefined;
-
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={id}
-        value={value}
-        aria-describedby={hintId}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-      />
-      {hint && (
-        <p id={hintId} className="mt-1 text-sm text-muted">
-          {hint}
-        </p>
-      )}
-    </div>
   );
 }
