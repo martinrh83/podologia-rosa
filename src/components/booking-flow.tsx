@@ -367,7 +367,7 @@ export function BookingFlow({
               step={2}
               of={3}
               headingRef={headingRef}
-              lead={`Los turnos duran ${practitioner.slotMinutes} minutos. Elegí el día y después el horario que te quede cómodo.`}
+              lead={`Los turnos duran ${practitioner.slotMinutes} minutos.`}
             >
               ¿Cuándo te queda cómodo?
             </StepHeading>
@@ -397,15 +397,20 @@ export function BookingFlow({
                 Día
               </h3>
               {/*
-                En el teléfono los días se corren con el dedo y el que sigue
-                queda cortado al borde: sin este aviso, nadie sabe que hay más.
-                Desde `sm` entran todos, envueltos en varias filas.
+                Los días se corren con el dedo y el que sigue queda cortado al
+                borde: sin este aviso, nadie sabe que hay más. La tira se desliza
+                en cualquier pantalla, así que el aviso también va siempre.
               */}
-              <p className="text-[0.95rem] text-muted sm:hidden">
+              <p className="text-[0.95rem] text-muted">
                 {days.length} {days.length === 1 ? "día" : "días"} con lugar · deslizá →
               </p>
             </div>
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:thin] sm:flex-wrap sm:overflow-visible">
+            {/*
+              Una sola fila que se desliza, en cualquier resolución: los días
+              quedan en orden y a la misma altura, sin reacomodarse en filas
+              según entre el ancho.
+            */}
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:thin]">
               {days.map((day) => {
                 const isSelected = day.key === selectedDay?.key;
                 return (
@@ -481,10 +486,6 @@ export function BookingFlow({
                   })}
                 </div>
 
-                <p className="mt-4 text-[0.95rem] text-muted">
-                  Se puede reservar hasta {horizonDays} días para adelante. Para una fecha más
-                  lejana, llamanos.
-                </p>
               </div>
             )}
           </section>
