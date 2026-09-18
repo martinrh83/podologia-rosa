@@ -68,7 +68,7 @@ export default async function TurnosPage() {
       <StepHeading
         step={1}
         of={3}
-        lead="Cada profesional tiene su propia agenda. Elegí y te mostramos sus horarios libres; no hace falta crear una cuenta ni llamar."
+        lead="Cada profesional tiene su propia agenda."
       >
         ¿Con quién te querés atender?
       </StepHeading>
