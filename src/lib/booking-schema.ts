@@ -84,37 +84,76 @@ export function normalizeDni(input: string): string {
  * `createBooking`, y el mensaje acá para que el formulario diga exactamente lo
  * mismo que el servidor.
  */
-export const CONSENT_REQUIRED_MESSAGE = "Necesitamos tu consentimiento para guardar tus datos.";
+export const CONSENT_REQUIRED_MESSAGE = "Marcá la casilla para que podamos guardar tus datos";
 
-export const bookingSchema = z.object({
-  /** Con quién es el turno. No hay reserva sin profesional. */
-  practitionerId: z.uuid("Elegí un profesional"),
-  startsAt: z.iso.datetime({ offset: true }),
-  patientFirstName: z.string().trim().min(2, "Ingresá tu nombre").max(80),
-  patientLastName: z.string().trim().min(2, "Ingresá tu apellido").max(80),
-  patientDni: z
-    .string()
-    .trim()
-    .transform(normalizeDni)
-    // Los DNI argentinos vigentes tienen 7 u 8 dígitos.
-    .refine((value) => value.length >= 7 && value.length <= 8, "Ingresá un DNI válido"),
-  patientCoverage: z.enum(COVERAGE_VALUES, "Elegí tu obra social"),
-  patientPhone: z
-    .string()
-    .trim()
-    .min(6, "Ingresá un teléfono válido")
-    .max(30)
-    .transform(normalizePhone)
-    .refine((value) => value.replace(/\D/g, "").length >= 8, "Ingresá un teléfono válido"),
-  // Optional, and a DATO SENSIBLE under Ley 25.326 art. 2.
-  motivo: z
-    .string()
-    .trim()
-    .max(500, "El motivo no puede superar los 500 caracteres")
-    .optional()
-    .or(z.literal("")),
-  /** Must be explicitly true for an online booking; recorded as consent_at. */
-  consent: z.boolean(),
-});
+/**
+ * Los mensajes de cada campo, según quién escribe.
+ *
+ * Las reglas son las mismas en la reserva y en «Nuevo turno»; lo que cambia es
+ * a quién se le habla. En el sitio el paciente escribe sus datos («Ingresá tu
+ * nombre»); en el panel la recepción escribe los de otra persona, y «tu nombre»
+ * le pedía el suyo.
+ */
+const VOICES = {
+  paciente: {
+    practitionerId: "Elegí un profesional",
+    startsAt: "Elegí un horario",
+    firstName: "Ingresá tu nombre",
+    lastName: "Ingresá tu apellido",
+    dni: "Ingresá un DNI válido",
+    coverage: "Elegí tu obra social",
+    phone: "Ingresá un teléfono válido",
+  },
+  personal: {
+    practitionerId: "Elegí un profesional",
+    startsAt: "Elegí un horario",
+    firstName: "Ingresá el nombre",
+    lastName: "Ingresá el apellido",
+    dni: "Ingresá un DNI válido",
+    coverage: "Elegí la obra social",
+    phone: "Ingresá un teléfono válido",
+  },
+} as const;
+
+export function bookingSchemaFor(voice: keyof typeof VOICES) {
+  const say = VOICES[voice];
+
+  return z.object({
+    /** Con quién es el turno. No hay reserva sin profesional. */
+    practitionerId: z.uuid(say.practitionerId),
+    startsAt: z.iso.datetime({ offset: true, error: say.startsAt }),
+    patientFirstName: z.string(say.firstName).trim().min(2, say.firstName).max(80, "Es demasiado largo"),
+    patientLastName: z.string(say.lastName).trim().min(2, say.lastName).max(80, "Es demasiado largo"),
+    patientDni: z
+      .string(say.dni)
+      .trim()
+      .transform(normalizeDni)
+      // Los DNI argentinos vigentes tienen 7 u 8 dígitos.
+      .refine((value) => value.length >= 7 && value.length <= 8, say.dni),
+    patientCoverage: z.enum(COVERAGE_VALUES, say.coverage),
+    patientPhone: z
+      .string(say.phone)
+      .trim()
+      .min(6, say.phone)
+      .max(30, say.phone)
+      .transform(normalizePhone)
+      .refine((value) => value.replace(/\D/g, "").length >= 8, say.phone),
+    // Optional, and a DATO SENSIBLE under Ley 25.326 art. 2.
+    motivo: z
+      .string("El motivo tiene que ser texto")
+      .trim()
+      .max(500, "El motivo no puede superar los 500 caracteres")
+      .optional()
+      .or(z.literal("")),
+    /** Must be explicitly true for an online booking; recorded as consent_at. */
+    consent: z.boolean(CONSENT_REQUIRED_MESSAGE),
+  });
+}
+
+/** La reserva pública, en la voz del paciente. */
+export const bookingSchema = bookingSchemaFor("paciente");
+
+/** «Nuevo turno» del panel: las mismas reglas, habladas por la recepción. */
+export const adminBookingSchema = bookingSchemaFor("personal");
 
 export type BookingInput = z.infer<typeof bookingSchema>;

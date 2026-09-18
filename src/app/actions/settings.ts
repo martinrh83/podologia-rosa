@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { normalizePhone } from "@/lib/booking-schema";
+import { formError, formValues, MESSAGES, parseForm, SAVED, type ActionState } from "@/lib/forms";
+import { settingsSchema } from "@/lib/schemas";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -24,13 +25,9 @@ export async function updateClinicSettings(
 ): Promise<ActionState> {
   await requireStaff();
 
-  const clinicName = String(formData.get("clinicName") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const whatsapp = String(formData.get("whatsapp") ?? "").trim();
-
-  if (clinicName.length < 2) {
-    return { status: "error", message: "El nombre del consultorio no puede quedar vacío." };
-  }
+  const parsed = parseForm(settingsSchema, formValues(formData, ["clinicName", "phone", "whatsapp"]));
+  if (!parsed.ok) return parsed.state;
+  const { clinicName, phone, whatsapp } = parsed.data;
 
   const supabase = createSupabaseAdminClient();
 
@@ -48,14 +45,12 @@ export async function updateClinicSettings(
     })
     .eq("id", true);
 
-  if (error) {
-    return { status: "error", message: "No pudimos guardar los cambios." };
-  }
+  if (error) return formError(MESSAGES.saveFailed("los cambios"));
 
   // Todas las páginas que muestran estos datos.
   for (const path of ["/", "/turnos", "/privacidad", "/admin/consultorio"]) {
     revalidatePath(path);
   }
 
-  return { status: "saved" };
+  return SAVED;
 }

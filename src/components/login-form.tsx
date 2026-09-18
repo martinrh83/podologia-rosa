@@ -2,29 +2,40 @@
 
 import { useActionState } from "react";
 
-import { login, type LoginState } from "@/app/actions/auth";
+import { login } from "@/app/actions/auth";
 import { SubmitButton } from "@/components/admin/buttons";
-import { TextField } from "@/components/admin/fields";
+import { TextField } from "@/components/fields";
+import { FormAlert } from "@/components/form-alert";
+import { useForm } from "@/components/use-form";
+import { IDLE } from "@/lib/forms";
+import { loginSchema } from "@/lib/schemas";
 
 export function LoginForm({ next }: { next: string }) {
-  const [state, formAction] = useActionState(login, {} as LoginState);
+  const [state, formAction] = useActionState(login, IDLE);
+  const form = useForm(loginSchema, { email: "", password: "" }, state);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} onSubmit={form.onSubmit} noValidate className="space-y-5">
       <input type="hidden" name="next" value={next} />
 
-      <TextField id="email" label="Email" type="email" required autoComplete="username" />
+      <TextField
+        id="email"
+        label="Email"
+        type="email"
+        required
+        autoComplete="username"
+        {...form.field("email")}
+      />
       <TextField
         id="password"
         label="Contraseña"
         type="password"
         required
         autoComplete="current-password"
+        {...form.field("password")}
       />
 
-      <p aria-live="polite" className="text-[0.95rem] font-bold text-[color:var(--danger)]">
-        {state.error ?? ""}
-      </p>
+      <FormAlert state={state} />
 
       <SubmitButton block pendingLabel="Entrando…">
         Entrar

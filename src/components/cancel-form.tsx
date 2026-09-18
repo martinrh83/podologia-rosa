@@ -2,12 +2,12 @@
 
 import { useActionState } from "react";
 
-import { cancelTurno, type CancelState } from "@/app/actions/cancel";
-
-const INITIAL: CancelState = { status: "idle" };
+import { cancelTurno } from "@/app/actions/cancel";
+import { FormAlert } from "@/components/form-alert";
+import { IDLE } from "@/lib/forms";
 
 export function CancelForm({ token, clinicPhone }: { token: string; clinicPhone: string | null }) {
-  const [state, formAction, isPending] = useActionState(cancelTurno, INITIAL);
+  const [state, formAction, isPending] = useActionState(cancelTurno, IDLE);
 
   /*
     No hay rama de "cancelado" acá: la acción redirige a la misma página con
@@ -28,10 +28,11 @@ export function CancelForm({ token, clinicPhone }: { token: string; clinicPhone:
         querés volver, hay que sacar un turno nuevo.
       </p>
 
+      {/* El mismo aviso de error que el resto de los formularios del sitio. */}
       {state.status === "error" && (
-        <p role="alert" className="mt-4 text-[0.95rem] font-bold text-[color:var(--danger)]">
-          {state.message}
-        </p>
+        <div className="mt-6">
+          <FormAlert state={state} />
+        </div>
       )}
 
       <button

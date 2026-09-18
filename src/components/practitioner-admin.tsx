@@ -3,33 +3,41 @@
 import { useActionState, useState } from "react";
 
 import { createPractitioner, createSpecialty } from "@/app/actions/practitioners";
-import { IDLE } from "@/app/actions/state";
 import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
-import { SelectField, TextField } from "@/components/admin/fields";
+import { SelectField, TextField } from "@/components/fields";
+import { FormAlert } from "@/components/form-alert";
 import { Notice } from "@/components/notice";
+import { useForm } from "@/components/use-form";
+import { IDLE } from "@/lib/forms";
+import { newPractitionerSchema, specialtySchema } from "@/lib/schemas";
 
 export type SpecialtyOption = { id: string; name: string };
 
-/** Alta de un profesional. Controlado por el mismo motivo que el resto del panel. */
+/**
+ * Alta de un profesional.
+ *
+ * Controlado por el mismo motivo que el resto del panel: React vacía un
+ * formulario no controlado al terminar la acción, y ante un error eso borraba
+ * lo que se acababa de escribir. Se vacía sólo cuando guardó.
+ */
 export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOption[] }) {
   const [state, formAction] = useActionState(createPractitioner, IDLE);
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [title, setTitle] = useState("");
-  const [slotMinutes, setSlotMinutes] = useState("60");
-  const [specialtyId, setSpecialtyId] = useState(specialties[0]?.id ?? "");
+  const empty = {
+    firstName: "",
+    lastName: "",
+    title: "",
+    slotMinutes: "60",
+    specialtyId: specialties[0]?.id ?? "",
+  };
+  const form = useForm(newPractitionerSchema, empty, state);
 
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
     setLastResult(state);
-    if (state.status === "saved") {
-      setFirstName("");
-      setLastName("");
-      setTitle("");
-      setSlotMinutes("60");
-    }
+    // La especialidad elegida queda: se suele cargar a varias de la misma.
+    if (state.status === "saved") form.reset({ ...empty, specialtyId: form.values.specialtyId });
   }
 
   if (specialties.length === 0) {
@@ -41,31 +49,14 @@ export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOpt
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} onSubmit={form.onSubmit} noValidate className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField
-          id="firstName"
-          label="Nombre"
-          required
-          value={firstName}
-          onChange={(event) => setFirstName(event.target.value)}
-        />
-        <TextField
-          id="lastName"
-          label="Apellido"
-          required
-          value={lastName}
-          onChange={(event) => setLastName(event.target.value)}
-        />
+        <TextField id="firstName" label="Nombre" required {...form.field("firstName")} />
+        <TextField id="lastName" label="Apellido" required {...form.field("lastName")} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <SelectField
-          id="specialtyId"
-          label="Especialidad"
-          value={specialtyId}
-          onChange={(event) => setSpecialtyId(event.target.value)}
-        >
+        <SelectField id="specialtyId" label="Especialidad" {...form.field("specialtyId")}>
           {specialties.map((specialty) => (
             <option key={specialty.id} value={specialty.id}>
               {specialty.name}
@@ -80,8 +71,7 @@ export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOpt
           step="5"
           inputMode="numeric"
           hint="Cada profesional puede tener la suya."
-          value={slotMinutes}
-          onChange={(event) => setSlotMinutes(event.target.value)}
+          {...form.field("slotMinutes")}
         />
       </div>
 
@@ -90,9 +80,10 @@ export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOpt
         label="Título"
         optional
         hint="Se ve debajo del nombre. Ej: Podóloga · MP 1234"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
+        {...form.field("title")}
       />
+
+      <FormAlert state={state} />
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
         <SubmitButton>Agregar profesional</SubmitButton>
@@ -104,28 +95,22 @@ export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOpt
 
 export function NewSpecialtyForm() {
   const [state, formAction] = useActionState(createSpecialty, IDLE);
-  const [name, setName] = useState("");
+  const form = useForm(specialtySchema, { name: "" }, state);
 
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
     setLastResult(state);
-    if (state.status === "saved") setName("");
+    if (state.status === "saved") form.reset();
   }
 
   return (
-    <form action={formAction}>
-      <div className="flex flex-wrap items-end gap-3">
-        <TextField
-          id="name"
-          label="Nombre"
-          required
-          className="min-w-[14rem] grow"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-        <SubmitButton>Agregar</SubmitButton>
-      </div>
-      <div className="mt-2">
+    <form action={formAction} onSubmit={form.onSubmit} noValidate className="space-y-4">
+      <TextField id="name" label="Nombre" required {...form.field("name")} />
+
+      <FormAlert state={state} />
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+        <SubmitButton>Agregar especialidad</SubmitButton>
         <ActionResult state={state} saved="Especialidad cargada." />
       </div>
     </form>

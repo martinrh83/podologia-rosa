@@ -2,9 +2,11 @@
 
 import { redirect } from "next/navigation";
 
+import { formError, formValues, parseForm, type ActionState } from "@/lib/forms";
+import { loginSchema } from "@/lib/schemas";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type LoginState = { error?: string };
+const WRONG_CREDENTIALS = "El email o la contraseña no coinciden. Revisalos y probá de nuevo.";
 
 /**
  * Sign Rosa in. There is no public sign-up: her user is created by hand in the
@@ -14,22 +16,20 @@ export type LoginState = { error?: string };
  * porque "sign-ups disabled" es un toggle del dashboard, no una garantía del
  * código: si alguien lo activa, esto sigue sin dejar entrar a nadie.
  */
-export async function login(_previous: LoginState, formData: FormData): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
+export async function login(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = parseForm(loginSchema, formValues(formData, ["email", "password"]));
+  if (!parsed.ok) return parsed.state;
+  const { email, password } = parsed.data;
   const next = String(formData.get("next") ?? "/admin");
-
-  if (!email || !password) {
-    return { error: "Completá email y contraseña." };
-  }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.user) {
     // Deliberately vague: distinguishing "wrong password" from "no such user"
-    // tells an attacker which emails exist.
-    return { error: "Email o contraseña incorrectos." };
+    // tells an attacker which emails exist. Y por eso va como error del
+    // formulario y no en un campo: marcar la contraseña diría que el email existe.
+    return formError(WRONG_CREDENTIALS);
   }
 
   // La contraseña era correcta, pero eso sólo prueba que el usuario existe en
@@ -47,7 +47,7 @@ export async function login(_previous: LoginState, formData: FormData): Promise<
     await supabase.auth.signOut();
     // Mismo mensaje que arriba, por lo mismo: decir "tu usuario no tiene
     // acceso" confirma que ese email existe.
-    return { error: "Email o contraseña incorrectos." };
+    return formError(WRONG_CREDENTIALS);
   }
 
   // Only redirect to our own paths — never to whatever ?next= contained.

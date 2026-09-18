@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-18T16:54:30-03:00",
+  "generatedAt": "2026-09-18T17:32:58-03:00",
   "title": "Design System: Podología Mitre",
   "extensions": {
     "colorMeta": {
@@ -478,6 +478,11 @@
         "name": "The Confirmar En El Renglón Rule",
         "body": "En el panel, lo que no tiene vuelta atrás —cancelar un turno, quitar una franja o un cierre, dar de baja— se abre con un enlace de texto y se confirma en el mismo lugar con el contorno de aviso chico. Nunca un modal. En reposo el enlace no lleva rojo: pasa a rojo de aviso sólo al pasar el mouse o con el foco.",
         "section": "components"
+      },
+      {
+        "name": "The Error En Su Lugar Rule",
+        "body": "Cada error va donde se arregla. El de un campo, debajo del campo con el borde en rojo de aviso, aunque lo haya detectado el servidor. El que no es de ningún campo, en un aviso de error arriba del botón. El de una acción de un botón, en letra roja al lado del botón. Todos los formularios validan con el mismo schema de Zod en el navegador y en el servidor, así que el mensaje es el mismo venga de donde venga: el de un campo dice qué hacer, sin punto final; el del formulario es una oración completa que dice qué pasó y qué hacer.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -492,7 +497,8 @@
       "**Do** decir el paso dentro de la frase que sigue al título, en negrita, y repetirlo en la lista numerada al costado.",
       "**Do** girar lo apoyado (tarjeta, foto, sellos) entre -1° y -9°, y dejar derecho todo lo impreso.",
       "**Do** reservar la animación `sellar` (520ms, cubic-bezier(0.16, 1, 0.3, 1), 380ms de espera) para un único sello por página, y dejarlo quieto con movimiento reducido.",
-      "**Do** en el panel, pedir en el lugar la confirmación de lo que no tiene vuelta atrás, y que cada formulario diga «Guardando…» y después «Guardado.» o el error."
+      "**Do** en el panel, pedir en el lugar la confirmación de lo que no tiene vuelta atrás, y que cada formulario diga «Guardando…» y después «Guardado.» o el error.",
+      "**Do** poner cada error donde se arregla: el de un campo en el campo, el del formulario en un aviso arriba del botón, y escribirlo diciendo qué hacer."
     ],
     "donts": [
       "**Don't** usar foto de stock, celeste genérico de clínica ni tarjetas con íconos.",

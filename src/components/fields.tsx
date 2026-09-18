@@ -1,17 +1,17 @@
 /**
- * Los campos del panel.
+ * Los campos de formulario de todo el sitio: la reserva, cancelar, el ingreso y
+ * el panel.
  *
- * Son los mismos del formulario público: rótulo en versalita angosta, campo
- * blanco de 2px sobre la cartulina, esquinas vivas. Antes cada formulario del
- * panel tenía su propio `Field` —había tres— y la misma cadena de clases
- * repetida en unos treinta inputs, cada uno con su variante mínima.
+ * Rótulo en versalita angosta, campo blanco de 2px sobre la cartulina, esquinas
+ * vivas. El panel tenía tres `Field` propios y la reserva otro; ahora hay uno, y
+ * todos marcan los errores igual: el borde pasa a rojo de aviso y el mensaje va
+ * debajo del campo, en negrita. El color nunca va solo, siempre hay texto.
  *
- * Sirven controlados o no: lo que no es propio del campo (`value`,
- * `defaultValue`, `onChange`, `required`…) pasa derecho al elemento.
+ * Sirven controlados o no: lo que no es propio del campo (`value`, `onChange`,
+ * `onBlur`, `required`…) pasa derecho al elemento.
  */
 
-export const FIELD =
-  "w-full border-2 border-border bg-surface px-3.5 py-3 text-[1.05rem]";
+export const FIELD = "w-full border-2 bg-surface px-3.5 py-3 text-[1.05rem]";
 
 /**
  * El `<select>` nativo no respeta el alto de línea y quedaba 6px más bajo que
@@ -21,13 +21,24 @@ export const SELECT = `${FIELD} h-[3.31rem]`;
 
 const LABEL = "block font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted";
 
+function border(error?: string) {
+  return error ? "border-[color:var(--danger)]" : "border-border";
+}
+
 type Common = {
   label: string;
   hint?: string;
-  /** Se dice en el rótulo, en redonda y minúscula, como en el sitio. */
+  /** Se dice en el rótulo, en redonda y minúscula. */
   optional?: boolean;
+  /** El error de este campo. Vacío o ausente, no hay. */
+  error?: string;
   className?: string;
 };
+
+/** Los ids que describen el campo: primero la ayuda, después el error. */
+function describedBy(id: string, hint?: string) {
+  return [hint ? `${id}-hint` : null, `${id}-error`].filter(Boolean).join(" ");
+}
 
 export function Label({
   htmlFor,
@@ -59,16 +70,35 @@ function Hint({ id, children }: { id: string; children: React.ReactNode }) {
   );
 }
 
+/**
+ * El error de un campo.
+ *
+ * Siempre está en el DOM, aunque esté vacío: una región `aria-live` tiene que
+ * existir *antes* de que aparezca el texto, si no el lector de pantalla no
+ * anuncia nada. Eso cubre el caso de quien se va del campo con un error y
+ * nunca lo ve.
+ */
+export function FieldError({ id, message }: { id: string; message?: string }) {
+  return (
+    <p
+      id={id}
+      aria-live="polite"
+      className={`text-[0.95rem] font-bold text-[color:var(--danger)] ${message ? "mt-1.5" : ""}`}
+    >
+      {message ?? ""}
+    </p>
+  );
+}
+
 export function TextField({
   label,
   hint,
   optional,
+  error,
   className = "",
   id,
   ...input
 }: Common & { id: string } & Omit<React.ComponentProps<"input">, "id" | "className">) {
-  const hintId = hint ? `${id}-hint` : undefined;
-
   return (
     <div className={className}>
       <Label htmlFor={id} optional={optional}>
@@ -77,11 +107,13 @@ export function TextField({
       <input
         id={id}
         name={id}
-        aria-describedby={hintId}
+        aria-describedby={describedBy(id, hint)}
+        aria-invalid={error ? true : undefined}
         {...input}
-        className={`mt-2 ${FIELD} ${input.type === "number" ? "tabular-nums" : ""}`}
+        className={`mt-2 ${FIELD} ${border(error)} ${input.type === "number" ? "tabular-nums" : ""}`}
       />
-      {hint && hintId && <Hint id={hintId}>{hint}</Hint>}
+      {hint && <Hint id={`${id}-hint`}>{hint}</Hint>}
+      <FieldError id={`${id}-error`} message={error} />
     </div>
   );
 }
@@ -90,22 +122,29 @@ export function SelectField({
   label,
   hint,
   optional,
+  error,
   className = "",
   id,
   children,
   ...select
 }: Common & { id: string } & Omit<React.ComponentProps<"select">, "id" | "className">) {
-  const hintId = hint ? `${id}-hint` : undefined;
-
   return (
     <div className={className}>
       <Label htmlFor={id} optional={optional}>
         {label}
       </Label>
-      <select id={id} name={id} aria-describedby={hintId} {...select} className={`mt-2 ${SELECT}`}>
+      <select
+        id={id}
+        name={id}
+        aria-describedby={describedBy(id, hint)}
+        aria-invalid={error ? true : undefined}
+        {...select}
+        className={`mt-2 ${SELECT} ${border(error)}`}
+      >
         {children}
       </select>
-      {hint && hintId && <Hint id={hintId}>{hint}</Hint>}
+      {hint && <Hint id={`${id}-hint`}>{hint}</Hint>}
+      <FieldError id={`${id}-error`} message={error} />
     </div>
   );
 }
@@ -114,12 +153,11 @@ export function TextArea({
   label,
   hint,
   optional,
+  error,
   className = "",
   id,
   ...textarea
 }: Common & { id: string } & Omit<React.ComponentProps<"textarea">, "id" | "className">) {
-  const hintId = hint ? `${id}-hint` : undefined;
-
   return (
     <div className={className}>
       <Label htmlFor={id} optional={optional}>
@@ -128,11 +166,13 @@ export function TextArea({
       <textarea
         id={id}
         name={id}
-        aria-describedby={hintId}
+        aria-describedby={describedBy(id, hint)}
+        aria-invalid={error ? true : undefined}
         {...textarea}
-        className={`mt-2 ${FIELD}`}
+        className={`mt-2 ${FIELD} ${border(error)}`}
       />
-      {hint && hintId && <Hint id={hintId}>{hint}</Hint>}
+      {hint && <Hint id={`${id}-hint`}>{hint}</Hint>}
+      <FieldError id={`${id}-error`} message={error} />
     </div>
   );
 }
@@ -145,6 +185,7 @@ export function TextArea({
  */
 export function MoneyField({
   label,
+  error,
   className = "",
   id,
   ...input
@@ -167,11 +208,14 @@ export function MoneyField({
           name={id}
           type="number"
           min="0"
-          inputMode="numeric"
+          inputMode="decimal"
+          aria-describedby={`${id}-error`}
+          aria-invalid={error ? true : undefined}
           {...input}
-          className={`${FIELD} pl-8 tabular-nums`}
+          className={`${FIELD} ${border(error)} pl-8 tabular-nums`}
         />
       </div>
+      <FieldError id={`${id}-error`} message={error} />
     </div>
   );
 }
@@ -179,36 +223,47 @@ export function MoneyField({
 /**
  * Opción única en bloques con la casilla cuadrada: la obra social.
  *
- * Igual a la del formulario público. Elegida, el borde y el texto pasan a tinta
- * de sello; la casilla se tilda en birome.
+ * Elegida, el borde y el texto pasan a tinta de sello; la casilla se tilda en
+ * birome. El primer radio lleva `id`: es al que se le manda el foco si hay que
+ * elegir y no se eligió.
  */
 export function OptionGroup<T extends string>({
+  id,
   legend,
   name,
   options,
   value,
+  error,
   onChange,
 }: {
-  legend: string;
+  id: string;
+  legend: React.ReactNode;
   name: string;
   options: readonly { value: T; label: string }[];
-  value: T;
+  value: T | "";
+  error?: string;
   onChange: (value: T) => void;
 }) {
   return (
-    <fieldset>
+    <fieldset
+      aria-describedby={`${id}-error`}
+      aria-invalid={error ? true : undefined}
+    >
       <Legend>{legend}</Legend>
       <div className="mt-2 grid gap-2 sm:grid-cols-3">
-        {options.map((option) => (
+        {options.map((option, index) => (
           <label
             key={option.value}
-            className={`flex min-h-12 cursor-pointer items-center gap-3 border-2 bg-surface px-4 py-3 text-[1.05rem] font-bold transition-colors ${
+            className={`flex cursor-pointer items-center gap-3 border-2 bg-surface px-4 py-3.5 text-[1.05rem] font-bold transition-colors ${
               value === option.value
                 ? "border-accent text-accent"
-                : "border-border hover:border-accent"
+                : error
+                  ? "border-[color:var(--danger)] hover:border-accent"
+                  : "border-border hover:border-accent"
             }`}
           >
             <input
+              id={index === 0 ? id : undefined}
               type="radio"
               name={name}
               value={option.value}
@@ -221,6 +276,7 @@ export function OptionGroup<T extends string>({
           </label>
         ))}
       </div>
+      <FieldError id={`${id}-error`} message={error} />
     </fieldset>
   );
 }

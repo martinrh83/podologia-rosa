@@ -1,4 +1,9 @@
-/** Un aviso: neutro, de error o de que algo salió bien. */
+/**
+ * Un aviso: neutro, de error o de que algo salió bien.
+ *
+ * El de error es `alert` y no `status`: lo que dice frenó lo que la persona
+ * estaba haciendo, y tiene que enterarse aunque el foco esté en otro lado.
+ */
 export function Notice({
   tone,
   title,
@@ -15,7 +20,7 @@ export function Notice({
   }[tone];
 
   return (
-    <div role="status" className={`border-2 p-5 ${toneClass}`}>
+    <div role={tone === "danger" ? "alert" : "status"} className={`border-2 p-5 ${toneClass}`}>
       <p className="text-[1.15rem] font-bold">{title}</p>
       {children && <div className="mt-1.5 leading-relaxed text-muted">{children}</div>}
     </div>

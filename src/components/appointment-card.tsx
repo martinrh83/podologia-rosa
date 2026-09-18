@@ -1,6 +1,6 @@
 import { updateStatus } from "@/app/actions/appointments";
 import { buttonClass, TEXT_ACTION } from "@/components/admin/button-styles";
-import { ConfirmAction, SubmitButton } from "@/components/admin/buttons";
+import { ActionButton, ConfirmAction } from "@/components/admin/buttons";
 import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
 import type { Appointment, AppointmentWithPractitioner } from "@/lib/db/types";
@@ -200,12 +200,8 @@ function StatusForm({
   label: string;
 }) {
   return (
-    <form action={updateStatus}>
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="status" value={status} />
-      <SubmitButton variant="ink" size="sm" pendingLabel="Guardando…">
-        {label}
-      </SubmitButton>
-    </form>
+    <ActionButton action={updateStatus} fields={{ id, status }}>
+      {label}
+    </ActionButton>
   );
 }

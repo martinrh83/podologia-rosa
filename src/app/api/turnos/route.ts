@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createBooking } from "@/lib/booking";
 import { bookingSchema } from "@/lib/booking-schema";
+import { fieldErrorsOf, MESSAGES } from "@/lib/forms";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 
 /**
@@ -21,14 +22,16 @@ export async function POST(request: NextRequest) {
   try {
     payload = await request.json();
   } catch {
-    return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
+    return NextResponse.json({ error: MESSAGES.checkFields }, { status: 400 });
   }
 
+  // Los errores van por campo, con el mismo texto que el formulario muestra al
+  // validar del lado del navegador: el schema es el mismo. El formulario los
+  // pone en cada campo; `error` queda para quien no los sepa leer.
   const parsed = bookingSchema.safeParse(payload);
   if (!parsed.success) {
-    const firstIssue = parsed.error.issues[0];
     return NextResponse.json(
-      { error: firstIssue?.message ?? "Revisá los datos del formulario." },
+      { error: MESSAGES.checkFields, fieldErrors: fieldErrorsOf(parsed.error) },
       { status: 400 },
     );
   }

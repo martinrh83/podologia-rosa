@@ -2,8 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
+import {
+  formError,
+  formValues,
+  MESSAGES,
+  parseForm,
+  SAVED,
+  type ActionState,
+} from "@/lib/forms";
+import { blockSchema, serviceSchema, shiftSchema } from "@/lib/schemas";
 import { shiftsOverlap } from "@/lib/shifts";
 import { localDayRangeFromKey } from "@/lib/slots";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -23,9 +31,9 @@ function revalidateSchedule() {
 /**
  * Add one shift. Two rows on the same weekday express a split shift.
  *
- * Cada rechazo dice por qué. Antes todos hacían `return` en silencio: el
- * formulario se vaciaba, la página se recargaba igual y la franja no aparecía,
- * sin una sola palabra de explicación.
+ * Cada rechazo dice por qué, y en el campo que hay que corregir. Las reglas de
+ * forma están en `shiftSchema`; acá queda la que necesita la base: que no se
+ * pise con otra franja del mismo día.
  */
 export async function addShift(
   _previous: ActionState,
@@ -33,37 +41,13 @@ export async function addShift(
 ): Promise<ActionState> {
   await requireStaff();
 
-  const practitionerId = String(formData.get("practitionerId") ?? "");
-  const locationId = String(formData.get("locationId") ?? "");
-  const weekday = Number(formData.get("weekday"));
-  const startTime = String(formData.get("startTime") ?? "");
-  const endTime = String(formData.get("endTime") ?? "");
-
-  if (!practitionerId) {
-    return { status: "error", message: "Elegí de quién es la franja." };
-  }
-
-  if (!locationId) {
-    return { status: "error", message: "Elegí en qué sede se atiende." };
-  }
-
-  if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
-    return { status: "error", message: "Elegí un día de la semana." };
-  }
-
-  if (!startTime || !endTime) {
-    return { status: "error", message: "Completá la hora de inicio y la de fin." };
-  }
-
-  if (endTime <= startTime) {
-    // El caso que más pasa: cargar "de 8 a 12" y que el 12 quede en medianoche.
-    // La franja terminaría antes de empezar, y el check de la base la rechaza.
-    return {
-      status: "error",
-      message:
-        "La hora de fin tiene que ser posterior a la de inicio. Ojo que el mediodía son las 12:00 y la medianoche las 00:00.",
-    };
-  }
+  const parsed = parseForm(
+    shiftSchema,
+    formValues(formData, ["practitionerId", "locationId", "weekday", "startTime", "endTime"]),
+  );
+  if (!parsed.ok) return parsed.state;
+  const { practitionerId, locationId, startTime, endTime } = parsed.data;
+  const weekday = Number(parsed.data.weekday);
 
   const supabase = createSupabaseAdminClient();
 
@@ -87,40 +71,43 @@ export async function addShift(
   if (clash) {
     return {
       status: "error",
-      message:
-        `Se pisa con la franja de ${clash.start_time.slice(0, 5)} a ` +
-        `${clash.end_time.slice(0, 5)} que ya tiene ese día.`,
+      fieldErrors: {
+        startTime:
+          `Se pisa con la franja de ${clash.start_time.slice(0, 5)} a ` +
+          `${clash.end_time.slice(0, 5)} que ya tiene ese día`,
+      },
     };
   }
 
-  const { error } = await supabase
-    .from("weekly_schedule")
-    .insert({
-      practitioner_id: practitionerId,
-      location_id: locationId,
-      weekday,
-      start_time: startTime,
-      end_time: endTime,
-    });
+  const { error } = await supabase.from("weekly_schedule").insert({
+    practitioner_id: practitionerId,
+    location_id: locationId,
+    weekday,
+    start_time: startTime,
+    end_time: endTime,
+  });
 
-  if (error) {
-    return { status: "error", message: "No pudimos guardar la franja. Probá de nuevo." };
-  }
+  if (error) return formError(MESSAGES.saveFailed("la franja"));
 
   revalidateSchedule();
-  return { status: "saved" };
+  return SAVED;
 }
 
-export async function removeShift(formData: FormData): Promise<void> {
+export async function removeShift(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  if (!id) return formError(MESSAGES.notFound("la franja"));
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("weekly_schedule").delete().eq("id", id);
+  const { error } = await supabase.from("weekly_schedule").delete().eq("id", id);
+  if (error) return formError(MESSAGES.saveFailed("el cambio"));
 
   revalidateSchedule();
+  return SAVED;
 }
 
 /**
@@ -137,31 +124,26 @@ export async function addBlock(
 ): Promise<ActionState> {
   await requireStaff();
 
-  const fromKey = String(formData.get("from") ?? "");
-  const toKey = String(formData.get("to") ?? "");
-  const reason = String(formData.get("reason") ?? "").trim();
+  const parsed = parseForm(
+    blockSchema,
+    formValues(formData, ["practitionerId", "locationId", "from", "to", "reason"]),
+  );
+  if (!parsed.ok) return parsed.state;
+  const { from, to, reason } = parsed.data;
   // Vacío significa "todos": el feriado que no es de nadie en particular y
   // aplica también a quien entre después. Lo mismo con la sede.
-  const practitionerId = String(formData.get("practitionerId") ?? "") || null;
-  const locationId = String(formData.get("locationId") ?? "") || null;
-
-  if (!fromKey || !toKey) {
-    return { status: "error", message: "Completá las dos fechas." };
-  }
+  const practitionerId = parsed.data.practitionerId || null;
+  const locationId = parsed.data.locationId || null;
 
   let start: Date;
   let end: Date;
 
   try {
-    start = localDayRangeFromKey(fromKey).start;
+    start = localDayRangeFromKey(from).start;
     // `end` of the last day, so an inclusive date range behaves as written.
-    end = localDayRangeFromKey(toKey).end;
+    end = localDayRangeFromKey(to).end;
   } catch {
-    return { status: "error", message: "Revisá las fechas." };
-  }
-
-  if (end <= start) {
-    return { status: "error", message: "La fecha de fin no puede ser anterior a la de inicio." };
+    return { status: "error", fieldErrors: { from: "Ingresá una fecha válida" } };
   }
 
   const supabase = createSupabaseAdminClient();
@@ -173,24 +155,27 @@ export async function addBlock(
     reason: reason || null,
   });
 
-  if (error) {
-    return { status: "error", message: "No pudimos guardar el cierre. Probá de nuevo." };
-  }
+  if (error) return formError(MESSAGES.saveFailed("el cierre"));
 
   revalidateSchedule();
-  return { status: "saved" };
+  return SAVED;
 }
 
-export async function removeBlock(formData: FormData): Promise<void> {
+export async function removeBlock(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  if (!id) return formError(MESSAGES.notFound("el cierre"));
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("schedule_blocks").delete().eq("id", id);
+  const { error } = await supabase.from("schedule_blocks").delete().eq("id", id);
+  if (error) return formError(MESSAGES.saveFailed("el cambio"));
 
   revalidateSchedule();
+  return SAVED;
 }
 
 /** Update a service's name and price. Prices live in the DB because of inflation. */
@@ -201,37 +186,38 @@ export async function updateService(
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
-  const name = String(formData.get("name") ?? "").trim();
-  const rawPrice = String(formData.get("price") ?? "").trim();
+  if (!id) return formError(MESSAGES.notFound("el servicio"));
 
-  if (!id) return { status: "error", message: "No encontramos el servicio. Recargá la página." };
-  if (!name) return { status: "error", message: "El nombre no puede quedar vacío." };
-
-  const price = rawPrice === "" ? null : Number(rawPrice);
-  if (price !== null && (Number.isNaN(price) || price < 0)) {
-    return { status: "error", message: "El precio tiene que ser un número, sin puntos ni signos." };
-  }
+  const parsed = parseForm(serviceSchema, formValues(formData, ["name", "price"]));
+  if (!parsed.ok) return parsed.state;
+  const { name } = parsed.data;
+  const price = parsed.data.price === "" ? null : Number(parsed.data.price);
 
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase.from("services").update({ name, price }).eq("id", id);
 
-  if (error) return { status: "error", message: "No pudimos guardar los cambios. Probá de nuevo." };
+  if (error) return formError(MESSAGES.saveFailed("los cambios"));
 
   revalidatePath("/admin/servicios");
   revalidatePath("/");
-  return { status: "saved" };
+  return SAVED;
 }
 
-export async function toggleService(formData: FormData): Promise<void> {
+export async function toggleService(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
   const active = String(formData.get("active") ?? "") === "true";
-  if (!id) return;
+  if (!id) return formError(MESSAGES.notFound("el servicio"));
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("services").update({ active: !active }).eq("id", id);
+  const { error } = await supabase.from("services").update({ active: !active }).eq("id", id);
+  if (error) return formError(MESSAGES.saveFailed("el cambio"));
 
   revalidatePath("/admin/servicios");
   revalidatePath("/");
+  return SAVED;
 }

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition } from "react";
 
-import { FIELD, Label, SELECT } from "@/components/admin/fields";
+import { FIELD, Label, SELECT } from "@/components/fields";
 
 /** Cuánto se espera después de la última tecla antes de ir a buscar horarios. */
 const DEBOUNCE_MS = 400;
@@ -75,7 +75,7 @@ export function SlotFilters({ practitioners, practitionerId, dateKey }: Props) {
             id="profesional"
             value={practitionerId}
             onChange={(event) => go({ profesional: event.target.value })}
-            className={`mt-2 ${SELECT}`}
+            className={`mt-2 ${SELECT} border-border`}
           >
             {practitioners.map((row) => (
               <option key={row.id} value={row.id}>
@@ -100,7 +100,7 @@ export function SlotFilters({ practitioners, practitionerId, dateKey }: Props) {
             if (!value) return;
             timer.current = setTimeout(() => go({ fecha: value }), DEBOUNCE_MS);
           }}
-          className={`mt-2 ${FIELD}`}
+          className={`mt-2 ${FIELD} border-border`}
         />
       </div>
 

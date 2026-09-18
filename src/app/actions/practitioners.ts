@@ -2,8 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
+import {
+  formError,
+  formValues,
+  MESSAGES,
+  parseForm,
+  SAVED,
+  type ActionState,
+} from "@/lib/forms";
+import { newPractitionerSchema, practitionerSchema, specialtySchema } from "@/lib/schemas";
 import { RESERVED_SLUGS, slugify } from "@/lib/slug";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -23,34 +31,28 @@ function revalidatePractitioners() {
   }
 }
 
+const PRACTITIONER_FIELDS = ["firstName", "lastName", "title", "slotMinutes"] as const;
+
 export async function createPractitioner(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   await requireStaff();
 
-  const firstName = String(formData.get("firstName") ?? "").trim();
-  const lastName = String(formData.get("lastName") ?? "").trim();
-  const specialtyId = String(formData.get("specialtyId") ?? "");
-  const title = String(formData.get("title") ?? "").trim();
-  const slotMinutes = Number(formData.get("slotMinutes"));
-
-  if (firstName.length < 2 || lastName.length < 2) {
-    return { status: "error", message: "Completá el nombre y el apellido." };
-  }
-
-  if (!specialtyId) {
-    return { status: "error", message: "Elegí una especialidad." };
-  }
-
-  if (!Number.isInteger(slotMinutes) || slotMinutes <= 0) {
-    return { status: "error", message: "La duración del turno tiene que ser un número de minutos." };
-  }
+  const parsed = parseForm(
+    newPractitionerSchema,
+    formValues(formData, [...PRACTITIONER_FIELDS, "specialtyId"]),
+  );
+  if (!parsed.ok) return parsed.state;
+  const { firstName, lastName, title, slotMinutes, specialtyId } = parsed.data;
 
   const slug = slugify(`${firstName} ${lastName}`);
 
   if (!slug || RESERVED_SLUGS.has(slug)) {
-    return { status: "error", message: "Ese nombre no se puede usar como dirección web." };
+    return {
+      status: "error",
+      fieldErrors: { lastName: "Con ese nombre no se puede armar su dirección web" },
+    };
   }
 
   const supabase = createSupabaseAdminClient();
@@ -68,14 +70,14 @@ export async function createPractitioner(
     if (error.code === "23505") {
       return {
         status: "error",
-        message: "Ya hay alguien con ese nombre. Agregá el segundo apellido para diferenciarlos.",
+        fieldErrors: { lastName: "Ya hay alguien con ese nombre. Agregá el segundo apellido" },
       };
     }
-    return { status: "error", message: "No pudimos guardar el profesional." };
+    return formError(MESSAGES.saveFailed("el profesional"));
   }
 
   revalidatePractitioners();
-  return { status: "saved" };
+  return SAVED;
 }
 
 /**
@@ -92,20 +94,11 @@ export async function updatePractitioner(
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
-  const firstName = String(formData.get("firstName") ?? "").trim();
-  const lastName = String(formData.get("lastName") ?? "").trim();
-  const title = String(formData.get("title") ?? "").trim();
-  const slotMinutes = Number(formData.get("slotMinutes"));
+  if (!id) return formError(MESSAGES.notFound("al profesional"));
 
-  // Los mismos mensajes que el alta. Antes cada rechazo era un `return` mudo:
-  // la página se recargaba con el dato viejo y nadie decía por qué.
-  if (!id) return { status: "error", message: "No encontramos a quién editar. Recargá la página." };
-  if (firstName.length < 2 || lastName.length < 2) {
-    return { status: "error", message: "Completá el nombre y el apellido." };
-  }
-  if (!Number.isInteger(slotMinutes) || slotMinutes <= 0) {
-    return { status: "error", message: "La duración del turno tiene que ser un número de minutos." };
-  }
+  const parsed = parseForm(practitionerSchema, formValues(formData, PRACTITIONER_FIELDS));
+  if (!parsed.ok) return parsed.state;
+  const { firstName, lastName, title, slotMinutes } = parsed.data;
 
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase
@@ -118,10 +111,10 @@ export async function updatePractitioner(
     })
     .eq("id", id);
 
-  if (error) return { status: "error", message: "No pudimos guardar los cambios. Probá de nuevo." };
+  if (error) return formError(MESSAGES.saveFailed("los cambios"));
 
   revalidatePractitioners();
-  return { status: "saved" };
+  return SAVED;
 }
 
 /**
@@ -130,37 +123,47 @@ export async function updatePractitioner(
  * Nunca se borra: los turnos pasados apuntan a esta fila, y borrarla rompería el
  * historial y la retención. Inactivo desaparece del sitio y de la agenda.
  */
-export async function togglePractitioner(formData: FormData): Promise<void> {
+export async function togglePractitioner(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
   const active = String(formData.get("active") ?? "") === "true";
-  if (!id) return;
+  if (!id) return formError(MESSAGES.notFound("al profesional"));
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("practitioners").update({ active: !active }).eq("id", id);
+  const { error } = await supabase.from("practitioners").update({ active: !active }).eq("id", id);
+  if (error) return formError(MESSAGES.saveFailed("el cambio"));
 
   revalidatePractitioners();
+  return SAVED;
 }
 
 /**
  * Dar de baja o reactivar una especialidad.
  *
  * Nunca se borra: la referencian profesionales y servicios. Inactiva sale del
- * alta de profesionales y esconde sus precios del sitio.
+ * alta de profesionales y esconde sus tratamientos del sitio.
  */
-export async function toggleSpecialty(formData: FormData): Promise<void> {
+export async function toggleSpecialty(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
   const active = String(formData.get("active") ?? "") === "true";
-  if (!id) return;
+  if (!id) return formError(MESSAGES.notFound("la especialidad"));
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("specialties").update({ active: !active }).eq("id", id);
+  const { error } = await supabase.from("specialties").update({ active: !active }).eq("id", id);
+  if (error) return formError(MESSAGES.saveFailed("el cambio"));
 
   revalidatePath("/admin/especialidades");
   revalidatePath("/turnos");
+  return SAVED;
 }
 
 export async function createSpecialty(
@@ -169,23 +172,20 @@ export async function createSpecialty(
 ): Promise<ActionState> {
   await requireStaff();
 
-  const name = String(formData.get("name") ?? "").trim();
-
-  if (name.length < 3) {
-    return { status: "error", message: "Escribí el nombre de la especialidad." };
-  }
+  const parsed = parseForm(specialtySchema, formValues(formData, ["name"]));
+  if (!parsed.ok) return parsed.state;
 
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase.from("specialties").insert({ name });
+  const { error } = await supabase.from("specialties").insert({ name: parsed.data.name });
 
   if (error) {
     if (error.code === "23505") {
-      return { status: "error", message: "Esa especialidad ya está cargada." };
+      return { status: "error", fieldErrors: { name: "Esa especialidad ya está cargada" } };
     }
-    return { status: "error", message: "No pudimos guardar la especialidad." };
+    return formError(MESSAGES.saveFailed("la especialidad"));
   }
 
   revalidatePath("/admin/especialidades");
   revalidatePath("/turnos");
-  return { status: "saved" };
+  return SAVED;
 }

@@ -4,8 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { cancelByToken } from "@/lib/booking";
+import { formError, type ActionState } from "@/lib/forms";
 
-export type CancelState = { status: "idle" | "cancelled" | "error"; message?: string };
+/** Un enlace roto o viejo. El paciente no puede recargar su camino: se le dice a quién llamar. */
+const NOT_FOUND =
+  "No encontramos ese turno, o ya estaba cancelado. Si necesitás ayuda, llamanos al consultorio.";
 
 /**
  * Release a turno.
@@ -18,17 +21,14 @@ export type CancelState = { status: "idle" | "cancelled" | "error"; message?: st
  * admin, which for a clinic this size is soon enough.
  */
 export async function cancelTurno(
-  _previous: CancelState,
+  _previous: ActionState,
   formData: FormData,
-): Promise<CancelState> {
+): Promise<ActionState> {
   const token = String(formData.get("token") ?? "");
-  if (!token) return { status: "error", message: "Enlace inválido." };
+  if (!token) return formError(NOT_FOUND);
 
   const result = await cancelByToken(token);
-
-  if (!result.ok) {
-    return { status: "error", message: "No encontramos ese turno." };
-  }
+  if (!result.ok) return formError(NOT_FOUND);
 
   revalidatePath("/turnos");
   revalidatePath("/admin");

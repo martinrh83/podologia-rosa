@@ -3,29 +3,37 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import type { ActionState } from "@/app/actions/state";
 import { requireStaff } from "@/lib/auth";
 import { createBooking } from "@/lib/booking";
-import { bookingSchema } from "@/lib/booking-schema";
+import { adminBookingSchema } from "@/lib/booking-schema";
 import { setAppointmentStatus } from "@/lib/db/appointments";
 import type { Appointment } from "@/lib/db/types";
+import { formError, MESSAGES, parseForm, SAVED, type ActionState } from "@/lib/forms";
 
 const ALLOWED: Appointment["status"][] = ["booked", "cancelled", "completed", "no_show"];
 
 /** Change a turno's status from the admin. Re-verifies the session every time. */
-export async function updateStatus(formData: FormData): Promise<void> {
+export async function updateStatus(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireStaff();
 
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as Appointment["status"];
 
-  if (!id || !ALLOWED.includes(status)) return;
+  if (!id || !ALLOWED.includes(status)) return formError(MESSAGES.notFound("el turno"));
 
-  await setAppointmentStatus(id, status);
+  try {
+    await setAppointmentStatus(id, status);
+  } catch {
+    return formError(MESSAGES.saveFailed("el cambio"));
+  }
 
   revalidatePath("/admin");
   revalidatePath("/admin/manana");
   revalidatePath("/turnos");
+  return SAVED;
 }
 
 /**
@@ -48,7 +56,9 @@ export async function createAdminBooking(
   const practitionerId = String(formData.get("practitionerId") ?? "");
   const fecha = String(formData.get("fecha") ?? "");
 
-  const parsed = bookingSchema.safeParse({
+  // El schema del panel: las mismas reglas que la reserva pública, con los
+  // mensajes dichos por la recepción («Ingresá el nombre», no «tu nombre»).
+  const parsed = parseForm(adminBookingSchema, {
     practitionerId,
     startsAt: String(formData.get("startsAt") ?? ""),
     patientFirstName: String(formData.get("patientFirstName") ?? ""),
@@ -63,14 +73,17 @@ export async function createAdminBooking(
   // Un error vuelve como estado y no como redirección: antes volvía a la
   // página con el mensaje en la URL y el formulario vacío, y con el paciente
   // esperando del otro lado del mostrador había que tipear todo de nuevo.
-  if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0].message };
-  }
+  if (!parsed.ok) return parsed.state;
 
   const result = await createBooking(parsed.data, { audience: "admin" });
 
   if (!result.ok) {
-    return { status: "error", message: result.message };
+    // Que el horario se haya ocupado es un problema del horario, no del
+    // formulario: se marca en la grilla, donde hay que elegir otro.
+    if (result.reason === "slot_taken" || result.reason === "slot_unavailable") {
+      return { status: "error", fieldErrors: { startsAt: result.message } };
+    }
+    return formError(result.message);
   }
 
   revalidatePath("/admin");

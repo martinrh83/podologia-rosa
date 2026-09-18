@@ -1,15 +1,15 @@
-import type { ActionState } from "@/app/actions/state";
+import type { ActionState } from "@/lib/forms";
 
 /**
- * Lo que respondió la última acción de un formulario.
+ * El «listo» de un formulario del panel, al lado de su botón.
+ *
+ * Sólo el éxito: los errores de campo van en el campo y el del formulario en
+ * `FormAlert`, arriba del botón, igual que en el resto del sitio.
  *
  * El párrafo está siempre, vacío mientras no pase nada: una región `aria-live`
  * tiene que existir antes de que aparezca el texto, si no el lector de pantalla
- * no anuncia nada. Reemplaza a `FormMessage`, `Result` y la versión en línea de
- * las sedes, que eran el mismo párrafo tres veces.
- *
- * `hidden` lo vacía sin sacarlo del DOM: una ficha lo usa para no seguir
- * diciendo «Guardado» mientras ya se está editando otra cosa.
+ * no anuncia nada. `hidden` lo vacía sin sacarlo del DOM: una ficha lo usa para
+ * no seguir diciendo «Guardado» mientras ya se está editando otra cosa.
  */
 export function ActionResult({
   state,
@@ -20,16 +20,9 @@ export function ActionResult({
   saved: string;
   hidden?: boolean;
 }) {
-  const show = !hidden && state.status !== "idle";
-
   return (
-    <p
-      aria-live="polite"
-      className={`text-[0.95rem] font-bold ${
-        state.status === "error" ? "text-[color:var(--danger)]" : "text-[color:var(--success)]"
-      }`}
-    >
-      {show ? (state.status === "error" ? state.message : saved) : ""}
+    <p aria-live="polite" className="text-[0.95rem] font-bold text-[color:var(--success)]">
+      {!hidden && state.status === "saved" ? saved : ""}
     </p>
   );
 }

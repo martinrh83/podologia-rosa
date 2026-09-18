@@ -3,10 +3,13 @@
 import { useActionState, useState } from "react";
 
 import { addShift } from "@/app/actions/schedule";
-import { IDLE } from "@/app/actions/state";
 import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
-import { SelectField, TextField } from "@/components/admin/fields";
+import { SelectField, TextField } from "@/components/fields";
+import { FormAlert } from "@/components/form-alert";
+import { useForm } from "@/components/use-form";
+import { IDLE } from "@/lib/forms";
+import { shiftSchema } from "@/lib/schemas";
 import { WEEKDAYS } from "@/lib/weekdays";
 
 /**
@@ -27,37 +30,34 @@ export function ShiftForm({
   locations: ShiftFormLocation[];
 }) {
   const [state, formAction] = useActionState(addShift, IDLE);
+  const form = useForm(
+    shiftSchema,
+    {
+      // De quién es la franja: lo define el selector de arriba de la pantalla.
+      practitionerId,
+      locationId: locations[0]?.id ?? "",
+      weekday: "1",
+      startTime: "",
+      endTime: "",
+    },
+    state,
+  );
 
-  const [weekday, setWeekday] = useState("1");
-  const [locationId, setLocationId] = useState(locations[0]?.id ?? "");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-
-  // Ajustar el estado durante el render, no en un efecto: cuando llega un
-  // resultado nuevo y fue exitoso, se vacían los campos. React lo resuelve
-  // antes de pintar, sin el render en cascada que provoca un `useEffect`.
+  // Al guardar se vacían las horas y quedan el día y la sede: lo que sigue
+  // suele ser la otra franja del mismo día, o el mismo horario otro día.
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
     setLastResult(state);
-    if (state.status === "saved") {
-      setStartTime("");
-      setEndTime("");
-    }
+    if (state.status === "saved") form.reset({ ...form.values, startTime: "", endTime: "" });
   }
 
   return (
-    <form action={formAction}>
-      {/* De quién es la franja: lo define el selector de arriba de la pantalla. */}
+    <form action={formAction} onSubmit={form.onSubmit} noValidate>
       <input type="hidden" name="practitionerId" value={practitionerId} />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {locations.length > 1 ? (
-          <SelectField
-            id="locationId"
-            label="Sede"
-            value={locationId}
-            onChange={(event) => setLocationId(event.target.value)}
-          >
+          <SelectField id="locationId" label="Sede" {...form.field("locationId")}>
             {locations.map((location) => (
               <option key={location.id} value={location.id}>
                 {location.name}
@@ -65,16 +65,15 @@ export function ShiftForm({
             ))}
           </SelectField>
         ) : (
-          <input type="hidden" name="locationId" value={locationId} />
+          <input type="hidden" name="locationId" value={form.values.locationId} />
         )}
 
         <SelectField
           id="weekday"
           label="Día"
-          value={weekday}
-          onChange={(event) => setWeekday(event.target.value)}
           // Sin sede que elegir, el día ocupa su lugar y la fila queda pareja.
           className={locations.length > 1 ? "" : "col-span-2"}
+          {...form.field("weekday")}
         >
           {WEEKDAYS.map((day) => (
             <option key={day.value} value={day.value}>
@@ -83,27 +82,16 @@ export function ShiftForm({
           ))}
         </SelectField>
 
-        <TextField
-          id="startTime"
-          label="Desde"
-          type="time"
-          required
-          value={startTime}
-          onChange={(event) => setStartTime(event.target.value)}
-        />
-        <TextField
-          id="endTime"
-          label="Hasta"
-          type="time"
-          required
-          value={endTime}
-          onChange={(event) => setEndTime(event.target.value)}
-        />
+        <TextField id="startTime" label="Desde" type="time" required {...form.field("startTime")} />
+        <TextField id="endTime" label="Hasta" type="time" required {...form.field("endTime")} />
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <SubmitButton>Agregar franja</SubmitButton>
-        <ActionResult state={state} saved="Listo, la franja ya está cargada." />
+      <div className="mt-5 space-y-4">
+        <FormAlert state={state} />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <SubmitButton>Agregar franja</SubmitButton>
+          <ActionResult state={state} saved="Listo, la franja ya está cargada." />
+        </div>
       </div>
     </form>
   );
