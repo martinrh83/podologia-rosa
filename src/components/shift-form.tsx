@@ -5,11 +5,11 @@ import { useActionState, useState } from "react";
 import { addShift } from "@/app/actions/schedule";
 import { SubmitButton } from "@/components/admin/buttons";
 import { sent, withToast } from "@/components/admin/with-toast";
-import { SelectField, TextField } from "@/components/fields";
+import { SelectField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
 import { IDLE } from "@/lib/forms";
-import { shiftSchema } from "@/lib/schemas";
+import { SHIFT_HOURS, shiftSchema } from "@/lib/schemas";
 import { WEEKDAYS, weekdayLabel } from "@/lib/weekdays";
 
 /**
@@ -90,8 +90,36 @@ export function ShiftForm({
           ))}
         </SelectField>
 
-        <TextField id="startTime" label="Desde" type="time" required {...form.field("startTime")} />
-        <TextField id="endTime" label="Hasta" type="time" required {...form.field("endTime")} />
+        <SelectField
+          id="startTime"
+          label="Desde"
+          required
+          {...form.field("startTime")}
+          // Si «Hasta» queda antes del nuevo inicio, se vacía: mejor pedirla de
+          // nuevo que dejar una franja al revés.
+          onChange={(event) => {
+            const startTime = event.target.value;
+            const { endTime } = form.values;
+            form.update({ startTime, endTime: endTime > startTime ? endTime : "" });
+          }}
+        >
+          <option value="">Elegí</option>
+          {SHIFT_HOURS.slice(0, -1).map((hour) => (
+            <option key={hour} value={hour}>
+              {hour}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField id="endTime" label="Hasta" required {...form.field("endTime")}>
+          <option value="">Elegí</option>
+          {SHIFT_HOURS.slice(1)
+            .filter((hour) => hour > form.values.startTime)
+            .map((hour) => (
+              <option key={hour} value={hour}>
+                {hour}
+              </option>
+            ))}
+        </SelectField>
       </div>
 
       <div className="mt-5 space-y-4">

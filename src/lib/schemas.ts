@@ -14,7 +14,6 @@ import { normalizePhone } from "@/lib/booking-schema";
  * fechas se interpretan acá.
  */
 
-const HOUR = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Opcional: vacío vale, y si hay algo tiene que cumplir la regla. */
@@ -85,19 +84,28 @@ export const serviceSchema = z.object({
 
 // ————— Agenda —————
 
+/**
+ * Las horas de una franja: en punto, de 8 a 23.
+ *
+ * Se eligen de una lista en vez de tipearse. El campo de hora del navegador
+ * obligaba a buscar entre 60 minutos y a elegir AM o PM, y el «de 8 a 12»
+ * terminaba con el 12 en medianoche.
+ */
+export const SHIFT_HOURS = Array.from({ length: 16 }, (_, i) => `${String(i + 8).padStart(2, "0")}:00`);
+
 export const shiftSchema = z
   .object({
     practitionerId: z.uuid("Elegí de quién es la franja"),
     locationId: z.uuid("Elegí la sede"),
     weekday: z.string().regex(/^[0-6]$/, "Elegí un día de la semana"),
-    startTime: z.string().regex(HOUR, "Ingresá la hora de inicio"),
-    endTime: z.string().regex(HOUR, "Ingresá la hora de fin"),
+    startTime: z.enum(SHIFT_HOURS.slice(0, -1), "Elegí la hora de inicio"),
+    endTime: z.enum(SHIFT_HOURS.slice(1), "Elegí la hora de fin"),
   })
-  // El caso que más pasa: cargar «de 8 a 12» y que el 12 quede en medianoche.
-  // La franja terminaría antes de empezar, y el check de la base la rechaza.
+  // La lista de «Hasta» ya ofrece sólo horas posteriores; esto cubre lo que
+  // llegue al servidor por otro lado, antes de que lo rechace la base.
   .refine((shift) => shift.endTime > shift.startTime, {
     path: ["endTime"],
-    error: "Tiene que ser después de la hora de inicio. El mediodía es 12:00",
+    error: "Tiene que ser después de la hora de inicio",
   });
 
 export const blockSchema = z
