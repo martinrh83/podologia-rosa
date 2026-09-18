@@ -118,6 +118,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
                   label="Quitar"
                   question="¿Quitar esta franja?"
                   confirmLabel="Sí, quitar"
+                  success={`Franja del ${weekdayLabel(row.weekday).toLowerCase()} quitada.`}
                 />
               </li>
             ))}
@@ -169,6 +170,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
                     label="Quitar"
                     question="¿Volver a abrir esos días?"
                     confirmLabel="Sí, quitar"
+                    success="Cierre quitado: esos días se pueden reservar de nuevo."
                   />
                 </li>
               );

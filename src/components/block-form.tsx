@@ -3,8 +3,8 @@
 import { useActionState, useState } from "react";
 
 import { addBlock } from "@/app/actions/schedule";
-import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
+import { withToast } from "@/components/admin/with-toast";
 import { SelectField, TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
@@ -21,7 +21,10 @@ export function BlockForm({
   practitioners: BlockFormOption[];
   locations: BlockFormOption[];
 }) {
-  const [state, formAction] = useActionState(addBlock, IDLE);
+  const [state, formAction] = useActionState(
+    withToast(addBlock, "Cierre agregado: esos días ya no se pueden reservar."),
+    IDLE,
+  );
   // Vacío = todos, y es el default: un feriado no es de nadie ni de una sede.
   const form = useForm(
     blockSchema,
@@ -79,9 +82,8 @@ export function BlockForm({
 
       <FormAlert state={state} />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+      <div className="pt-2">
         <SubmitButton>Cerrar esos días</SubmitButton>
-        <ActionResult state={state} saved="Listo, esos días ya no se pueden reservar." />
       </div>
     </form>
   );

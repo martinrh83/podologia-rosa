@@ -3,14 +3,14 @@
 import { useActionState, useState } from "react";
 
 import { addShift } from "@/app/actions/schedule";
-import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
+import { sent, withToast } from "@/components/admin/with-toast";
 import { SelectField, TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
 import { IDLE } from "@/lib/forms";
 import { shiftSchema } from "@/lib/schemas";
-import { WEEKDAYS } from "@/lib/weekdays";
+import { WEEKDAYS, weekdayLabel } from "@/lib/weekdays";
 
 /**
  * Alta de una franja horaria.
@@ -29,7 +29,15 @@ export function ShiftForm({
   practitionerId: string;
   locations: ShiftFormLocation[];
 }) {
-  const [state, formAction] = useActionState(addShift, IDLE);
+  const [state, formAction] = useActionState(
+    withToast(
+      addShift,
+      (data) =>
+        `Franja agregada: ${weekdayLabel(Number(sent(data, "weekday"))).toLowerCase()} ` +
+        `de ${sent(data, "startTime")} a ${sent(data, "endTime")}.`,
+    ),
+    IDLE,
+  );
   const form = useForm(
     shiftSchema,
     {
@@ -88,10 +96,7 @@ export function ShiftForm({
 
       <div className="mt-5 space-y-4">
         <FormAlert state={state} />
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <SubmitButton>Agregar franja</SubmitButton>
-          <ActionResult state={state} saved="Listo, la franja ya está cargada." />
-        </div>
+        <SubmitButton>Agregar franja</SubmitButton>
       </div>
     </form>
   );

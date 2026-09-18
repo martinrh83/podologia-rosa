@@ -64,6 +64,7 @@ export default async function AdminProfesionalesPage() {
                   label="Dar de baja"
                   question={`¿Sacar a ${practitioner.first_name} del sitio?`}
                   confirmLabel="Sí, dar de baja"
+                  success={`${practitioner.first_name} ${practitioner.last_name}, de baja.`}
                 />
               }
             >
@@ -87,6 +88,7 @@ export default async function AdminProfesionalesPage() {
               <InlineAction
                 action={togglePractitioner}
                 fields={{ id: practitioner.id, active: "false" }}
+                success={`${practitioner.first_name} ${practitioner.last_name} vuelve a aparecer en el sitio.`}
               >
                 Volver a activar
               </InlineAction>

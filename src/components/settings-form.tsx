@@ -3,8 +3,8 @@
 import { useActionState } from "react";
 
 import { updateClinicSettings } from "@/app/actions/settings";
-import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
+import { withToast } from "@/components/admin/with-toast";
 import { TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
@@ -19,7 +19,10 @@ import { settingsSchema } from "@/lib/schemas";
  * servidor dejaba el formulario con los datos viejos y se perdía lo escrito.
  */
 export function SettingsForm({ settings }: { settings: ClinicSettings }) {
-  const [state, formAction] = useActionState(updateClinicSettings, IDLE);
+  const [state, formAction] = useActionState(
+    withToast(updateClinicSettings, "Datos del consultorio guardados. Ya se ven en la página."),
+    IDLE,
+  );
   const form = useForm(
     settingsSchema,
     {
@@ -60,9 +63,8 @@ export function SettingsForm({ settings }: { settings: ClinicSettings }) {
 
       <FormAlert state={state} />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+      <div className="pt-2">
         <SubmitButton>Guardar cambios</SubmitButton>
-        <ActionResult state={state} saved="Listo, los cambios ya se ven en la página." />
       </div>
     </form>
   );

@@ -47,9 +47,20 @@ solo a los cuatro segundos.
 ## Cómo se arma
 
 - `npm install sonner`.
-- Un `<Toaster position="bottom-left" />` en `src/app/admin/layout.tsx`, con el
-  resto de las opciones por defecto.
-- Cada lugar llama a `toast.success("…")`. Sin envoltorio propio.
+- Un `<Toaster position="bottom-center" />` en `src/app/admin/layout.tsx`, con
+  el resto de las opciones por defecto. Abajo al centro porque el contenido del
+  panel es una columna centrada: una esquina de la ventana queda lejos del
+  botón que se acaba de tocar. En el teléfono va a todo el ancho, cerca del
+  pulgar.
+- Blanco, el estilo por defecto: se consideró `richColors` (fondo verde) y se
+  descartó, para no sumar otra excepción a DESIGN.md.
+- Tres ajustes con opciones de Sonner, sin CSS propio: la letra del sitio a
+  1rem (la de Sonner es de 13px y del sistema), seis segundos en lugar de
+  cuatro, y la cruz para cerrar.
+- Cada acción pasa por `withToast`, que llama a `toast.success("…")` cuando
+  vuelve la respuesta y no en el render siguiente: al cancelar un turno o dar
+  de baja, el renglón desaparece en esa misma respuesta y un componente que
+  esperara a renderizarse ya no estaría para avisar.
 - Se sacan el «Guardado.» / «Listo, …» de al lado de los botones
   (`ActionResult`) y el aviso verde de Nuevo turno.
 - Se mantiene el «Guardando…» del botón mientras guarda: es el estado en curso,

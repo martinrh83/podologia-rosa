@@ -9,6 +9,7 @@ import {
   TEXT_ACTION,
   type ButtonVariant,
 } from "@/components/admin/button-styles";
+import { withToast } from "@/components/admin/with-toast";
 import { IDLE, type ActionState } from "@/lib/forms";
 
 /** Una acción de un solo botón: sin campos, con un resultado que puede fallar. */
@@ -85,15 +86,18 @@ function InlineError({ state }: { state: ActionState }) {
 export function ActionButton({
   action,
   fields,
+  success,
   children,
   variant = "ink",
 }: {
   action: ServerAction;
   fields: Record<string, string>;
+  /** El toast si sale bien: «Turno de las 16:00: atendido.» */
+  success: string;
   children: React.ReactNode;
   variant?: ButtonVariant;
 }) {
-  const [state, formAction] = useActionState(action, IDLE);
+  const [state, formAction] = useActionState(withToast(action, success), IDLE);
 
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-y-1">
@@ -113,13 +117,16 @@ export function ActionButton({
 export function InlineAction({
   action,
   fields,
+  success,
   children,
 }: {
   action: ServerAction;
   fields: Record<string, string>;
+  /** El toast si sale bien: «Sede Centro, otra vez activa.» */
+  success: string;
   children: React.ReactNode;
 }) {
-  const [state, formAction] = useActionState(action, IDLE);
+  const [state, formAction] = useActionState(withToast(action, success), IDLE);
 
   return (
     <form action={formAction} className="flex flex-wrap items-center justify-end">
@@ -154,14 +161,17 @@ export function ConfirmAction({
   label,
   question,
   confirmLabel,
+  success,
 }: {
   action: ServerAction;
   fields: Record<string, string>;
   label: string;
   question: string;
   confirmLabel: string;
+  /** El toast si sale bien: «Turno de las 16:00 cancelado.» */
+  success: string;
 }) {
-  const [state, formAction] = useActionState(action, IDLE);
+  const [state, formAction] = useActionState(withToast(action, success), IDLE);
   const [asking, setAsking] = useState(false);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);

@@ -74,6 +74,7 @@ export default async function AdminEspecialidadesPage() {
                   label="Dar de baja"
                   question="¿Dejar de ofrecerla? Sus tratamientos salen de la página."
                   confirmLabel="Sí, dar de baja"
+                  success={`Especialidad ${specialty.name}, de baja.`}
                 />
               }
             />
@@ -88,7 +89,11 @@ export default async function AdminEspecialidadesPage() {
             title={specialty.name}
             meta={<span className="tabular-nums">{professionals(specialty.id)}</span>}
             action={
-              <InlineAction action={toggleSpecialty} fields={{ id: specialty.id, active: "false" }}>
+              <InlineAction
+                action={toggleSpecialty}
+                fields={{ id: specialty.id, active: "false" }}
+                success={`Especialidad ${specialty.name}, activa otra vez.`}
+              >
                 Volver a activar
               </InlineAction>
             }
