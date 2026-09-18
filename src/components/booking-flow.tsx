@@ -496,7 +496,7 @@ export function BookingFlow({
                 step={3}
                 of={3}
                 headingRef={headingRef}
-                lead="Es lo último. No creás ninguna cuenta ni contraseña."
+                lead="Completá con tus datos personales para confirmar la reserva."
               >
                 Tus datos
               </StepHeading>
