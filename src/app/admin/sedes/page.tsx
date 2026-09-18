@@ -54,6 +54,7 @@ export default async function AdminSedesPage() {
                   label="Dar de baja"
                   question={`¿Sacar la sede ${location.name} del sitio?`}
                   confirmLabel="Sí, dar de baja"
+                  success={`Sede ${location.name}, de baja.`}
                 />
               }
             >
@@ -74,7 +75,11 @@ export default async function AdminSedesPage() {
             title={location.name}
             meta={location.address}
             action={
-              <InlineAction action={toggleLocation} fields={{ id: location.id, active: "false" }}>
+              <InlineAction
+                action={toggleLocation}
+                fields={{ id: location.id, active: "false" }}
+                success={`Sede ${location.name}, activa otra vez.`}
+              >
                 Volver a activar
               </InlineAction>
             }

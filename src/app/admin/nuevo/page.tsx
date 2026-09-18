@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { ArrivalToast } from "@/components/admin/arrival-toast";
 import { AdminBookingForm, type AdminSlot } from "@/components/admin/booking-form";
 import { PageHeading } from "@/components/admin/page-heading";
 import { Notice } from "@/components/notice";
@@ -75,12 +76,15 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
     <div>
       <PageHeading title="Nuevo turno" />
 
+      {/* La confirmación de lo que se acaba de guardar, como en el resto del panel. */}
       {saved && (
-        <div className="mb-6">
-          <Notice tone="success" title="Turno guardado">
-            Para el {formatDay(saved)} a las {formatTime(saved)}. Ya no se ofrece online.
-          </Notice>
-        </div>
+        <ArrivalToast
+          message={`Turno guardado para el ${formatDay(saved)} a las ${formatTime(saved)}.`}
+          cleanUrl={`/admin/nuevo?${new URLSearchParams({
+            ...(practitioner ? { profesional: practitioner.id } : {}),
+            fecha: dateKey,
+          })}`}
+        />
       )}
 
       <SlotFilters

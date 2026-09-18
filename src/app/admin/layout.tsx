@@ -1,3 +1,5 @@
+import { Toaster } from "sonner";
+
 import { AdminNav } from "@/components/admin/admin-nav";
 import { getStaffSession } from "@/lib/auth";
 
@@ -17,6 +19,24 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     <div className="mx-auto max-w-3xl px-4 pb-10 pt-6 sm:px-6 sm:pt-8">
       <AdminNav />
       {children}
+      {/*
+        Las confirmaciones de lo que se guardó. Ver `withToast`.
+
+        El estilo de Sonner queda por defecto salvo la letra: la suya es de
+        13px y del sistema, la más chica de todo el panel. Seis segundos y una
+        cruz para cerrar, porque «Se agregó a Bea López. Ya se le puede sacar
+        turno.» no se alcanza a leer en cuatro, y en el teléfono no hay hover
+        que lo pause.
+      */}
+      <Toaster
+        position="bottom-center"
+        duration={6000}
+        closeButton
+        // La letra va en el contenedor: Sonner le pone la del sistema ahí, y
+        // cada toast la hereda de él, no del resto de la página.
+        style={{ fontFamily: "inherit" }}
+        toastOptions={{ style: { fontSize: "1rem" } }}
+      />
     </div>
   );
 }

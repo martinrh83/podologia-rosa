@@ -3,8 +3,8 @@
 import { useActionState, useState } from "react";
 
 import { createLocation } from "@/app/actions/locations";
-import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
+import { sent, withToast } from "@/components/admin/with-toast";
 import { TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
@@ -13,7 +13,13 @@ import { locationSchema } from "@/lib/schemas";
 
 /** Alta de una sede. Controlado por el mismo motivo que el resto del panel. */
 export function NewLocationForm() {
-  const [state, formAction] = useActionState(createLocation, IDLE);
+  const [state, formAction] = useActionState(
+    withToast(
+      createLocation,
+      (data) => `Sede ${sent(data, "name")} agregada. Ya se le pueden cargar horarios.`,
+    ),
+    IDLE,
+  );
   const form = useForm(locationSchema, { name: "", address: "", mapUrl: "" }, state);
 
   const [lastResult, setLastResult] = useState(state);
@@ -46,9 +52,8 @@ export function NewLocationForm() {
 
       <FormAlert state={state} />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+      <div className="pt-2">
         <SubmitButton>Agregar sede</SubmitButton>
-        <ActionResult state={state} saved="Listo, ya se le pueden cargar horarios." />
       </div>
     </form>
   );

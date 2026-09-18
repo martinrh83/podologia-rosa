@@ -3,8 +3,8 @@
 import { useActionState, useState } from "react";
 
 import { createPractitioner, createSpecialty } from "@/app/actions/practitioners";
-import { ActionResult } from "@/components/admin/action-result";
 import { SubmitButton } from "@/components/admin/buttons";
+import { sent, withToast } from "@/components/admin/with-toast";
 import { SelectField, TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { Notice } from "@/components/notice";
@@ -22,7 +22,14 @@ export type SpecialtyOption = { id: string; name: string };
  * lo que se acababa de escribir. Se vacía sólo cuando guardó.
  */
 export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOption[] }) {
-  const [state, formAction] = useActionState(createPractitioner, IDLE);
+  const [state, formAction] = useActionState(
+    withToast(
+      createPractitioner,
+      (data) =>
+        `Se agregó a ${sent(data, "firstName")} ${sent(data, "lastName")}. Ya se le puede sacar turno.`,
+    ),
+    IDLE,
+  );
 
   const empty = {
     firstName: "",
@@ -85,16 +92,18 @@ export function NewPractitionerForm({ specialties }: { specialties: SpecialtyOpt
 
       <FormAlert state={state} />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+      <div className="pt-2">
         <SubmitButton>Agregar profesional</SubmitButton>
-        <ActionResult state={state} saved="Listo, ya se le puede sacar turno." />
       </div>
     </form>
   );
 }
 
 export function NewSpecialtyForm() {
-  const [state, formAction] = useActionState(createSpecialty, IDLE);
+  const [state, formAction] = useActionState(
+    withToast(createSpecialty, (data) => `Especialidad ${sent(data, "name")} agregada.`),
+    IDLE,
+  );
   const form = useForm(specialtySchema, { name: "" }, state);
 
   const [lastResult, setLastResult] = useState(state);
@@ -109,9 +118,8 @@ export function NewSpecialtyForm() {
 
       <FormAlert state={state} />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+      <div className="pt-2">
         <SubmitButton>Agregar especialidad</SubmitButton>
-        <ActionResult state={state} saved="Especialidad cargada." />
       </div>
     </form>
   );

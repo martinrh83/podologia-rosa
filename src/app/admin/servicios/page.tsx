@@ -85,6 +85,7 @@ export default async function AdminServiciosPage() {
                       label="Ocultar de la página"
                       question="¿Sacarlo de Tratamientos?"
                       confirmLabel="Sí, ocultar"
+                      success={`${service.name} ya no aparece en la página.`}
                     />
                   }
                 >
@@ -103,7 +104,11 @@ export default async function AdminServiciosPage() {
             title={service.name}
             meta={showHeadings || groups.size === 0 ? service.specialty?.name : undefined}
             action={
-              <InlineAction action={toggleService} fields={{ id: service.id, active: "false" }}>
+              <InlineAction
+                action={toggleService}
+                fields={{ id: service.id, active: "false" }}
+                success={`${service.name} vuelve a aparecer en la página.`}
+              >
                 Mostrar en la página
               </InlineAction>
             }

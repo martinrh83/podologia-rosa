@@ -141,10 +141,20 @@ export function AppointmentCard({
           )}
 
           {appointment.status !== "completed" && (
-            <StatusForm id={appointment.id} status="completed" label="Marcar atendido" />
+            <StatusForm
+              id={appointment.id}
+              status="completed"
+              label="Marcar atendido"
+              success={`Turno de las ${time}: atendido.`}
+            />
           )}
           {appointment.status !== "no_show" && (
-            <StatusForm id={appointment.id} status="no_show" label="No vino" />
+            <StatusForm
+              id={appointment.id}
+              status="no_show"
+              label="No vino"
+              success={`Turno de las ${time}: no vino.`}
+            />
           )}
 
           <ConfirmAction
@@ -153,6 +163,7 @@ export function AppointmentCard({
             label="Cancelar turno"
             question={`¿Cancelar el turno de las ${time}?`}
             confirmLabel="Sí, cancelar"
+            success={`Turno de las ${time} cancelado.`}
           />
         </div>
       )}
@@ -194,13 +205,15 @@ function StatusForm({
   id,
   status,
   label,
+  success,
 }: {
   id: string;
   status: Appointment["status"];
   label: string;
+  success: string;
 }) {
   return (
-    <ActionButton action={updateStatus} fields={{ id, status }}>
+    <ActionButton action={updateStatus} fields={{ id, status }} success={success}>
       {label}
     </ActionButton>
   );
