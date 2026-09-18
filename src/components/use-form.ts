@@ -44,10 +44,20 @@ export function useForm<V extends Record<string, unknown>>(
   }
 
   function set<K extends Field>(field: K, value: V[K]) {
-    const next = { ...values, [field]: value };
+    update({ [field]: value } as unknown as Partial<V>);
+  }
+
+  /** Cambia varios campos juntos, cuando uno arrastra a otro. */
+  function update(patch: Partial<V>) {
+    const next = { ...values, ...patch };
     setValues(next);
-    if (errors[field]) {
-      setErrors((current) => ({ ...current, [field]: check(next)[field] }));
+    const marked = (Object.keys(patch) as Field[]).filter((field) => errors[field]);
+    if (marked.length > 0) {
+      const found = check(next);
+      setErrors((current) => ({
+        ...current,
+        ...Object.fromEntries(marked.map((field) => [field, found[field]])),
+      }));
     }
   }
 
@@ -88,5 +98,5 @@ export function useForm<V extends Record<string, unknown>>(
     };
   }
 
-  return { values, errors, set, blur, onSubmit, reset, field };
+  return { values, errors, set, update, blur, onSubmit, reset, field };
 }

@@ -102,12 +102,21 @@ describe("precios", () => {
 describe("agenda", () => {
   const shift = { practitionerId: ID, locationId: ID, weekday: "1", startTime: "08:00", endTime: "12:00" };
 
-  it("marca la hora de fin si termina antes de empezar", () => {
-    // El caso real: «de 8 a 12» con el 12 cargado como medianoche.
-    expect(errorOf(parseForm(shiftSchema, { ...shift, endTime: "00:00" }), "endTime")).toBe(
-      "Tiene que ser después de la hora de inicio. El mediodía es 12:00",
+  it("marca la hora de fin si no es posterior a la de inicio", () => {
+    expect(errorOf(parseForm(shiftSchema, { ...shift, startTime: "12:00", endTime: "10:00" }), "endTime")).toBe(
+      "Tiene que ser después de la hora de inicio",
     );
     expect(parseForm(shiftSchema, shift).ok).toBe(true);
+  });
+
+  it("acepta sólo horas en punto, de 8 a 23", () => {
+    expect(errorOf(parseForm(shiftSchema, { ...shift, startTime: "08:30" }), "startTime")).toBe(
+      "Elegí la hora de inicio",
+    );
+    expect(errorOf(parseForm(shiftSchema, { ...shift, startTime: "07:00" }), "startTime")).toBe(
+      "Elegí la hora de inicio",
+    );
+    expect(parseForm(shiftSchema, { ...shift, startTime: "22:00", endTime: "23:00" }).ok).toBe(true);
   });
 
   it("marca la fecha de fin si es anterior a la de inicio", () => {
