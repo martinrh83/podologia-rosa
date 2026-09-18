@@ -4,7 +4,8 @@ import { togglePractitioner } from "@/app/actions/practitioners";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { EditPractitionerForm } from "@/components/admin/edit-forms";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
-import { RecordList, RecordRow } from "@/components/admin/record-row";
+import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
+import { Notice } from "@/components/notice";
 import { NewPractitionerForm } from "@/components/practitioner-admin";
 import { requireStaff } from "@/lib/auth";
 import { listActiveSpecialties, listAllPractitioners } from "@/lib/db/practitioners";
@@ -30,21 +31,25 @@ export default async function AdminProfesionalesPage() {
     listAllPractitioners(),
     listActiveSpecialties(),
   ]);
+  const active = practitioners.filter((practitioner) => practitioner.active);
+  const inactive = practitioners.filter((practitioner) => !practitioner.active);
 
   return (
     <div>
       <PageHeading title="Profesionales" />
 
-      <RecordList>
-        {practitioners.map((practitioner) => {
-          const name = `${practitioner.first_name} ${practitioner.last_name}`;
-          const fields = { id: practitioner.id, active: String(practitioner.active) };
-
-          return (
+      {active.length === 0 ? (
+        <div className="mb-6">
+          <Notice tone="muted" title="No hay profesionales activos">
+            Agregá uno acá abajo, o volvé a activar a alguien de la lista de baja.
+          </Notice>
+        </div>
+      ) : (
+        <RecordList>
+          {active.map((practitioner) => (
             <RecordRow
               key={practitioner.id}
-              title={name}
-              inactive={practitioner.active ? undefined : "De baja: no aparece en el sitio"}
+              title={`${practitioner.first_name} ${practitioner.last_name}`}
               meta={
                 <>
                   {practitioner.specialty?.name}
@@ -52,29 +57,43 @@ export default async function AdminProfesionalesPage() {
                   <span className="tabular-nums">/turnos/{practitioner.slug}</span>
                 </>
               }
-              // Nunca se borra: los turnos pasados apuntan a esta fila. Inactivo
-              // sale del sitio y de la agenda, y el historial queda entero.
               action={
-                practitioner.active ? (
-                  <ConfirmAction
-                    action={togglePractitioner}
-                    fields={fields}
-                    label="Dar de baja"
-                    question={`¿Sacar a ${practitioner.first_name} del sitio?`}
-                    confirmLabel="Sí, dar de baja"
-                  />
-                ) : (
-                  <InlineAction action={togglePractitioner} fields={fields}>
-                    Volver a activar
-                  </InlineAction>
-                )
+                <ConfirmAction
+                  action={togglePractitioner}
+                  fields={{ id: practitioner.id, active: "true" }}
+                  label="Dar de baja"
+                  question={`¿Sacar a ${practitioner.first_name} del sitio?`}
+                  confirmLabel="Sí, dar de baja"
+                />
               }
             >
               <EditPractitionerForm practitioner={practitioner} />
             </RecordRow>
-          );
-        })}
-      </RecordList>
+          ))}
+        </RecordList>
+      )}
+
+      {/*
+        Nunca se borra: los turnos pasados apuntan a esta fila. De baja sale del
+        sitio y de la agenda, el historial queda entero, y acá no estorba.
+      */}
+      <InactiveList label="De baja" count={inactive.length}>
+        {inactive.map((practitioner) => (
+          <InactiveRow
+            key={practitioner.id}
+            title={`${practitioner.first_name} ${practitioner.last_name}`}
+            meta={practitioner.specialty?.name}
+            action={
+              <InlineAction
+                action={togglePractitioner}
+                fields={{ id: practitioner.id, active: "false" }}
+              >
+                Volver a activar
+              </InlineAction>
+            }
+          />
+        ))}
+      </InactiveList>
 
       <section className="mt-14 border-t-2 border-foreground pt-6">
         <SectionHeading>Agregar profesional</SectionHeading>

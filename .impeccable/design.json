@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-18T17:32:58-03:00",
+  "generatedAt": "2026-09-18T17:53:38-03:00",
   "title": "Design System: Podología Mitre",
   "extensions": {
     "colorMeta": {
@@ -482,6 +482,11 @@
       {
         "name": "The Error En Su Lugar Rule",
         "body": "Cada error va donde se arregla. El de un campo, debajo del campo con el borde en rojo de aviso, aunque lo haya detectado el servidor. El que no es de ningún campo, en un aviso de error arriba del botón. El de una acción de un botón, en letra roja al lado del botón. Todos los formularios validan con el mismo schema de Zod en el navegador y en el servidor, así que el mensaje es el mismo venga de donde venga: el de un campo dice qué hacer, sin punto final; el del formulario es una oración completa que dice qué pasó y qué hacer.",
+        "section": "components"
+      },
+      {
+        "name": "The De Baja Plegado Rule",
+        "body": "En el panel, lo dado de baja nunca se borra —los turnos pasados lo referencian— pero no se mezcla con lo activo: va al final de la lista en un <details> cerrado que dice cuántos hay, con un renglón por cada uno y la forma de volver, sin campos para editar.",
         "section": "components"
       }
     ],

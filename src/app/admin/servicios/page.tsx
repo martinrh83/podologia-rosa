@@ -4,7 +4,8 @@ import { toggleService } from "@/app/actions/schedule";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { EditServiceForm } from "@/components/admin/edit-forms";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
-import { RecordList, RecordRow } from "@/components/admin/record-row";
+import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
+import { Notice } from "@/components/notice";
 import { requireStaff } from "@/lib/auth";
 import type { ServiceWithSpecialty } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -40,16 +41,27 @@ export default async function AdminServiciosPage() {
 
   // Igual que en la página pública: con una sola disciplina el título sobra,
   // con dos es lo único que evita una pila indistinta de precios.
+  //
+  // Los ocultos no entran en los grupos: van todos juntos al final, plegados.
   const groups = new Map<string, ServiceWithSpecialty[]>();
-  for (const service of services) {
+  for (const service of services.filter((row) => row.active)) {
     const key = service.specialty?.name ?? "Sin especialidad";
     groups.set(key, [...(groups.get(key) ?? []), service]);
   }
   const showHeadings = groups.size > 1;
+  const hidden = services.filter((service) => !service.active);
 
   return (
     <div>
       <PageHeading title="Servicios y precios" />
+
+      {groups.size === 0 && (
+        <div className="mb-6">
+          <Notice tone="muted" title="No hay tratamientos a la vista">
+            Todos están ocultos. Mostrá los que se hacen desde la lista de ocultos.
+          </Notice>
+        </div>
+      )}
 
       <div className="space-y-12">
         {[...groups.entries()].map(([specialty, items]) => (
@@ -61,39 +73,43 @@ export default async function AdminServiciosPage() {
             )}
 
             <RecordList>
-              {items.map((service) => {
-                const fields = { id: service.id, active: String(service.active) };
-
-                return (
-                  <RecordRow
-                    key={service.id}
-                    title={service.name}
-                    heading={showHeadings ? "h3" : "h2"}
-                    inactive={service.active ? undefined : "Oculto: no aparece en la página"}
-                    action={
-                      service.active ? (
-                        <ConfirmAction
-                          action={toggleService}
-                          fields={fields}
-                          label="Ocultar de la página"
-                          question="¿Sacarlo de Tratamientos?"
-                          confirmLabel="Sí, ocultar"
-                        />
-                      ) : (
-                        <InlineAction action={toggleService} fields={fields}>
-                          Mostrar en la página
-                        </InlineAction>
-                      )
-                    }
-                  >
-                    <EditServiceForm service={service} />
-                  </RecordRow>
-                );
-              })}
+              {items.map((service) => (
+                <RecordRow
+                  key={service.id}
+                  title={service.name}
+                  heading={showHeadings ? "h3" : "h2"}
+                  action={
+                    <ConfirmAction
+                      action={toggleService}
+                      fields={{ id: service.id, active: "true" }}
+                      label="Ocultar de la página"
+                      question="¿Sacarlo de Tratamientos?"
+                      confirmLabel="Sí, ocultar"
+                    />
+                  }
+                >
+                  <EditServiceForm service={service} />
+                </RecordRow>
+              ))}
             </RecordList>
           </section>
         ))}
       </div>
+
+      <InactiveList label="Ocultos" count={hidden.length}>
+        {hidden.map((service) => (
+          <InactiveRow
+            key={service.id}
+            title={service.name}
+            meta={showHeadings || groups.size === 0 ? service.specialty?.name : undefined}
+            action={
+              <InlineAction action={toggleService} fields={{ id: service.id, active: "false" }}>
+                Mostrar en la página
+              </InlineAction>
+            }
+          />
+        ))}
+      </InactiveList>
     </div>
   );
 }

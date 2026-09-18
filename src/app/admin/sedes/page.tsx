@@ -4,7 +4,8 @@ import { toggleLocation } from "@/app/actions/locations";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { EditLocationForm } from "@/components/admin/edit-forms";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
-import { RecordList, RecordRow } from "@/components/admin/record-row";
+import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
+import { Notice } from "@/components/notice";
 import { NewLocationForm } from "@/components/location-form";
 import { requireStaff } from "@/lib/auth";
 import { listAllLocations } from "@/lib/db/locations";
@@ -26,44 +27,60 @@ export default async function AdminSedesPage() {
   await requireStaff();
 
   const locations = await listAllLocations();
+  const active = locations.filter((location) => location.active);
+  const inactive = locations.filter((location) => !location.active);
 
   return (
     <div>
       <PageHeading title="Sedes" />
 
-      <RecordList>
-        {locations.map((location) => {
-          const fields = { id: location.id, active: String(location.active) };
-
-          return (
+      {active.length === 0 ? (
+        <div className="mb-6">
+          <Notice tone="muted" title="No hay sedes activas">
+            Sin una sede no se pueden cargar horarios. Agregá una acá abajo, o volvé a activar una de
+            la lista de baja.
+          </Notice>
+        </div>
+      ) : (
+        <RecordList>
+          {active.map((location) => (
             <RecordRow
               key={location.id}
               title={location.name}
-              inactive={location.active ? undefined : "Dada de baja: no aparece en el sitio"}
-              // Nunca se borra: los turnos que pasaron ahí la referencian.
-              // Inactiva sale del sitio y de los formularios, y el historial
-              // queda entero.
               action={
-                location.active ? (
-                  <ConfirmAction
-                    action={toggleLocation}
-                    fields={fields}
-                    label="Dar de baja"
-                    question={`¿Sacar la sede ${location.name} del sitio?`}
-                    confirmLabel="Sí, dar de baja"
-                  />
-                ) : (
-                  <InlineAction action={toggleLocation} fields={fields}>
-                    Volver a activar
-                  </InlineAction>
-                )
+                <ConfirmAction
+                  action={toggleLocation}
+                  fields={{ id: location.id, active: "true" }}
+                  label="Dar de baja"
+                  question={`¿Sacar la sede ${location.name} del sitio?`}
+                  confirmLabel="Sí, dar de baja"
+                />
               }
             >
               <EditLocationForm location={location} />
             </RecordRow>
-          );
-        })}
-      </RecordList>
+          ))}
+        </RecordList>
+      )}
+
+      {/*
+        Nunca se borra: los turnos que pasaron ahí la referencian. De baja sale
+        del sitio y de los formularios, y el historial queda entero.
+      */}
+      <InactiveList label="De baja" count={inactive.length}>
+        {inactive.map((location) => (
+          <InactiveRow
+            key={location.id}
+            title={location.name}
+            meta={location.address}
+            action={
+              <InlineAction action={toggleLocation} fields={{ id: location.id, active: "false" }}>
+                Volver a activar
+              </InlineAction>
+            }
+          />
+        ))}
+      </InactiveList>
 
       <section className="mt-14 border-t-2 border-foreground pt-6">
         <SectionHeading>Agregar sede</SectionHeading>

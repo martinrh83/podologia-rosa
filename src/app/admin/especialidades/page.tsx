@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { toggleSpecialty } from "@/app/actions/practitioners";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
-import { RecordList, RecordRow } from "@/components/admin/record-row";
+import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
 import { Notice } from "@/components/notice";
 import { NewSpecialtyForm } from "@/components/practitioner-admin";
 import { requireStaff } from "@/lib/auth";
@@ -39,52 +39,62 @@ export default async function AdminEspecialidadesPage() {
     );
   }
 
+  const active = specialties.filter((specialty) => specialty.active);
+  const inactive = specialties.filter((specialty) => !specialty.active);
+
+  function professionals(specialtyId: string) {
+    const count = countBySpecialty.get(specialtyId) ?? 0;
+    return count === 0 ? "Sin profesionales" : `${count} ${count === 1 ? "profesional" : "profesionales"}`;
+  }
+
   return (
     <div>
       <PageHeading title="Especialidades" />
 
-      {specialties.length === 0 ? (
-        <Notice tone="muted" title="Todavía no hay ninguna">
-          Cargá la primera acá abajo. Sin especialidad no se puede agregar un profesional.
-        </Notice>
+      {active.length === 0 ? (
+        <div className="mb-6">
+          <Notice
+            tone="muted"
+            title={specialties.length === 0 ? "Todavía no hay ninguna" : "No hay especialidades activas"}
+          >
+            Cargá una acá abajo. Sin especialidad no se puede agregar un profesional.
+          </Notice>
+        </div>
       ) : (
         <RecordList>
-          {specialties.map((specialty) => {
-            const count = countBySpecialty.get(specialty.id) ?? 0;
-            const fields = { id: specialty.id, active: String(specialty.active) };
-
-            return (
-              <RecordRow
-                key={specialty.id}
-                title={specialty.name}
-                inactive={specialty.active ? undefined : "De baja: no se ofrece"}
-                meta={
-                  <span className="tabular-nums">
-                    {count === 0
-                      ? "Sin profesionales"
-                      : `${count} ${count === 1 ? "profesional" : "profesionales"}`}
-                  </span>
-                }
-                action={
-                  specialty.active ? (
-                    <ConfirmAction
-                      action={toggleSpecialty}
-                      fields={fields}
-                      label="Dar de baja"
-                      question="¿Dejar de ofrecerla? Sus tratamientos salen de la página."
-                      confirmLabel="Sí, dar de baja"
-                    />
-                  ) : (
-                    <InlineAction action={toggleSpecialty} fields={fields}>
-                      Volver a activar
-                    </InlineAction>
-                  )
-                }
-              />
-            );
-          })}
+          {active.map((specialty) => (
+            <RecordRow
+              key={specialty.id}
+              title={specialty.name}
+              meta={<span className="tabular-nums">{professionals(specialty.id)}</span>}
+              action={
+                <ConfirmAction
+                  action={toggleSpecialty}
+                  fields={{ id: specialty.id, active: "true" }}
+                  label="Dar de baja"
+                  question="¿Dejar de ofrecerla? Sus tratamientos salen de la página."
+                  confirmLabel="Sí, dar de baja"
+                />
+              }
+            />
+          ))}
         </RecordList>
       )}
+
+      <InactiveList label="De baja" count={inactive.length}>
+        {inactive.map((specialty) => (
+          <InactiveRow
+            key={specialty.id}
+            title={specialty.name}
+            meta={<span className="tabular-nums">{professionals(specialty.id)}</span>}
+            action={
+              <InlineAction action={toggleSpecialty} fields={{ id: specialty.id, active: "false" }}>
+                Volver a activar
+              </InlineAction>
+            }
+          />
+        ))}
+      </InactiveList>
 
       <section className="mt-14 border-t-2 border-foreground pt-6">
         <SectionHeading>Agregar especialidad</SectionHeading>
