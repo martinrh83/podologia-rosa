@@ -216,7 +216,16 @@ export function StepHeading({
       >
         {children}
       </Heading>
-      <p className="mt-3 max-w-[52ch] text-[1.1rem] leading-relaxed text-muted">
+      {/*
+        Sin tope de medida: la columna ya viene angosta por `max-w-6xl`, y un
+        corte a 52ch dejaba un hueco a la derecha que se leía como error de
+        maquetación y no como renglón corto.
+
+        El margen sigue el mismo ritmo que los renglones de abajo —51px, que es
+        el `py-6` de cada fila contra el de la siguiente— así toda la columna
+        respira igual.
+      */}
+      <p className="mt-12 text-[1.1rem] leading-relaxed text-muted">
         <strong className="font-bold text-foreground">
           Paso {step} de {of}.
         </strong>{" "}

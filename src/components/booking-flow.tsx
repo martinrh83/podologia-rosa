@@ -367,7 +367,7 @@ export function BookingFlow({
               step={2}
               of={3}
               headingRef={headingRef}
-              lead={`Los turnos duran ${practitioner.slotMinutes} minutos. Elegí el día y después el horario que te quede cómodo.`}
+              lead={`Los turnos duran ${practitioner.slotMinutes} minutos.`}
             >
               ¿Cuándo te queda cómodo?
             </StepHeading>
@@ -397,15 +397,20 @@ export function BookingFlow({
                 Día
               </h3>
               {/*
-                En el teléfono los días se corren con el dedo y el que sigue
-                queda cortado al borde: sin este aviso, nadie sabe que hay más.
-                Desde `sm` entran todos, envueltos en varias filas.
+                Los días se corren con el dedo y el que sigue queda cortado al
+                borde: sin este aviso, nadie sabe que hay más. La tira se desliza
+                en cualquier pantalla, así que el aviso también va siempre.
               */}
-              <p className="text-[0.95rem] text-muted sm:hidden">
+              <p className="text-[0.95rem] text-muted">
                 {days.length} {days.length === 1 ? "día" : "días"} con lugar · deslizá →
               </p>
             </div>
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:thin] sm:flex-wrap sm:overflow-visible">
+            {/*
+              Una sola fila que se desliza, en cualquier resolución: los días
+              quedan en orden y a la misma altura, sin reacomodarse en filas
+              según entre el ancho.
+            */}
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:thin]">
               {days.map((day) => {
                 const isSelected = day.key === selectedDay?.key;
                 return (
@@ -414,7 +419,10 @@ export function BookingFlow({
                     type="button"
                     onClick={() => setSelectedDayKey(day.key)}
                     aria-pressed={isSelected}
-                    className={`shrink-0 border-2 px-4 py-3 text-center transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
+                    // Ancho fijo para que la tira quede pareja: "1 horario" es
+                    // más angosto que "4 horarios" y ese día salía más flaco
+                    // que los demás.
+                    className={`w-[7.5rem] shrink-0 border-2 px-4 py-3 text-center transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
                       isSelected
                         ? "border-accent bg-accent text-white"
                         : "border-border bg-surface hover:border-accent"
@@ -478,10 +486,6 @@ export function BookingFlow({
                   })}
                 </div>
 
-                <p className="mt-4 text-[0.95rem] text-muted">
-                  Se puede reservar hasta {horizonDays} días para adelante. Para una fecha más
-                  lejana, llamanos.
-                </p>
               </div>
             )}
           </section>
@@ -492,7 +496,7 @@ export function BookingFlow({
                 step={3}
                 of={3}
                 headingRef={headingRef}
-                lead="Es lo último. No creás ninguna cuenta ni contraseña."
+                lead="Completá con tus datos personales para confirmar la reserva."
               >
                 Tus datos
               </StepHeading>
@@ -621,9 +625,12 @@ export function BookingFlow({
                 </div>
 
                 {/*
-                  Explicit consent, naming health data. The motivo field above is a
-                  dato sensible under Ley 25.326 art. 2, so a generic "acepto los
-                  términos" would not be valid consent for it.
+                  Una sola autorización para todo el formulario. El motivo de la
+                  consulta es un dato sensible (Ley 25.326 art. 2), pero quien lo
+                  guarda es un establecimiento sanitario tratando a su paciente:
+                  el art. 8 habilita ese tratamiento bajo secreto profesional, sin
+                  necesidad de un consentimiento aparte. El detalle de qué se hace
+                  con cada dato vive en /privacidad.
                 */}
                 <div>
                   <label className="flex cursor-pointer items-start gap-3 border-t border-border pt-5 text-[0.95rem] leading-relaxed">
@@ -639,8 +646,8 @@ export function BookingFlow({
                       className="casilla mt-0.5"
                     />
                     <span>
-                      Autorizo a Podología Mitre a guardar mis datos de contacto y, si lo completé, el
-                      motivo de mi consulta —un dato de salud— con el fin de gestionar mi turno.{" "}
+                      Autorizo a Podología Mitre a guardar los datos proporcionados en este
+                      formulario para confirmar mi reserva.{" "}
                       <a
                         href="/privacidad"
                         target="_blank"

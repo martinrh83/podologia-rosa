@@ -68,7 +68,7 @@ export default async function TurnosPage() {
       <StepHeading
         step={1}
         of={3}
-        lead="Cada una tiene su propia agenda. Elegí y te mostramos sus horarios libres; no hace falta crear una cuenta ni llamar."
+        lead="Cada profesional tiene su propia agenda."
       >
         ¿Con quién te querés atender?
       </StepHeading>
@@ -84,7 +84,9 @@ export default async function TurnosPage() {
           </Notice>
         </div>
       ) : (
-        <div className="mt-10 space-y-10">
+        // `mt-6` y no más: el `py-6` de la primera fila completa los mismos
+        // 51px que separan un profesional del siguiente.
+        <div className="mt-6 space-y-10">
           {[...groups.entries()].map(([specialty, people]) => (
             <section key={specialty} aria-labelledby={`esp-${specialty}`}>
               {showSpecialtyHeadings && (

@@ -47,8 +47,9 @@ export default async function PrivacidadPage() {
           </p>
           <p className="mt-2">
             El motivo de la consulta es un <strong>dato sensible</strong> según el artículo 2 de la
-            Ley 25.326. Por eso el campo es opcional, te pedimos autorización expresa antes de
-            guardarlo, y solo puede verlo {settings.clinic_name}.
+            Ley 25.326. Por eso el campo es opcional y solo puede verlo {settings.clinic_name}. Como
+            consultorio de salud lo guardamos bajo secreto profesional, que es lo que el artículo 8
+            de esa misma ley nos exige.
           </p>
           <p className="mt-2">
             El DNI lo usamos únicamente para identificarte en la ficha y para facturar según tu
