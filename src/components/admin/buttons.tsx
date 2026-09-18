@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { buttonClass, TEXT_ACTION, type ButtonVariant } from "@/components/admin/button-styles";
+import {
+  buttonClass,
+  REMOVE_ACTION,
+  TEXT_ACTION,
+  type ButtonVariant,
+} from "@/components/admin/button-styles";
 
 type ServerAction = (formData: FormData) => void | Promise<void>;
 
@@ -122,7 +127,7 @@ export function ConfirmAction({
         ref={triggerRef}
         type="button"
         onClick={() => setAsking(true)}
-        className={TEXT_ACTION}
+        className={REMOVE_ACTION}
       >
         {label}
       </button>

@@ -87,7 +87,7 @@ export function AppointmentCard({
         DNI <span className="tabular-nums">{appointment.patient_dni || "—"}</span> · {coverage} ·{" "}
         <a
           href={`tel:${appointment.patient_phone}`}
-          className="tabular-nums underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-foreground"
+          className="tabular-nums underline decoration-current underline-offset-4 hover:text-foreground"
         >
           {appointment.patient_phone}
         </a>
@@ -164,7 +164,7 @@ export function AppointmentCard({
       */}
       {!isCancelled && (
         <details className="mt-3">
-          <summary className={`inline-flex cursor-pointer items-center ${TEXT_ACTION}`}>
+          <summary className={`cursor-pointer ${TEXT_ACTION}`}>
             Enlace para que cancele
           </summary>
 

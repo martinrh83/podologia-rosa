@@ -46,9 +46,24 @@ export function buttonClass(
 }
 
 /**
- * Un enlace de texto: para lo que no merece el peso de un botón (quitar una
- * franja, dar de baja). Tinta suave subrayada en color renglón, como el
- * «Cambiar» del mostrador.
+ * Un enlace de texto: para lo que no merece el peso de un botón (volver a
+ * activar, abrir el enlace de cancelación).
+ *
+ * Tinta suave en 500, subrayada en su mismo color. Empezó copiando el
+ * «Cambiar» del mostrador —subrayado en color renglón—, pero ese subrayado
+ * queda a 1.5:1 sobre la cartulina y era lo único que decía «esto se toca»: en
+ * el teléfono, sin hover, «Dar de baja» se confundía con la letra chica de al
+ * lado. 44px de alto, como los enlaces del menú.
  */
-export const TEXT_ACTION =
-  "min-h-10 text-[0.95rem] text-muted underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground";
+const TEXT_ACTION_BASE =
+  "inline-flex min-h-11 items-center text-[0.95rem] font-medium underline decoration-current decoration-1 underline-offset-4 transition-colors";
+
+export const TEXT_ACTION = `${TEXT_ACTION_BASE} text-muted hover:text-foreground`;
+
+/**
+ * El mismo enlace para lo que saca algo: cancelar un turno, quitar una franja,
+ * dar de baja, ocultar de la página, y salir del panel. En reposo es igual a
+ * los demás; al pasar el mouse o con el foco pasa a rojo de aviso, que avisa
+ * qué va a pasar antes de la confirmación sin gritar en cada renglón.
+ */
+export const REMOVE_ACTION = `${TEXT_ACTION_BASE} text-muted hover:text-[color:var(--danger)] focus-visible:text-[color:var(--danger)]`;

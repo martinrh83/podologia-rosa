@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { logout } from "@/app/actions/auth";
-import { TEXT_ACTION } from "@/components/admin/button-styles";
+import { REMOVE_ACTION } from "@/components/admin/button-styles";
 
 /** Lo de todos los días: arriba, grande, al alcance del pulgar. */
 const DAY = [
@@ -87,7 +87,8 @@ export function AdminNav() {
         })}
         <li className="ml-auto">
           <form action={logout}>
-            <button type="submit" className={`flex items-center ${TEXT_ACTION}`}>
+            {/* El relleno agranda el área de toque; el margen negativo lo deja donde estaba. */}
+            <button type="submit" className={`-mx-3 px-3 ${REMOVE_ACTION}`}>
               Salir
             </button>
           </form>
