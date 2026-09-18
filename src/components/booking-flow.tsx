@@ -414,7 +414,10 @@ export function BookingFlow({
                     type="button"
                     onClick={() => setSelectedDayKey(day.key)}
                     aria-pressed={isSelected}
-                    className={`shrink-0 border-2 px-4 py-3 text-center transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
+                    // Ancho fijo para que la tira quede pareja: "1 horario" es
+                    // más angosto que "4 horarios" y ese día salía más flaco
+                    // que los demás.
+                    className={`w-[7.5rem] shrink-0 border-2 px-4 py-3 text-center transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
                       isSelected
                         ? "border-accent bg-accent text-white"
                         : "border-border bg-surface hover:border-accent"
