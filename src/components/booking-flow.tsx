@@ -625,9 +625,12 @@ export function BookingFlow({
                 </div>
 
                 {/*
-                  Explicit consent, naming health data. The motivo field above is a
-                  dato sensible under Ley 25.326 art. 2, so a generic "acepto los
-                  términos" would not be valid consent for it.
+                  Una sola autorización para todo el formulario. El motivo de la
+                  consulta es un dato sensible (Ley 25.326 art. 2), pero quien lo
+                  guarda es un establecimiento sanitario tratando a su paciente:
+                  el art. 8 habilita ese tratamiento bajo secreto profesional, sin
+                  necesidad de un consentimiento aparte. El detalle de qué se hace
+                  con cada dato vive en /privacidad.
                 */}
                 <div>
                   <label className="flex cursor-pointer items-start gap-3 border-t border-border pt-5 text-[0.95rem] leading-relaxed">
@@ -643,9 +646,8 @@ export function BookingFlow({
                       className="casilla mt-0.5"
                     />
                     <span>
-                      Autorizo a Podología Mitre a guardar mis datos de contacto para gestionar mi
-                      turno. Si completé el motivo de la consulta, autorizo también a guardar ese
-                      dato de salud.{" "}
+                      Autorizo a Podología Mitre a guardar los datos proporcionados en este
+                      formulario para confirmar mi reserva.{" "}
                       <a
                         href="/privacidad"
                         target="_blank"
