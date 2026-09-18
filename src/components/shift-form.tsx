@@ -2,10 +2,15 @@
 
 import { useActionState, useState } from "react";
 
-import { addShift, type ScheduleState } from "@/app/actions/schedule";
+import { addShift } from "@/app/actions/schedule";
+import { ActionResult } from "@/components/admin/action-result";
+import { SubmitButton } from "@/components/admin/buttons";
+import { SelectField, TextField } from "@/components/fields";
+import { FormAlert } from "@/components/form-alert";
+import { useForm } from "@/components/use-form";
+import { IDLE } from "@/lib/forms";
+import { shiftSchema } from "@/lib/schemas";
 import { WEEKDAYS } from "@/lib/weekdays";
-
-const INITIAL: ScheduleState = { status: "idle" };
 
 /**
  * Alta de una franja horaria.
@@ -24,135 +29,70 @@ export function ShiftForm({
   practitionerId: string;
   locations: ShiftFormLocation[];
 }) {
-  const [state, formAction, isPending] = useActionState(addShift, INITIAL);
+  const [state, formAction] = useActionState(addShift, IDLE);
+  const form = useForm(
+    shiftSchema,
+    {
+      // De quién es la franja: lo define el selector de arriba de la pantalla.
+      practitionerId,
+      locationId: locations[0]?.id ?? "",
+      weekday: "1",
+      startTime: "",
+      endTime: "",
+    },
+    state,
+  );
 
-  const [weekday, setWeekday] = useState("1");
-  const [locationId, setLocationId] = useState(locations[0]?.id ?? "");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-
-  // Ajustar el estado durante el render, no en un efecto: cuando llega un
-  // resultado nuevo y fue exitoso, se vacían los campos. React lo resuelve
-  // antes de pintar, sin el render en cascada que provoca un `useEffect`.
+  // Al guardar se vacían las horas y quedan el día y la sede: lo que sigue
+  // suele ser la otra franja del mismo día, o el mismo horario otro día.
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
     setLastResult(state);
-    if (state.status === "saved") {
-      setStartTime("");
-      setEndTime("");
-    }
+    if (state.status === "saved") form.reset({ ...form.values, startTime: "", endTime: "" });
   }
 
   return (
-    <form action={formAction} className="mt-4 rounded-xl border border-border bg-surface p-4">
-      {/* De quién es la franja: lo define el selector de arriba de la pantalla. */}
+    <form action={formAction} onSubmit={form.onSubmit} noValidate>
       <input type="hidden" name="practitionerId" value={practitionerId} />
 
-      <div className="flex flex-wrap items-end gap-3">
-        {locations.length > 1 && (
-          <div>
-            <label htmlFor="locationId" className="block text-sm font-medium">
-              Sede
-            </label>
-            <select
-              id="locationId"
-              name="locationId"
-              value={locationId}
-              onChange={(event) => setLocationId(event.target.value)}
-              className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-            >
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {locations.length <= 1 && (
-          <input type="hidden" name="locationId" value={locationId} />
-        )}
-
-        <div>
-          <label htmlFor="weekday" className="block text-sm font-medium">
-            Día
-          </label>
-          <select
-            id="weekday"
-            name="weekday"
-            value={weekday}
-            onChange={(event) => setWeekday(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          >
-            {WEEKDAYS.map((day) => (
-              <option key={day.value} value={day.value}>
-                {day.label}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {locations.length > 1 ? (
+          <SelectField id="locationId" label="Sede" {...form.field("locationId")}>
+            {locations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name}
               </option>
             ))}
-          </select>
-        </div>
+          </SelectField>
+        ) : (
+          <input type="hidden" name="locationId" value={form.values.locationId} />
+        )}
 
-        <div>
-          <label htmlFor="startTime" className="block text-sm font-medium">
-            Desde
-          </label>
-          <input
-            id="startTime"
-            name="startTime"
-            type="time"
-            required
-            value={startTime}
-            onChange={(event) => setStartTime(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="endTime" className="block text-sm font-medium">
-            Hasta
-          </label>
-          <input
-            id="endTime"
-            name="endTime"
-            type="time"
-            required
-            value={endTime}
-            onChange={(event) => setEndTime(event.target.value)}
-            className="mt-1 rounded-lg border border-border bg-background px-3 py-2.5"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+        <SelectField
+          id="weekday"
+          label="Día"
+          // Sin sede que elegir, el día ocupa su lugar y la fila queda pareja.
+          className={locations.length > 1 ? "" : "col-span-2"}
+          {...form.field("weekday")}
         >
-          {isPending ? "Guardando…" : "Agregar"}
-        </button>
+          {WEEKDAYS.map((day) => (
+            <option key={day.value} value={day.value}>
+              {day.label}
+            </option>
+          ))}
+        </SelectField>
+
+        <TextField id="startTime" label="Desde" type="time" required {...form.field("startTime")} />
+        <TextField id="endTime" label="Hasta" type="time" required {...form.field("endTime")} />
       </div>
 
-      <FormMessage state={state} saved="Listo, la franja ya está cargada." />
+      <div className="mt-5 space-y-4">
+        <FormAlert state={state} />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <SubmitButton>Agregar franja</SubmitButton>
+          <ActionResult state={state} saved="Listo, la franja ya está cargada." />
+        </div>
+      </div>
     </form>
   );
-}
-
-/** El resultado de la última acción. Vacío mientras no haya pasado nada. */
-export function FormMessage({ state, saved }: { state: ScheduleState; saved: string }) {
-  if (state.status === "error") {
-    return (
-      <p role="alert" className="mt-3 text-[0.95rem] text-[color:var(--danger)]">
-        {state.message}
-      </p>
-    );
-  }
-
-  if (state.status === "saved") {
-    return (
-      <p role="status" className="mt-3 text-[0.95rem] text-[color:var(--success)]">
-        {saved}
-      </p>
-    );
-  }
-
-  return null;
 }

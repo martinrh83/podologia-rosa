@@ -1,14 +1,20 @@
 import { updateStatus } from "@/app/actions/appointments";
+import { buttonClass, TEXT_ACTION } from "@/components/admin/button-styles";
+import { ActionButton, ConfirmAction } from "@/components/admin/buttons";
 import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
 import type { Appointment, AppointmentWithPractitioner } from "@/lib/db/types";
 import { formatDay, formatTime, whatsappLink } from "@/lib/format";
 
-const STATUS_LABEL: Record<Appointment["status"], string> = {
-  booked: "Reservado",
-  completed: "Atendido",
-  no_show: "No vino",
-  cancelled: "Cancelado",
+/**
+ * El estado, dicho sólo cuando no es el de siempre. Casi todos los turnos del
+ * día están reservados: repetir «Reservado» en cada fila era ruido que tapaba
+ * a los que sí cambiaron.
+ */
+const STATUS: Partial<Record<Appointment["status"], { label: string; className: string }>> = {
+  completed: { label: "Atendido", className: "text-[color:var(--success)]" },
+  no_show: { label: "No vino", className: "text-foreground" },
+  cancelled: { label: "Cancelado", className: "text-[color:var(--danger)]" },
 };
 
 type Props = {
@@ -26,6 +32,13 @@ type Props = {
   siteUrl: string;
 };
 
+/**
+ * Un turno de la lista del día.
+ *
+ * Es un renglón de la hoja y no una tarjeta blanca por turno: con diez turnos
+ * eran diez planos blancos apilados. La hora manda, en el ancho de los
+ * encabezados, porque es por lo que se busca un turno en la lista.
+ */
 export function AppointmentCard({
   appointment,
   reminderMessage,
@@ -34,83 +47,114 @@ export function AppointmentCard({
   showLocation = false,
 }: Props) {
   const isCancelled = appointment.status === "cancelled";
+  const time = formatTime(appointment.starts_at);
+  const status = STATUS[appointment.status];
   const cancelUrl = `${siteUrl}/turnos/cancelar/${appointment.cancel_token}`;
   const fullName = `${appointment.patient_last_name}, ${appointment.patient_first_name}`;
   const coverage = COVERAGES.find((item) => item.value === appointment.patient_coverage)?.label;
 
   return (
-    <li
-      className={`rounded-xl border border-border bg-surface p-4 ${isCancelled ? "opacity-60" : ""}`}
-    >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="text-xl font-semibold tabular-nums">
-          {formatTime(appointment.starts_at)}
-          {showPractitioner && appointment.practitioner && (
-            <span className="ml-3 text-[0.95rem] font-medium text-accent">
-              {appointment.practitioner.first_name} {appointment.practitioner.last_name}
-            </span>
-          )}
+    <li className="border-b border-border py-5">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <p
+          className={`font-wide text-[1.6rem] font-extrabold leading-none tracking-[-0.02em] tabular-nums ${
+            isCancelled ? "text-muted line-through decoration-2" : ""
+          }`}
+        >
+          {time}
         </p>
-        <span className="text-sm text-muted">
-          {showLocation && appointment.location && (
-            <span className="mr-2 uppercase tracking-wide text-accent">
-              {appointment.location.name}
-            </span>
-          )}
-          {STATUS_LABEL[appointment.status]}
-          {appointment.source === "admin" && " · cargado a mano"}
-        </span>
+        {showPractitioner && appointment.practitioner && (
+          <p className="font-bold text-accent">
+            {appointment.practitioner.first_name} {appointment.practitioner.last_name}
+          </p>
+        )}
+        {showLocation && appointment.location && (
+          <p className="font-narrow text-sm font-bold uppercase tracking-[0.08em] text-muted">
+            {appointment.location.name}
+          </p>
+        )}
+        {status && (
+          <p className={`ml-auto text-[0.95rem] font-bold ${status.className}`}>{status.label}</p>
+        )}
       </div>
 
       {/* Apellido primero: es como se busca una ficha. */}
-      <p className="mt-1 text-[1.05rem]">{fullName}</p>
-
-      <p className="mt-0.5 text-[0.95rem] text-muted">
-        DNI {appointment.patient_dni || "—"} · {coverage}
+      <p className={`mt-2 text-[1.15rem] font-bold ${isCancelled ? "text-muted" : ""}`}>
+        {fullName}
       </p>
 
       <p className="mt-0.5 text-[0.95rem] text-muted">
-        <a href={`tel:${appointment.patient_phone}`} className="hover:text-foreground">
+        DNI <span className="tabular-nums">{appointment.patient_dni || "—"}</span> · {coverage} ·{" "}
+        <a
+          href={`tel:${appointment.patient_phone}`}
+          className="tabular-nums underline decoration-current underline-offset-4 hover:text-foreground"
+        >
           {appointment.patient_phone}
         </a>
+        {appointment.source === "admin" && " · cargado a mano"}
       </p>
 
       {appointment.motivo && (
-        <p className="mt-2 rounded-lg bg-surface-muted px-3 py-2 text-[0.95rem]">
+        <p className="mt-3 max-w-[62ch] bg-surface-muted px-3.5 py-2.5 text-[0.95rem] leading-relaxed">
           {appointment.motivo}
         </p>
       )}
 
       {/*
-        Turnos sacados por la web: Rosa le confirma al paciente por WhatsApp.
-        No hay confirmación automática, así que este botón es el único aviso que
-        el paciente recibe de parte del consultorio.
+        Todo lo que se hace con el turno, en una sola fila que se parte donde
+        haga falta: primero hablarle al paciente, después marcar cómo terminó.
+        Cancelar va último y como texto: es lo menos frecuente y lo único sin
+        vuelta, así que no merece el peso de un botón más en cada fila.
       */}
-      {!isCancelled && appointment.source === "online" && (
-        <a
-          href={whatsappLink(
-            appointment.patient_phone,
-            `Hola ${appointment.patient_first_name}! Te confirmamos tu turno del ` +
-              `${formatDay(appointment.starts_at)} a las ${formatTime(appointment.starts_at)}. ` +
-              `¡Te esperamos!`,
+      {!isCancelled && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {reminderMessage && (
+            <a
+              href={whatsappLink(appointment.patient_phone, reminderMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonClass("primary", { size: "sm" })}
+            >
+              Recordar por WhatsApp
+            </a>
           )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-block rounded-lg border border-accent px-4 py-2.5 text-[0.95rem] font-medium text-accent hover:bg-accent hover:text-white"
-        >
-          Confirmar por WhatsApp
-        </a>
-      )}
 
-      {reminderMessage && !isCancelled && (
-        <a
-          href={whatsappLink(appointment.patient_phone, reminderMessage)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-block rounded-lg bg-accent px-4 py-2.5 text-[0.95rem] font-medium text-white hover:bg-accent-hover"
-        >
-          Recordar por WhatsApp
-        </a>
+          {/*
+            Turnos sacados por la web: Rosa le confirma al paciente por WhatsApp.
+            No hay confirmación automática, así que este botón es el único aviso
+            que el paciente recibe de parte del consultorio.
+          */}
+          {appointment.source === "online" && (
+            <a
+              href={whatsappLink(
+                appointment.patient_phone,
+                `Hola ${appointment.patient_first_name}! Te confirmamos tu turno del ` +
+                  `${formatDay(appointment.starts_at)} a las ${time}. ` +
+                  `¡Te esperamos!`,
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonClass("outline", { size: "sm" })}
+            >
+              Confirmar por WhatsApp
+            </a>
+          )}
+
+          {appointment.status !== "completed" && (
+            <StatusForm id={appointment.id} status="completed" label="Marcar atendido" />
+          )}
+          {appointment.status !== "no_show" && (
+            <StatusForm id={appointment.id} status="no_show" label="No vino" />
+          )}
+
+          <ConfirmAction
+            action={updateStatus}
+            fields={{ id: appointment.id, status: "cancelled" }}
+            label="Cancelar turno"
+            question={`¿Cancelar el turno de las ${time}?`}
+            confirmLabel="Sí, cancelar"
+          />
+        </div>
       )}
 
       {/*
@@ -119,48 +163,45 @@ export function AppointmentCard({
         able to hand it back without asking anyone for help.
       */}
       {!isCancelled && (
-        <details className="mt-3 border-t border-border pt-3">
-          <summary className="cursor-pointer text-sm text-muted hover:text-foreground">
+        <details className="mt-3">
+          <summary className={`cursor-pointer ${TEXT_ACTION}`}>
             Enlace para que cancele
           </summary>
 
-          <div className="mt-2 space-y-2">
+          <div className="mt-2 space-y-3">
             <CopyLink href={cancelUrl} label="Copiar el enlace de este turno" />
 
             <a
               href={whatsappLink(
                 appointment.patient_phone,
                 `Hola ${appointment.patient_first_name}! Si necesitás cancelar tu turno del ` +
-                  `${formatTime(appointment.starts_at)}, entrá acá: ${cancelUrl}`,
+                  `${time}, entrá acá: ${cancelUrl}`,
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded-lg border border-border px-3 py-2 text-sm hover:border-accent"
+              className={buttonClass("ink", { size: "sm" })}
             >
               Mandarlo por WhatsApp
             </a>
           </div>
         </details>
       )}
-
-      {!isCancelled && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {(["completed", "no_show", "cancelled"] as const)
-            .filter((status) => status !== appointment.status)
-            .map((status) => (
-              <form key={status} action={updateStatus}>
-                <input type="hidden" name="id" value={appointment.id} />
-                <input type="hidden" name="status" value={status} />
-                <button
-                  type="submit"
-                  className="rounded-lg border border-border px-3 py-2 text-sm text-muted hover:border-accent hover:text-foreground"
-                >
-                  {STATUS_LABEL[status]}
-                </button>
-              </form>
-            ))}
-        </div>
-      )}
     </li>
+  );
+}
+
+function StatusForm({
+  id,
+  status,
+  label,
+}: {
+  id: string;
+  status: Appointment["status"];
+  label: string;
+}) {
+  return (
+    <ActionButton action={updateStatus} fields={{ id, status }}>
+      {label}
+    </ActionButton>
   );
 }

@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { createAdminBooking } from "@/app/actions/appointments";
+import { AdminBookingForm, type AdminSlot } from "@/components/admin/booking-form";
+import { PageHeading } from "@/components/admin/page-heading";
+import { Notice } from "@/components/notice";
 import { SlotFilters } from "@/components/slot-filters";
 import { getAvailability } from "@/lib/availability";
-import { COVERAGES } from "@/lib/booking-schema";
 import { listActiveLocations } from "@/lib/db/locations";
 import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { requireStaff } from "@/lib/auth";
-import { formatTime, toLocalDateKey } from "@/lib/format";
+import { formatDay, formatTime, toLocalDateKey } from "@/lib/format";
 import { localDayRangeFromKey } from "@/lib/slots";
 
 export const metadata: Metadata = {
@@ -29,7 +30,9 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
   await requireStaff();
 
   const params = await searchParams;
-  const error = typeof params.error === "string" ? params.error : null;
+  // La hora del turno recién guardado. Sólo la hora: el paciente no va en la URL.
+  const savedAt = typeof params.guardado === "string" ? new Date(params.guardado) : null;
+  const saved = savedAt && !Number.isNaN(savedAt.getTime()) ? savedAt : null;
   const dateKey = typeof params.fecha === "string" ? params.fecha : toLocalDateKey(new Date());
 
   const [practitioners, locations] = await Promise.all([
@@ -44,7 +47,7 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
   const practitioner =
     practitioners.find((row) => row.id === requested) ?? practitioners[0] ?? null;
 
-  let slots: { value: string; label: string }[] = [];
+  let slots: AdminSlot[] = [];
   let dateError: string | null = null;
 
   if (practitioner) {
@@ -58,12 +61,10 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
       });
       slots = availability.slots.map((slot) => ({
         value: slot.start.toISOString(),
-        // La sede va en la etiqueta: el secretario tiene que saber dónde está
+        time: formatTime(slot.start),
+        // La sede va en la ficha: el secretario tiene que saber dónde está
         // citando al paciente, y ese día puede estar partido entre las dos.
-        label:
-          locations.length > 1
-            ? `${formatTime(slot.start)} · ${locationName.get(slot.locationId) ?? ""}`
-            : formatTime(slot.start),
+        location: locations.length > 1 ? locationName.get(slot.locationId) : undefined,
       }));
     } catch {
       dateError = "Esa fecha no es válida.";
@@ -72,8 +73,15 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
 
   return (
     <div>
-      <h2 className="mb-1 text-2xl font-semibold tracking-tight">Nuevo turno</h2>
-      <p className="mb-5 text-muted">Para turnos que te piden por teléfono o en el consultorio.</p>
+      <PageHeading title="Nuevo turno" />
+
+      {saved && (
+        <div className="mb-6">
+          <Notice tone="success" title="Turno guardado">
+            Para el {formatDay(saved)} a las {formatTime(saved)}. Ya no se ofrece online.
+          </Notice>
+        </div>
+      )}
 
       <SlotFilters
         practitioners={practitioners.map((row) => ({ id: row.id, name: practitionerName(row) }))}
@@ -81,148 +89,35 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
         dateKey={dateKey}
       />
 
-      {error && (
-        <p role="alert" className="mb-4 rounded-lg border border-[color:var(--danger)]/30 bg-[color:var(--danger)]/5 p-4">
-          {error}
-        </p>
-      )}
-
       {!practitioner ? (
-        <p className="text-muted">
-          Todavía no hay profesionales cargados.{" "}
-          <Link href="/admin/profesionales" className="text-accent underline">
-            Cargá el primero
+        <Notice tone="muted" title="Todavía no hay profesionales">
+          Cargá la primera en{" "}
+          <Link href="/admin/profesionales" className="font-bold text-accent underline underline-offset-4">
+            Profesionales
           </Link>
           .
-        </p>
+        </Notice>
       ) : dateError ? (
-        <p className="text-muted">{dateError}</p>
+        <Notice tone="danger" title={dateError}>
+          Elegí otra fecha en el calendario.
+        </Notice>
       ) : slots.length === 0 ? (
-        <p className="text-muted">
-          No quedan horarios libres ese día. Probá otra fecha, o revisá{" "}
-          <Link href="/admin" className="text-accent underline">
-            la agenda
+        <Notice tone="muted" title="No quedan horarios libres ese día">
+          Probá otra fecha, o revisá los horarios y cierres en{" "}
+          <Link href="/admin/agenda" className="font-bold text-accent underline underline-offset-4">
+            Agenda
           </Link>
           .
-        </p>
+        </Notice>
       ) : (
-        <form action={createAdminBooking} className="space-y-4 rounded-xl border border-border bg-surface p-5">
-          {/* El profesional y el día viajan con el turno: son los que definen la
-              lista de horarios de arriba, y son a los que hay que volver si algo
-              falla. */}
-          <input type="hidden" name="practitionerId" value={practitioner.id} />
-          <input type="hidden" name="fecha" value={dateKey} />
-
-          <div>
-            <label htmlFor="startsAt" className="block text-[0.95rem] font-medium">
-              Horario
-            </label>
-            <select
-              id="startsAt"
-              name="startsAt"
-              required
-              className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-            >
-              {slots.map((slot) => (
-                <option key={slot.value} value={slot.value}>
-                  {slot.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="patientFirstName" className="block text-[0.95rem] font-medium">
-                Nombre
-              </label>
-              <input
-                id="patientFirstName"
-                name="patientFirstName"
-                required
-                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-              />
-            </div>
-            <div>
-              <label htmlFor="patientLastName" className="block text-[0.95rem] font-medium">
-                Apellido
-              </label>
-              <input
-                id="patientLastName"
-                name="patientLastName"
-                required
-                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="patientDni" className="block text-[0.95rem] font-medium">
-                DNI
-              </label>
-              <input
-                id="patientDni"
-                name="patientDni"
-                required
-                inputMode="numeric"
-                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-              />
-            </div>
-            <div>
-              <label htmlFor="patientCoverage" className="block text-[0.95rem] font-medium">
-                Obra social
-              </label>
-              <select
-                id="patientCoverage"
-                name="patientCoverage"
-                required
-                defaultValue="particular"
-                className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-              >
-                {COVERAGES.map((coverage) => (
-                  <option key={coverage.value} value={coverage.value}>
-                    {coverage.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="patientPhone" className="block text-[0.95rem] font-medium">
-              Teléfono
-            </label>
-            <input
-              id="patientPhone"
-              name="patientPhone"
-              type="tel"
-              required
-              inputMode="tel"
-              className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-3 text-[1.05rem]"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="motivo" className="block text-[0.95rem] font-medium">
-              Motivo <span className="font-normal text-muted">(opcional)</span>
-            </label>
-            <textarea
-              id="motivo"
-              name="motivo"
-              rows={2}
-              maxLength={500}
-              className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-accent px-4 py-3.5 text-[1.05rem] font-medium text-white hover:bg-accent-hover"
-          >
-            Guardar turno
-          </button>
-        </form>
+        // La clave vuelve a armar el formulario vacío después de guardar, listo
+        // para la próxima llamada. Entre día y día, en cambio, lo escrito queda.
+        <AdminBookingForm
+          key={saved?.toISOString() ?? "nuevo"}
+          practitionerId={practitioner.id}
+          dateKey={dateKey}
+          slots={slots}
+        />
       )}
     </div>
   );

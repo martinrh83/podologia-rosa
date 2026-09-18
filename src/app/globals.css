@@ -178,6 +178,22 @@ html {
 }
 
 /*
+ * La manito en todo botón que se puede apretar.
+ *
+ * Tailwind 4 dejó a los botones con el cursor por defecto del navegador, la
+ * flecha, y los links siguieron con la manito: en el panel, «Guardar cambios»
+ * o «Cancelar turno» parecían texto al pasar el mouse. Es la regla que la guía
+ * de migración de Tailwind propone para volver al comportamiento de antes. Los
+ * deshabilitados quedan con la flecha: no hay nada que apretar.
+ */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/*
  * Sin el triángulo por defecto de <details>: las preguntas frecuentes dibujan su
  * propio ícono. `list-none` lo saca en Chrome y Firefox, pero el Safari viejo de
  * iPhone sólo lo esconde con este pseudo-elemento.

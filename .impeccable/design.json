@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-17T16:27:30-03:00",
+  "generatedAt": "2026-09-18T17:53:38-03:00",
   "title": "Design System: Podología Mitre",
   "extensions": {
     "colorMeta": {
@@ -236,6 +236,10 @@
       "stamp": {
         "displayName": "Sello",
         "purpose": "Texto dentro de un sello de goma."
+      },
+      "panel-title": {
+        "displayName": "Título de panel",
+        "purpose": "Título de cada pantalla de /admin: ancho 800 a escala fija (1.75rem, 2.1rem desde sm), con raya doble de 5px y sin bajada: lo siguiente es la lista o el formulario."
       }
     },
     "shadows": [
@@ -366,18 +370,43 @@
       "description": "Apertura de cada sección: troquel a todo el ancho, título ancho y raya doble.",
       "html": "<section class=\"ds-section\"><div class=\"ds-troquel\"></div><h2 class=\"ds-heading\">Tratamientos</h2></section>",
       "css": ".ds-troquel { height: 6px; background-image: radial-gradient(circle, var(--border) 1.6px, transparent 1.9px); background-size: 10px 6px; background-repeat: repeat-x; } .ds-heading { font-family: Archivo, sans-serif; font-variation-settings: \"wdth\" 118; font-weight: 800; font-size: clamp(2rem, 7vw, 3.1rem); line-height: 1; letter-spacing: -0.025em; color: var(--foreground); border-bottom: 5px double var(--foreground); padding-bottom: 1rem; margin: 4rem 0 0; }"
+    },
+    {
+      "name": "Menú del panel",
+      "kind": "nav",
+      "refersTo": "panel-tab",
+      "description": "Dos filas: las tareas del día como pestañas de 2px (la activa llena de sello) y la configuración como enlaces, con Salir al final.",
+      "html": "<nav class=\"ds-pnav\" aria-label=\"Panel\"><div class=\"ds-pnav-tabs\"><a class=\"ds-pnav-tab\" aria-current=\"page\" href=\"#\">Hoy</a><a class=\"ds-pnav-tab\" href=\"#\">Mañana</a><a class=\"ds-pnav-tab\" href=\"#\">Nuevo turno</a></div><div class=\"ds-pnav-links\"><a href=\"#\">Agenda</a><a href=\"#\" aria-current=\"page\">Profesionales</a><a href=\"#\">Sedes</a><a href=\"#\">Precios</a><a class=\"ds-pnav-out\" href=\"#\">Salir</a></div></nav>",
+      "css": ".ds-pnav { font-family: Archivo, sans-serif; } .ds-pnav-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; } .ds-pnav-tab { display: flex; min-height: 3rem; align-items: center; justify-content: center; border: 2px solid var(--foreground); color: var(--foreground); font-size: 1.05rem; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background-color 100ms, transform 100ms; } .ds-pnav-tab:hover { background: var(--surface); } .ds-pnav-tab:active { transform: translateY(2px) scale(0.985); } .ds-pnav-tab[aria-current] { background: var(--accent); border-color: var(--accent); color: #fff; } .ds-pnav-tab:focus-visible, .ds-pnav-links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-pnav-links { display: flex; flex-wrap: wrap; align-items: center; column-gap: 1.25rem; margin-top: 0.5rem; border-bottom: 2px solid var(--foreground); } .ds-pnav-links a { display: flex; min-height: 2.75rem; align-items: center; color: var(--muted); font-size: 0.95rem; font-weight: 500; text-decoration: none; text-underline-offset: 6px; } .ds-pnav-links a:hover, .ds-pnav-links a[aria-current] { color: var(--accent); text-decoration: underline; text-decoration-thickness: 2px; } .ds-pnav-links .ds-pnav-out { margin: 0 -0.75rem 0 auto; padding: 0 0.75rem; font-weight: 500; text-decoration: underline; text-decoration-color: currentColor; text-decoration-thickness: 1px; text-underline-offset: 4px; }"
+    },
+    {
+      "name": "Fila de turno",
+      "kind": "card",
+      "refersTo": "panel-motivo",
+      "description": "Un turno de la lista del día: la hora en ancho 800 manda, el paciente debajo y las acciones en una fila, con Cancelar como texto al final.",
+      "html": "<div class=\"ds-turno\"><div class=\"ds-turno-top\"><span class=\"ds-turno-hora\">16:00</span><span class=\"ds-turno-con\">Rosa Gómez</span><span class=\"ds-turno-sede\">Centro</span><span class=\"ds-turno-estado\">Atendido</span></div><p class=\"ds-turno-nombre\">Pérez, Ana</p><p class=\"ds-turno-meta\">DNI 30111222 · IPS · <a href=\"#\">387 555-1234</a></p><p class=\"ds-turno-motivo\">Uña encarnada en el pie derecho.</p><div class=\"ds-turno-acc\"><a class=\"ds-pbtn ds-pbtn-sello\" href=\"#\">Confirmar por WhatsApp</a><button class=\"ds-pbtn\" type=\"button\">No vino</button><button class=\"ds-ptext\" type=\"button\">Cancelar turno</button></div></div>",
+      "css": ".ds-turno { font-family: Archivo, sans-serif; color: var(--foreground); border-bottom: 1px solid var(--border); padding: 1.25rem 0; } .ds-turno-top { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.75rem; } .ds-turno-hora { font-variation-settings: \"wdth\" 118; font-size: 1.6rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; } .ds-turno-con { color: var(--accent); font-weight: 700; } .ds-turno-sede { font-variation-settings: \"wdth\" 80; font-size: 0.875rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); } .ds-turno-estado { margin-left: auto; font-size: 0.95rem; font-weight: 700; color: var(--success); } .ds-turno-nombre { margin: 0.5rem 0 0; font-size: 1.15rem; font-weight: 700; } .ds-turno-meta { margin: 0.125rem 0 0; font-size: 0.95rem; color: var(--muted); } .ds-turno-meta a { color: inherit; text-decoration-color: currentColor; text-underline-offset: 4px; } .ds-turno-motivo { margin: 0.75rem 0 0; background: var(--surface-muted); padding: 0.625rem 0.875rem; font-size: 0.95rem; line-height: 1.6; } .ds-turno-acc { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 1rem; } .ds-pbtn { display: inline-flex; min-height: 2.5rem; align-items: center; border: 2px solid var(--foreground); background: transparent; color: var(--foreground); padding: 0.375rem 0.875rem; font: inherit; font-size: 0.95rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-pbtn:hover { background: var(--foreground); color: #fff; } .ds-pbtn-sello { border-color: var(--accent); color: var(--accent); } .ds-pbtn-sello:hover { background: var(--accent); color: #fff; } .ds-pbtn:active { transform: translateY(2px) scale(0.985); } .ds-pbtn:focus-visible, .ds-ptext:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-ptext { border: 0; background: none; padding: 0; min-height: 2.75rem; font: inherit; font-size: 0.95rem; font-weight: 500; color: var(--muted); text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 4px; cursor: pointer; transition: color 150ms; } .ds-ptext:hover, .ds-ptext:focus-visible { color: var(--danger); }"
+    },
+    {
+      "name": "Confirmación en línea",
+      "kind": "custom",
+      "refersTo": "panel-button-sm",
+      "description": "El segundo paso de lo que no tiene vuelta atrás: la pregunta, el contorno de aviso y un No de texto, en el mismo renglón y sin modal.",
+      "html": "<div class=\"ds-confirm\" role=\"group\" aria-label=\"¿Cancelar el turno de las 19:00?\"><p>¿Cancelar el turno de las 19:00?</p><button class=\"ds-confirm-si\" type=\"button\">Sí, cancelar</button><button class=\"ds-confirm-no\" type=\"button\">No</button></div>",
+      "css": ".ds-confirm { font-family: Archivo, sans-serif; display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.75rem; row-gap: 0.5rem; color: var(--foreground); } .ds-confirm p { margin: 0; font-size: 0.95rem; font-weight: 700; } .ds-confirm-si { min-height: 2.5rem; border: 2px solid var(--danger); background: transparent; color: var(--danger); padding: 0.375rem 0.875rem; font: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background-color 100ms, color 100ms, transform 100ms; } .ds-confirm-si:hover { background: var(--danger); color: #fff; } .ds-confirm-si:active { transform: translateY(2px) scale(0.985); } .ds-confirm-si:focus-visible, .ds-confirm-no:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-confirm-no { min-height: 2.5rem; border: 0; background: none; padding: 0; font: inherit; font-size: 0.95rem; color: var(--muted); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 4px; cursor: pointer; } .ds-confirm-no:hover { color: var(--foreground); }"
     }
   ],
   "narrative": {
     "northStar": "La tarjetita de turno",
-    "overview": "El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma azul del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.\n\nLa densidad es la de un formulario: encabezados anchos y pesados subrayados con raya doble, renglones finos, letra chica legible a 17px de base. No hay fotos de ambiente ni tarjetas con íconos: la información real (con quién, qué días, dónde, qué obra social) se presenta escrita sobre la tarjeta, y eso es la ilustración. El movimiento es un solo gesto físico, el golpe del sello, y botones que se hunden al apretarlos.\n\nSacar un turno es el mostrador: la misma tarjeta a un costado, armándose renglón por renglón, y una sola pregunta por vez del otro. La tarjeta no es un adorno del home, es el objeto que el paciente construye y se lleva. Tema claro a propósito: se lee de día, en la calle, desde el teléfono. Se rechaza el sitio de clínica estándar: foto de stock, celeste genérico, tarjetas con íconos.",
+    "overview": "El sitio está impreso como la tarjeta que te dan en el mostrador de un consultorio argentino: una cartulina celeste grisácea, impresa en una sola tinta casi negra, con renglones y rótulos de formulario, datos completados a mano en birome, el sello de goma azul del consultorio y el rojo del numerador para las alturas de las calles. Todo lo que se ve tiene un equivalente en ese objeto de papel; lo que no lo tiene, no entra.\n\nLa densidad es la de un formulario: encabezados anchos y pesados subrayados con raya doble, renglones finos, letra chica legible a 17px de base. No hay fotos de ambiente ni tarjetas con íconos: la información real (con quién, qué días, dónde, qué obra social) se presenta escrita sobre la tarjeta, y eso es la ilustración. El movimiento es un solo gesto físico, el golpe del sello, y botones que se hunden al apretarlos.\n\nSacar un turno es el mostrador: la misma tarjeta a un costado, armándose renglón por renglón, y una sola pregunta por vez del otro. La tarjeta no es un adorno del home, es el objeto que el paciente construye y se lleva. Tema claro a propósito: se lee de día, en la calle, desde el teléfono. Se rechaza el sitio de clínica estándar: foto de stock, celeste genérico, tarjetas con íconos.\n\nEl panel del personal (`/admin`) es la misma hoja en clave de trabajo: mismas tintas, misma letra, bordes de 2px y renglones, pero sin birome ni sellos. Lo que manda es poder leer la lista de un vistazo y no tocar nada por error.",
     "keyCharacteristics": [
       "Cartulina como suelo, tarjeta blanca como único plano elevado.",
       "Cuatro tintas con oficio fijo: imprenta, birome, sello, numerador.",
       "Una sola familia (Archivo) en tres anchos; Kalam sólo para lo escrito a mano.",
       "Esquinas vivas en todo el sitio; filetes, rayas dobles y troquel en lugar de sombras.",
       "Un único golpe de sello animado por página; botones que se hunden como un sello.",
-      "En los flujos de varios pasos, el objeto que se arma queda siempre a la vista y la pantalla hace una pregunta por vez."
+      "En los flujos de varios pasos, el objeto que se arma queda siempre a la vista y la pantalla hace una pregunta por vez.",
+      "En el panel, la misma hoja sin adornos: escala fija, renglones en vez de tarjetas, y lo que no tiene vuelta atrás se confirma en el lugar."
     ],
     "rules": [
       {
@@ -444,6 +473,21 @@
         "name": "The Casilla Cuadrada Rule",
         "body": "Toda casilla de verificación y toda opción única se dibujan con la utilidad `casilla`: cuadrado de 2px tildado en birome. El radio y el relleno redondo del control nativo son lo único del sitio que vendría con esquinas redondeadas, y por eso se reemplazan.",
         "section": "shapes"
+      },
+      {
+        "name": "The Confirmar En El Renglón Rule",
+        "body": "En el panel, lo que no tiene vuelta atrás —cancelar un turno, quitar una franja o un cierre, dar de baja— se abre con un enlace de texto y se confirma en el mismo lugar con el contorno de aviso chico. Nunca un modal. En reposo el enlace no lleva rojo: pasa a rojo de aviso sólo al pasar el mouse o con el foco.",
+        "section": "components"
+      },
+      {
+        "name": "The Error En Su Lugar Rule",
+        "body": "Cada error va donde se arregla. El de un campo, debajo del campo con el borde en rojo de aviso, aunque lo haya detectado el servidor. El que no es de ningún campo, en un aviso de error arriba del botón. El de una acción de un botón, en letra roja al lado del botón. Todos los formularios validan con el mismo schema de Zod en el navegador y en el servidor, así que el mensaje es el mismo venga de donde venga: el de un campo dice qué hacer, sin punto final; el del formulario es una oración completa que dice qué pasó y qué hacer.",
+        "section": "components"
+      },
+      {
+        "name": "The De Baja Plegado Rule",
+        "body": "En el panel, lo dado de baja nunca se borra —los turnos pasados lo referencian— pero no se mezcla con lo activo: va al final de la lista en un <details> cerrado que dice cuántos hay, con un renglón por cada uno y la forma de volver, sin campos para editar.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -457,7 +501,9 @@
       "**Do** mantener a la vista lo ya decidido en un flujo de varios pasos: tarjeta al costado en escritorio, tira fija arriba en el teléfono, y una salida de texto para corregirlo.",
       "**Do** decir el paso dentro de la frase que sigue al título, en negrita, y repetirlo en la lista numerada al costado.",
       "**Do** girar lo apoyado (tarjeta, foto, sellos) entre -1° y -9°, y dejar derecho todo lo impreso.",
-      "**Do** reservar la animación `sellar` (520ms, cubic-bezier(0.16, 1, 0.3, 1), 380ms de espera) para un único sello por página, y dejarlo quieto con movimiento reducido."
+      "**Do** reservar la animación `sellar` (520ms, cubic-bezier(0.16, 1, 0.3, 1), 380ms de espera) para un único sello por página, y dejarlo quieto con movimiento reducido.",
+      "**Do** en el panel, pedir en el lugar la confirmación de lo que no tiene vuelta atrás, y que cada formulario diga «Guardando…» y después «Guardado.» o el error.",
+      "**Do** poner cada error donde se arregla: el de un campo en el campo, el del formulario en un aviso arriba del botón, y escribirlo diciendo qué hacer."
     ],
     "donts": [
       "**Don't** usar foto de stock, celeste genérico de clínica ni tarjetas con íconos.",
@@ -470,7 +516,8 @@
       "**Don't** poner antetítulos en versalitas encima de los títulos; las versalitas son rótulos de campo o de grupo de campos.",
       "**Don't** marcar el avance con una píldora de pasos ni con una barra de progreso: el paso se lee en la frase y en la lista numerada.",
       "**Don't** simular grano, manchas ni bordes corridos en los sellos; la tinta es plana.",
-      "**Don't** separar secciones con fondos alternados o bandas de color."
+      "**Don't** separar secciones con fondos alternados o bandas de color.",
+      "**Don't** llevar la birome, los sellos ni los títulos que crecen con la ventana al panel; ni abrir un modal para confirmar algo que se puede preguntar en el mismo renglón."
     ]
   }
 }

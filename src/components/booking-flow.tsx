@@ -7,14 +7,16 @@ import { useEffect, useRef, useState } from "react";
 import {
   Counter,
   PASOS,
-  Notice,
   Pendientes,
   StepHeading,
   TurnoCard,
   TurnoStrip,
   type TurnoLine,
 } from "@/components/booking/counter";
+import { Notice } from "@/components/notice";
 import { CopyLink } from "@/components/copy-link";
+import { FieldError, OptionGroup, TextArea, TextField } from "@/components/fields";
+import { FormAlert } from "@/components/form-alert";
 import {
   EMPTY_FORM,
   firstInvalidField,
@@ -24,7 +26,8 @@ import {
   type FieldName,
   type PatientForm,
 } from "@/lib/booking-form";
-import { COVERAGES } from "@/lib/booking-schema";
+import { COVERAGES, type Coverage } from "@/lib/booking-schema";
+import { MESSAGES } from "@/lib/forms";
 import { capitalizeFirst, whatsappLink } from "@/lib/format";
 
 export type BookingSlot = { startsAt: string; label: string; locationId: string };
@@ -170,6 +173,20 @@ export function BookingFlow({
     setErrors((current) => ({ ...current, [key]: validateField(key, form) ?? undefined }));
   }
 
+  /** Lo que necesita un campo de texto compartido para portarse como el resto. */
+  function fieldProps(
+    key: "patientFirstName" | "patientLastName" | "patientDni" | "patientPhone" | "motivo",
+  ) {
+    return {
+      name: key,
+      value: form[key],
+      error: errors[key],
+      onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+        update(key, event.target.value),
+      onBlur: () => handleBlur(key),
+    };
+  }
+
   function pickSlot(slot: BookingSlot) {
     setSelectedSlot(slot);
     setStatus({ kind: "idle" });
@@ -206,12 +223,25 @@ export function BookingFlow({
       });
 
       if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as { error?: string };
+        const body = (await response.json().catch(() => ({}))) as {
+          error?: string;
+          fieldErrors?: FieldErrors;
+        };
         const slotTaken = response.status === 409;
+
+        // Si el servidor marcó campos, van en los campos, como si los hubiera
+        // marcado el navegador: el schema es el mismo, y el texto también.
+        const firstFromServer = body.fieldErrors ? firstInvalidField(body.fieldErrors) : null;
+        if (body.fieldErrors && firstFromServer) {
+          setErrors(body.fieldErrors);
+          setStatus({ kind: "idle" });
+          document.getElementById(firstFromServer)?.focus();
+          return;
+        }
 
         setStatus({
           kind: "error",
-          message: body.error ?? "No pudimos guardar el turno. Probá de nuevo.",
+          message: body.error ?? MESSAGES.saveFailed("el turno"),
           slotTaken,
         });
 
@@ -247,7 +277,7 @@ export function BookingFlow({
     } catch {
       setStatus({
         kind: "error",
-        message: "No pudimos conectarnos. Revisá tu conexión e intentá de nuevo.",
+        message: MESSAGES.connection,
         slotTaken: false,
       });
     }
@@ -515,114 +545,64 @@ export function BookingFlow({
               */}
               <form noValidate onSubmit={handleSubmit} className="mt-10 space-y-7 border-t-2 border-foreground pt-8">
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <Field
+                  <TextField
+                    id="patientFirstName"
                     label="Nombre"
-                    name="patientFirstName"
                     required
                     autoComplete="given-name"
-                    value={form.patientFirstName}
-                    error={errors.patientFirstName}
-                    onChange={(value) => update("patientFirstName", value)}
-                    onBlur={() => handleBlur("patientFirstName")}
+                    {...fieldProps("patientFirstName")}
                   />
-                  <Field
+                  <TextField
+                    id="patientLastName"
                     label="Apellido"
-                    name="patientLastName"
                     required
                     autoComplete="family-name"
-                    value={form.patientLastName}
-                    error={errors.patientLastName}
-                    onChange={(value) => update("patientLastName", value)}
-                    onBlur={() => handleBlur("patientLastName")}
+                    {...fieldProps("patientLastName")}
                   />
                 </div>
 
-                <Field
+                <TextField
+                  id="patientDni"
                   label="DNI"
-                  name="patientDni"
                   required
                   inputMode="numeric"
                   hint="Sin puntos ni espacios."
-                  value={form.patientDni}
-                  error={errors.patientDni}
-                  onChange={(value) => update("patientDni", value)}
-                  onBlur={() => handleBlur("patientDni")}
+                  {...fieldProps("patientDni")}
                 />
 
-                <fieldset
-                  role="radiogroup"
-                  aria-invalid={errors.patientCoverage ? true : undefined}
-                  aria-describedby={errors.patientCoverage ? "patientCoverage-error" : undefined}
-                >
-                  <legend className="font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted">
-                    Obra social <span className="font-normal normal-case">(elegí una)</span>
-                  </legend>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                    {COVERAGES.map((coverage, index) => (
-                      <label
-                        key={coverage.value}
-                        className={`flex cursor-pointer items-center gap-3 border-2 bg-surface px-4 py-3.5 text-[1.05rem] font-bold transition-colors ${
-                          form.patientCoverage === coverage.value
-                            ? "border-accent text-accent"
-                            : "border-border hover:border-accent"
-                        }`}
-                      >
-                        <input
-                          // El primero lleva el id del grupo: es al que se le
-                          // manda el foco si el paciente no eligió ninguna.
-                          id={index === 0 ? "patientCoverage" : undefined}
-                          type="radio"
-                          name="patientCoverage"
-                          value={coverage.value}
-                          required
-                          checked={form.patientCoverage === coverage.value}
-                          onChange={() => update("patientCoverage", coverage.value)}
-                          className="casilla"
-                        />
-                        {coverage.label}
-                      </label>
-                    ))}
-                  </div>
-                  <FieldError id="patientCoverage-error" message={errors.patientCoverage} />
-                </fieldset>
+                <OptionGroup
+                  id="patientCoverage"
+                  name="patientCoverage"
+                  legend={
+                    <>
+                      Obra social <span className="font-normal normal-case">(elegí una)</span>
+                    </>
+                  }
+                  options={COVERAGES}
+                  value={form.patientCoverage as Coverage | ""}
+                  error={errors.patientCoverage}
+                  onChange={(value) => update("patientCoverage", value)}
+                />
 
-                <Field
+                <TextField
+                  id="patientPhone"
                   label="Teléfono"
-                  name="patientPhone"
                   type="tel"
                   required
                   autoComplete="tel"
                   hint="Para avisarte si surge algún cambio."
-                  value={form.patientPhone}
-                  error={errors.patientPhone}
-                  onChange={(value) => update("patientPhone", value)}
-                  onBlur={() => handleBlur("patientPhone")}
+                  {...fieldProps("patientPhone")}
                 />
 
-                <div>
-                  <label
-                    htmlFor="motivo"
-                    className="block font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted"
-                  >
-                    Motivo de la consulta <span className="font-normal normal-case">(opcional)</span>
-                  </label>
-                  <textarea
-                    id="motivo"
-                    name="motivo"
-                    rows={2}
-                    maxLength={500}
-                    value={form.motivo}
-                    aria-describedby={`motivo-hint${errors.motivo ? " motivo-error" : ""}`}
-                    aria-invalid={errors.motivo ? true : undefined}
-                    onChange={(event) => update("motivo", event.target.value)}
-                    onBlur={() => handleBlur("motivo")}
-                    className="mt-2 w-full border-2 border-border bg-surface px-3.5 py-3 text-[1.05rem]"
-                  />
-                  <p id="motivo-hint" className="mt-1.5 text-[0.95rem] text-muted">
-                    Contanos sólo si querés. Nos ayuda a preparar la consulta.
-                  </p>
-                  <FieldError id="motivo-error" message={errors.motivo} />
-                </div>
+                <TextArea
+                  id="motivo"
+                  label="Motivo de la consulta"
+                  optional
+                  rows={2}
+                  maxLength={500}
+                  hint="Contanos sólo si querés. Nos ayuda a preparar la consulta."
+                  {...fieldProps("motivo")}
+                />
 
                 {/*
                   Una sola autorización para todo el formulario. El motivo de la
@@ -639,7 +619,7 @@ export function BookingFlow({
                       type="checkbox"
                       name="consent"
                       required
-                      aria-describedby={errors.consent ? "consent-error" : undefined}
+                      aria-describedby="consent-error"
                       aria-invalid={errors.consent ? true : undefined}
                       checked={form.consent}
                       onChange={(event) => update("consent", event.target.checked)}
@@ -662,9 +642,7 @@ export function BookingFlow({
                 </div>
 
                 {status.kind === "error" && !status.slotTaken && (
-                  <Notice tone="danger" title="No pudimos guardar el turno">
-                    <p>{status.message}</p>
-                  </Notice>
+                  <FormAlert state={{ status: "error", message: status.message }} />
                 )}
 
                 <button
@@ -682,93 +660,6 @@ export function BookingFlow({
         )}
       </Counter>
     </div>
-  );
-}
-
-function Field({
-  label,
-  name,
-  hint,
-  type = "text",
-  required = false,
-  autoComplete,
-  inputMode,
-  value,
-  error,
-  onChange,
-  onBlur,
-}: {
-  label: string;
-  name: string;
-  hint?: string;
-  type?: string;
-  required?: boolean;
-  autoComplete?: string;
-  inputMode?: "numeric" | "tel" | "text";
-  value: string;
-  error?: string;
-  onChange: (value: string) => void;
-  onBlur: () => void;
-}) {
-  const hintId = hint ? `${name}-hint` : undefined;
-  const errorId = error ? `${name}-error` : undefined;
-
-  return (
-    <div>
-      <label
-        htmlFor={name}
-        className="block font-narrow text-sm font-bold uppercase tracking-[0.1em] text-muted"
-      >
-        {label}
-        {!required && <span className="font-normal normal-case"> (opcional)</span>}
-      </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        required={required}
-        autoComplete={autoComplete}
-        inputMode={inputMode}
-        // Los dos, en orden: primero la ayuda, después el error.
-        aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined}
-        aria-invalid={error ? true : undefined}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onBlur={onBlur}
-        className={`mt-2 w-full border-2 bg-surface px-3.5 py-3 text-[1.05rem] ${
-          error ? "border-[color:var(--danger)]" : "border-border"
-        }`}
-      />
-      {hint && (
-        <p id={hintId} className="mt-1.5 text-[0.95rem] text-muted">
-          {hint}
-        </p>
-      )}
-      <FieldError id={`${name}-error`} message={error} />
-    </div>
-  );
-}
-
-/**
- * El error de un campo.
- *
- * Siempre está en el DOM, aunque esté vacío: una región `aria-live` tiene que
- * existir *antes* de que aparezca el texto, si no el lector de pantalla no
- * anuncia nada. Eso cubre el caso de quien se va del campo con un error y
- * nunca lo ve.
- *
- * El texto es texto, no sólo un borde rojo: el color por sí solo no alcanza
- * (WCAG 1.4.1) y además no dice *qué* está mal.
- */
-function FieldError({ id, message }: { id: string; message?: string }) {
-  return (
-    <p
-      id={id}
-      aria-live="polite"
-      className={`text-[0.95rem] font-bold text-[color:var(--danger)] ${message ? "mt-1.5" : ""}`}
-    >
-      {message ?? ""}
-    </p>
   );
 }
 

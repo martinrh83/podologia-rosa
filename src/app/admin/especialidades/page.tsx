@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
 import { toggleSpecialty } from "@/app/actions/practitioners";
+import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
+import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
+import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
+import { Notice } from "@/components/notice";
 import { NewSpecialtyForm } from "@/components/practitioner-admin";
 import { requireStaff } from "@/lib/auth";
 import { listAllPractitioners, listSpecialties } from "@/lib/db/practitioners";
@@ -35,50 +39,69 @@ export default async function AdminEspecialidadesPage() {
     );
   }
 
+  const active = specialties.filter((specialty) => specialty.active);
+  const inactive = specialties.filter((specialty) => !specialty.active);
+
+  function professionals(specialtyId: string) {
+    const count = countBySpecialty.get(specialtyId) ?? 0;
+    return count === 0 ? "Sin profesionales" : `${count} ${count === 1 ? "profesional" : "profesionales"}`;
+  }
+
   return (
     <div>
-      <h2 className="text-2xl font-semibold tracking-tight">Especialidades</h2>
-      <p className="mt-1 text-muted">
-        Las disciplinas que se atienden. Agrupan a los profesionales y a los precios.
-      </p>
+      <PageHeading title="Especialidades" />
 
-      <ul className="mt-6 space-y-2">
-        {specialties.map((specialty) => {
-          const count = countBySpecialty.get(specialty.id) ?? 0;
-          return (
-            <li
+      {active.length === 0 ? (
+        <div className="mb-6">
+          <Notice
+            tone="muted"
+            title={specialties.length === 0 ? "Todavía no hay ninguna" : "No hay especialidades activas"}
+          >
+            Cargá una acá abajo. Sin especialidad no se puede agregar un profesional.
+          </Notice>
+        </div>
+      ) : (
+        <RecordList>
+          {active.map((specialty) => (
+            <RecordRow
               key={specialty.id}
-              className={`flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg border border-border bg-surface px-4 py-3 ${
-                specialty.active ? "" : "opacity-60"
-              }`}
-            >
-              <strong>{specialty.name}</strong>
-              <span className="flex items-center gap-4 text-sm text-muted">
-                <span>
-                  {count === 0
-                    ? "sin profesionales"
-                    : `${count} ${count === 1 ? "profesional" : "profesionales"}`}
-                  {!specialty.active && " · no se ofrece"}
-                </span>
-                <form action={toggleSpecialty}>
-                  <input type="hidden" name="id" value={specialty.id} />
-                  <input type="hidden" name="active" value={String(specialty.active)} />
-                  <button type="submit" className="hover:text-foreground">
-                    {specialty.active ? "Dar de baja" : "Volver a activar"}
-                  </button>
-                </form>
-              </span>
-            </li>
-          );
-        })}
-        {specialties.length === 0 && (
-          <li className="rounded-lg border border-border bg-surface-muted p-4 text-muted">
-            Todavía no hay ninguna.
-          </li>
-        )}
-      </ul>
+              title={specialty.name}
+              meta={<span className="tabular-nums">{professionals(specialty.id)}</span>}
+              action={
+                <ConfirmAction
+                  action={toggleSpecialty}
+                  fields={{ id: specialty.id, active: "true" }}
+                  label="Dar de baja"
+                  question="¿Dejar de ofrecerla? Sus tratamientos salen de la página."
+                  confirmLabel="Sí, dar de baja"
+                />
+              }
+            />
+          ))}
+        </RecordList>
+      )}
 
-      <NewSpecialtyForm />
+      <InactiveList label="De baja" count={inactive.length}>
+        {inactive.map((specialty) => (
+          <InactiveRow
+            key={specialty.id}
+            title={specialty.name}
+            meta={<span className="tabular-nums">{professionals(specialty.id)}</span>}
+            action={
+              <InlineAction action={toggleSpecialty} fields={{ id: specialty.id, active: "false" }}>
+                Volver a activar
+              </InlineAction>
+            }
+          />
+        ))}
+      </InactiveList>
+
+      <section className="mt-14 border-t-2 border-foreground pt-6">
+        <SectionHeading>Agregar especialidad</SectionHeading>
+        <div className="mt-5">
+          <NewSpecialtyForm />
+        </div>
+      </section>
     </div>
   );
 }

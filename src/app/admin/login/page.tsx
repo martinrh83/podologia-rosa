@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
+import { PageHeading } from "@/components/admin/page-heading";
 import { LoginForm } from "@/components/login-form";
+import { Notice } from "@/components/notice";
 
 export const metadata: Metadata = {
   title: "Ingresar",
@@ -18,16 +20,15 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
   const sinAcceso = params.error === "sin-acceso";
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Panel de turnos</h1>
+    <div className="mx-auto max-w-sm px-4 pb-16 pt-12 sm:pt-16">
+      <PageHeading title="Panel de turnos" />
 
       {sinAcceso && (
-        <p
-          role="status"
-          className="mb-4 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-muted"
-        >
-          Tu usuario ya no tiene acceso al panel. Si es un error, hablá con el consultorio.
-        </p>
+        <div className="mb-6">
+          <Notice tone="muted" title="Tu usuario ya no tiene acceso">
+            Si es un error, hablá con el consultorio.
+          </Notice>
+        </div>
       )}
 
       <LoginForm next={next} />

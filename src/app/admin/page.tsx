@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
+import { PageHeading } from "@/components/admin/page-heading";
 import { AppointmentCard } from "@/components/appointment-card";
+import { Notice } from "@/components/notice";
 import { PractitionerFilter } from "@/components/practitioner-filter";
 import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
@@ -34,14 +36,7 @@ export default async function AdminTodayPage({ searchParams }: PageProps<"/admin
 
   return (
     <div>
-      <h2 className="mb-1 text-2xl font-semibold tracking-tight">
-        {capitalizeFirst(formatDay(today))}
-      </h2>
-      <p className="mb-5 text-muted">
-        {appointments.length === 0
-          ? "No hay turnos para hoy."
-          : `${appointments.length} ${appointments.length === 1 ? "turno" : "turnos"}`}
-      </p>
+      <PageHeading title={capitalizeFirst(formatDay(today))} />
 
       <PractitionerFilter
         practitioners={practitioners}
@@ -49,18 +44,22 @@ export default async function AdminTodayPage({ searchParams }: PageProps<"/admin
         basePath="/admin"
       />
 
-      <ul className="space-y-3">
-        {appointments.map((appointment) => (
-          <AppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            siteUrl={base}
-            // Ya filtrada por una sola: repetir su nombre en cada fila es ruido.
-            showPractitioner={!practitionerId}
-            showLocation={locations.length > 1}
-          />
-        ))}
-      </ul>
+      {appointments.length === 0 ? (
+        <Notice tone="muted" title="No hay turnos para hoy" />
+      ) : (
+        <ul className="[&>li:first-child]:pt-0">
+          {appointments.map((appointment) => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              siteUrl={base}
+              // Ya filtrada por una sola: repetir su nombre en cada fila es ruido.
+              showPractitioner={!practitionerId}
+              showLocation={locations.length > 1}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageHeading } from "@/components/admin/page-heading";
 import { SettingsForm } from "@/components/settings-form";
 import { getClinicSettings } from "@/lib/availability";
 import { requireStaff } from "@/lib/auth";
@@ -17,10 +18,7 @@ export default async function ConsultorioPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold tracking-tight">Datos del consultorio</h2>
-      <p className="mb-5 mt-1 text-muted">
-        Lo que ven los pacientes en la página. Los cambios se aplican al instante.
-      </p>
+      <PageHeading title="Datos del consultorio" />
 
       <SettingsForm settings={settings} />
     </div>

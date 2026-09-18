@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 
-import { toggleLocation, updateLocation } from "@/app/actions/locations";
+import { toggleLocation } from "@/app/actions/locations";
+import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
+import { EditLocationForm } from "@/components/admin/edit-forms";
+import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
+import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
+import { Notice } from "@/components/notice";
 import { NewLocationForm } from "@/components/location-form";
 import { requireStaff } from "@/lib/auth";
 import { listAllLocations } from "@/lib/db/locations";
@@ -22,97 +27,67 @@ export default async function AdminSedesPage() {
   await requireStaff();
 
   const locations = await listAllLocations();
+  const active = locations.filter((location) => location.active);
+  const inactive = locations.filter((location) => !location.active);
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold tracking-tight">Sedes</h2>
-      <p className="mt-1 text-muted">
-        Cada franja horaria pertenece a una sede, y el turno guarda dónde fue.
-      </p>
+      <PageHeading title="Sedes" />
 
-      <ul className="mt-6 space-y-3">
-        {locations.map((location) => (
-          <li
+      {active.length === 0 ? (
+        <div className="mb-6">
+          <Notice tone="muted" title="No hay sedes activas">
+            Sin una sede no se pueden cargar horarios. Agregá una acá abajo, o volvé a activar una de
+            la lista de baja.
+          </Notice>
+        </div>
+      ) : (
+        <RecordList>
+          {active.map((location) => (
+            <RecordRow
+              key={location.id}
+              title={location.name}
+              action={
+                <ConfirmAction
+                  action={toggleLocation}
+                  fields={{ id: location.id, active: "true" }}
+                  label="Dar de baja"
+                  question={`¿Sacar la sede ${location.name} del sitio?`}
+                  confirmLabel="Sí, dar de baja"
+                />
+              }
+            >
+              <EditLocationForm location={location} />
+            </RecordRow>
+          ))}
+        </RecordList>
+      )}
+
+      {/*
+        Nunca se borra: los turnos que pasaron ahí la referencian. De baja sale
+        del sitio y de los formularios, y el historial queda entero.
+      */}
+      <InactiveList label="De baja" count={inactive.length}>
+        {inactive.map((location) => (
+          <InactiveRow
             key={location.id}
-            className={`rounded-xl border border-border bg-surface p-4 ${
-              location.active ? "" : "opacity-60"
-            }`}
-          >
-            {!location.active && (
-              <p className="mb-2 text-sm text-muted">No aparece en el sitio</p>
-            )}
-
-            <form action={updateLocation} className="space-y-3">
-              <input type="hidden" name="id" value={location.id} />
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label htmlFor={`n-${location.id}`} className="block text-sm font-medium">
-                    Nombre
-                  </label>
-                  <input
-                    id={`n-${location.id}`}
-                    name="name"
-                    required
-                    minLength={2}
-                    defaultValue={location.name}
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-                  />
-                </div>
-                <div>
-                  <label htmlFor={`a-${location.id}`} className="block text-sm font-medium">
-                    Dirección
-                  </label>
-                  <input
-                    id={`a-${location.id}`}
-                    name="address"
-                    required
-                    minLength={5}
-                    defaultValue={location.address}
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-end gap-3">
-                <div className="grow">
-                  <label htmlFor={`m-${location.id}`} className="block text-sm font-medium">
-                    Enlace del mapa
-                  </label>
-                  <input
-                    id={`m-${location.id}`}
-                    name="mapUrl"
-                    type="url"
-                    defaultValue={location.map_url ?? ""}
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-accent px-4 py-2.5 font-medium text-white hover:bg-accent-hover"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
-
-            {/*
-              Nunca se borra: los turnos que pasaron ahí la referencian. Inactiva
-              sale del sitio y de los formularios, y el historial queda entero.
-            */}
-            <form action={toggleLocation} className="mt-2">
-              <input type="hidden" name="id" value={location.id} />
-              <input type="hidden" name="active" value={String(location.active)} />
-              <button type="submit" className="text-sm text-muted hover:text-foreground">
-                {location.active ? "Dar de baja" : "Volver a activar"}
-              </button>
-            </form>
-          </li>
+            title={location.name}
+            meta={location.address}
+            action={
+              <InlineAction action={toggleLocation} fields={{ id: location.id, active: "false" }}>
+                Volver a activar
+              </InlineAction>
+            }
+          />
         ))}
-      </ul>
+      </InactiveList>
 
-      <h3 className="mt-8 text-lg font-semibold tracking-tight">Agregar sede</h3>
-      <NewLocationForm />
+      <section className="mt-14 border-t-2 border-foreground pt-6">
+        <SectionHeading>Agregar sede</SectionHeading>
+        <div className="mt-5">
+          <NewLocationForm />
+        </div>
+      </section>
     </div>
   );
 }
