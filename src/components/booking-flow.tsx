@@ -643,8 +643,9 @@ export function BookingFlow({
                       className="casilla mt-0.5"
                     />
                     <span>
-                      Autorizo a Podología Mitre a guardar mis datos de contacto y, si lo completé, el
-                      motivo de mi consulta —un dato de salud— con el fin de gestionar mi turno.{" "}
+                      Autorizo a Podología Mitre a guardar mis datos de contacto para gestionar mi
+                      turno. Si completé el motivo de la consulta, autorizo también a guardar ese
+                      dato de salud.{" "}
                       <a
                         href="/privacidad"
                         target="_blank"
