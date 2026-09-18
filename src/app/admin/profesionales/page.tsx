@@ -50,13 +50,7 @@ export default async function AdminProfesionalesPage() {
             <RecordRow
               key={practitioner.id}
               title={`${practitioner.first_name} ${practitioner.last_name}`}
-              meta={
-                <>
-                  {practitioner.specialty?.name}
-                  {" · "}
-                  <span className="tabular-nums">/turnos/{practitioner.slug}</span>
-                </>
-              }
+              meta={practitioner.specialty?.name}
               action={
                 <ConfirmAction
                   action={togglePractitioner}
