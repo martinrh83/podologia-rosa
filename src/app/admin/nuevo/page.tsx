@@ -73,10 +73,7 @@ export default async function AdminNewPage({ searchParams }: PageProps<"/admin/n
 
   return (
     <div>
-      <PageHeading title="Nuevo turno">
-        Para turnos que te piden por teléfono o en el consultorio. Acá no hay límite de 15 días:
-        podés dar turno para dentro de dos meses.
-      </PageHeading>
+      <PageHeading title="Nuevo turno" />
 
       {saved && (
         <div className="mb-6">

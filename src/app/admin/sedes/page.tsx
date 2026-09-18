@@ -29,9 +29,7 @@ export default async function AdminSedesPage() {
 
   return (
     <div>
-      <PageHeading title="Sedes">
-        Cada franja horaria pertenece a una sede, y el turno guarda dónde fue.
-      </PageHeading>
+      <PageHeading title="Sedes" />
 
       <RecordList>
         {locations.map((location) => {

@@ -41,9 +41,7 @@ export default async function AdminEspecialidadesPage() {
 
   return (
     <div>
-      <PageHeading title="Especialidades">
-        Las disciplinas que se atienden. Agrupan a los profesionales y a los precios.
-      </PageHeading>
+      <PageHeading title="Especialidades" />
 
       {specialties.length === 0 ? (
         <Notice tone="muted" title="Todavía no hay ninguna">

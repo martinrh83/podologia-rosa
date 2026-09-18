@@ -49,10 +49,7 @@ export default async function AdminServiciosPage() {
 
   return (
     <div>
-      <PageHeading title="Servicios y precios">
-        Los precios son de referencia para el consultorio: no se publican, se informan en la
-        consulta. El nombre sí aparece en Tratamientos, en la página.
-      </PageHeading>
+      <PageHeading title="Servicios y precios" />
 
       <div className="space-y-12">
         {[...groups.entries()].map(([specialty, items]) => (

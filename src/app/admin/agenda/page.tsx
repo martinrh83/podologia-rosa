@@ -81,9 +81,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
   return (
     <div className="space-y-16">
       <section>
-        <PageHeading title="Horarios de atención">
-          Si atiende mañana y tarde, cargá dos franjas para el mismo día.
-        </PageHeading>
+        <PageHeading title="Horarios de atención" />
 
         <PractitionerFilter
           practitioners={practitioners}
@@ -97,7 +95,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
             Así nadie puede sacarle turno. Cargá la primera franja acá abajo.
           </Notice>
         ) : (
-          <ul className="border-t-2 border-foreground">
+          <ul>
             {schedule.map((row) => (
               <li
                 key={row.id}
@@ -136,15 +134,11 @@ export default async function AgendaPage({ searchParams }: PageProps<"/admin/age
 
       <section className="border-t-2 border-foreground pt-6">
         <SectionHeading>Días que no se atiende</SectionHeading>
-        <p className="mt-2 max-w-[52ch] leading-relaxed text-muted">
-          Vacaciones, feriados o cualquier día suelto. Dejá «Todos los profesionales»
-          {locations.length > 1 && " y «Todas las sedes»"} para cerrar el consultorio entero.
-        </p>
 
         {blocks.length === 0 ? (
           <p className="mt-5 text-muted">No hay cierres cargados.</p>
         ) : (
-          <ul className="mt-5 border-t border-foreground">
+          <ul className="mt-3">
             {blocks.map((block) => {
               // ends_at is the exclusive midnight after the last day.
               const lastDay = new Date(new Date(block.ends_at).getTime() - 1);

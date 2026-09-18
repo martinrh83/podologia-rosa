@@ -18,10 +18,7 @@ export default async function ConsultorioPage() {
 
   return (
     <div>
-      <PageHeading title="Datos del consultorio">
-        Lo que ven los pacientes en la página. Los cambios se aplican al instante. Las
-        direcciones se cargan en Sedes.
-      </PageHeading>
+      <PageHeading title="Datos del consultorio" />
 
       <SettingsForm settings={settings} />
     </div>

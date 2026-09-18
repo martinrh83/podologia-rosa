@@ -33,10 +33,7 @@ export default async function AdminProfesionalesPage() {
 
   return (
     <div>
-      <PageHeading title="Profesionales">
-        Quiénes aparecen al sacar un turno. Corregir un nombre no cambia su dirección
-        /turnos/…, así que los enlaces que ya mandaste siguen andando.
-      </PageHeading>
+      <PageHeading title="Profesionales" />
 
       <RecordList>
         {practitioners.map((practitioner) => {

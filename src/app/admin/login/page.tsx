@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
 
   return (
     <div className="mx-auto max-w-sm px-4 pb-16 pt-12 sm:pt-16">
-      <PageHeading title="Panel de turnos">Para el personal del consultorio.</PageHeading>
+      <PageHeading title="Panel de turnos" />
 
       {sinAcceso && (
         <div className="mb-6">

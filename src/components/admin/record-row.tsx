@@ -9,7 +9,9 @@
  * se dice en la línea de abajo del nombre.
  */
 export function RecordList({ children }: { children: React.ReactNode }) {
-  return <ul className="border-t-2 border-foreground">{children}</ul>;
+  // Sin raya propia arriba: la lista va justo debajo de la raya doble del
+  // título, y dos rayas seguidas se leían como un renglón vacío.
+  return <ul className="[&>li:first-child]:pt-0">{children}</ul>;
 }
 
 export function RecordRow({

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { PageHeading } from "@/components/admin/page-heading";
 import { AppointmentCard } from "@/components/appointment-card";
+import { Notice } from "@/components/notice";
 import { PractitionerFilter } from "@/components/practitioner-filter";
 import { getClinicSettings } from "@/lib/availability";
 import { requireStaff } from "@/lib/auth";
@@ -46,11 +47,7 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
 
   return (
     <div>
-      <PageHeading title={capitalizeFirst(formatDay(tomorrow))}>
-        {appointments.length === 0
-          ? "No hay turnos para mañana."
-          : "Tocá cada botón para mandar el recordatorio por WhatsApp."}
-      </PageHeading>
+      <PageHeading title={capitalizeFirst(formatDay(tomorrow))} />
 
       <PractitionerFilter
         practitioners={practitioners}
@@ -58,8 +55,10 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
         basePath="/admin/manana"
       />
 
-      {appointments.length > 0 && (
-        <ul className="border-t-2 border-foreground">
+      {appointments.length === 0 ? (
+        <Notice tone="muted" title="No hay turnos para mañana" />
+      ) : (
+        <ul className="[&>li:first-child]:pt-0">
           {appointments.map((appointment) => (
             <AppointmentCard
               key={appointment.id}

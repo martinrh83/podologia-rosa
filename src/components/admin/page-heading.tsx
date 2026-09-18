@@ -4,17 +4,16 @@
  * El mismo encabezado ancho con raya doble del home, pero a escala fija: en una
  * herramienta el título no tiene que crecer con la ventana, tiene que estar
  * siempre en el mismo lugar y del mismo tamaño.
+ *
+ * Sin bajada, a propósito: debajo del título va directo lo que se usa. Las
+ * pantallas se abren muchas veces por día, y un párrafo que se lee una vez es
+ * un escalón más entre el título y el trabajo cada una de las veces siguientes.
  */
-export function PageHeading({ title, children }: { title: string; children?: React.ReactNode }) {
+export function PageHeading({ title }: { title: string }) {
   return (
-    <header className="mb-8">
-      <h1 className="border-b-[5px] border-double border-foreground pb-3 font-wide text-[1.75rem] font-extrabold leading-[1.05] tracking-[-0.025em] [text-wrap:balance] sm:text-[2.1rem]">
-        {title}
-      </h1>
-      {children && (
-        <p className="mt-3 max-w-[52ch] text-[1.05rem] leading-relaxed text-muted">{children}</p>
-      )}
-    </header>
+    <h1 className="mb-8 border-b-[5px] border-double border-foreground pb-3 font-wide text-[1.75rem] font-extrabold leading-[1.05] tracking-[-0.025em] [text-wrap:balance] sm:text-[2.1rem]">
+      {title}
+    </h1>
   );
 }
 

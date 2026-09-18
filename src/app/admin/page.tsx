@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { PageHeading } from "@/components/admin/page-heading";
 import { AppointmentCard } from "@/components/appointment-card";
+import { Notice } from "@/components/notice";
 import { PractitionerFilter } from "@/components/practitioner-filter";
 import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
@@ -35,11 +36,7 @@ export default async function AdminTodayPage({ searchParams }: PageProps<"/admin
 
   return (
     <div>
-      <PageHeading title={capitalizeFirst(formatDay(today))}>
-        {appointments.length === 0
-          ? "No hay turnos para hoy."
-          : `${appointments.length} ${appointments.length === 1 ? "turno" : "turnos"}`}
-      </PageHeading>
+      <PageHeading title={capitalizeFirst(formatDay(today))} />
 
       <PractitionerFilter
         practitioners={practitioners}
@@ -47,8 +44,10 @@ export default async function AdminTodayPage({ searchParams }: PageProps<"/admin
         basePath="/admin"
       />
 
-      {appointments.length > 0 && (
-        <ul className="border-t-2 border-foreground">
+      {appointments.length === 0 ? (
+        <Notice tone="muted" title="No hay turnos para hoy" />
+      ) : (
+        <ul className="[&>li:first-child]:pt-0">
           {appointments.map((appointment) => (
             <AppointmentCard
               key={appointment.id}
