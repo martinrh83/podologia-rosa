@@ -37,7 +37,10 @@ export async function listAllPractitioners(): Promise<PractitionerWithSpecialty[
     .from("practitioners")
     .select(WITH_SPECIALTY)
     .order("active", { ascending: false })
-    .order("display_order");
+    .order("display_order")
+    // El mismo desempate que la lista pública: con dos en el mismo lugar, el
+    // panel tiene que mostrarlas en el orden en que se las ve en el sitio.
+    .order("last_name");
 
   if (error) throw new Error(`No se pudieron leer los profesionales: ${error.message}`);
 

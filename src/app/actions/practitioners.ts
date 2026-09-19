@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireStaff } from "@/lib/auth";
+import { listActivePractitioners } from "@/lib/db/practitioners";
 import {
   formError,
   formValues,
@@ -138,6 +139,54 @@ export async function togglePractitioner(
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase.from("practitioners").update({ active: !active }).eq("id", id);
   if (error) return formError(MESSAGES.saveFailed("el cambio"));
+
+  revalidatePractitioners();
+  return SAVED;
+}
+
+/**
+ * Mover a alguien un lugar arriba o abajo en la lista.
+ *
+ * QUIÉN VA PRIMERO ES UNA DECISIÓN DEL CONSULTORIO
+ *
+ *   El orden se ve en todos lados: la sección "Profesionales" del home, la
+ *   lista de /turnos, los filtros de Hoy y Mañana, la agenda y el alta de un
+ *   turno. Hasta acá nadie podía cambiarlo: todas se daban de alta con el
+ *   mismo `display_order` y quedaban alfabéticas por apellido, que no es un
+ *   criterio que nadie haya elegido.
+ *
+ * El movimiento es entre activas, que son las que se ven. Cada vez que se
+ * mueve una se renumeran todas de 1 en adelante: así se deshacen los empates
+ * de las que quedaron en 0, y el orden guardado es el que se está viendo.
+ */
+export async function movePractitioner(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireStaff();
+
+  const id = String(formData.get("id") ?? "");
+  const direction = String(formData.get("direction") ?? "");
+  if (!id) return formError(MESSAGES.notFound("al profesional"));
+
+  const people = await listActivePractitioners();
+  const from = people.findIndex((person) => person.id === id);
+  const to = from + (direction === "up" ? -1 : 1);
+
+  // Fuera de la lista: la pantalla que mandó esto ya no es la que hay.
+  if (from === -1 || to < 0 || to >= people.length) return SAVED;
+
+  const moved = [...people];
+  [moved[from], moved[to]] = [moved[to], moved[from]];
+
+  const supabase = createSupabaseAdminClient();
+  const results = await Promise.all(
+    moved.map((person, index) =>
+      supabase.from("practitioners").update({ display_order: index + 1 }).eq("id", person.id),
+    ),
+  );
+
+  if (results.some((result) => result.error)) return formError(MESSAGES.saveFailed("el orden"));
 
   revalidatePractitioners();
   return SAVED;
