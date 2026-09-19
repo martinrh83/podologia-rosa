@@ -8,7 +8,12 @@ import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/a
 import { Notice } from "@/components/notice";
 import { NewPractitionerForm } from "@/components/practitioner-admin";
 import { requireStaff } from "@/lib/auth";
-import { listActiveSpecialties, listAllPractitioners } from "@/lib/db/practitioners";
+import {
+  listActiveSpecialties,
+  listAllPractitioners,
+  practitionerFirstName,
+  practitionerName,
+} from "@/lib/db/practitioners";
 
 export const metadata: Metadata = {
   title: "Profesionales",
@@ -49,16 +54,16 @@ export default async function AdminProfesionalesPage() {
           {active.map((practitioner) => (
             <RecordRow
               key={practitioner.id}
-              title={`${practitioner.first_name} ${practitioner.last_name}`}
+              title={practitionerName(practitioner)}
               meta={practitioner.specialty?.name}
               action={
                 <ConfirmAction
                   action={togglePractitioner}
                   fields={{ id: practitioner.id, active: "true" }}
                   label="Dar de baja"
-                  question={`¿Sacar a ${practitioner.first_name} del sitio?`}
+                  question={`¿Sacar a ${practitionerFirstName(practitioner)} del sitio?`}
                   confirmLabel="Sí, dar de baja"
-                  success={`${practitioner.first_name} ${practitioner.last_name}, de baja.`}
+                  success={`${practitionerName(practitioner)}, de baja.`}
                 />
               }
             >
@@ -76,13 +81,13 @@ export default async function AdminProfesionalesPage() {
         {inactive.map((practitioner) => (
           <InactiveRow
             key={practitioner.id}
-            title={`${practitioner.first_name} ${practitioner.last_name}`}
+            title={practitionerName(practitioner)}
             meta={practitioner.specialty?.name}
             action={
               <InlineAction
                 action={togglePractitioner}
                 fields={{ id: practitioner.id, active: "false" }}
-                success={`${practitioner.first_name} ${practitioner.last_name} vuelve a aparecer en el sitio.`}
+                success={`${practitionerName(practitioner)} vuelve a aparecer en el sitio.`}
               >
                 Volver a activar
               </InlineAction>

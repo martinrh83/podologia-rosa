@@ -12,6 +12,7 @@ import {
   type ActionState,
 } from "@/lib/forms";
 import { newPractitionerSchema, practitionerSchema, specialtySchema } from "@/lib/schemas";
+import { shortName } from "@/lib/person-name";
 import { RESERVED_SLUGS, slugify } from "@/lib/slug";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -46,7 +47,8 @@ export async function createPractitioner(
   if (!parsed.ok) return parsed.state;
   const { firstName, lastName, title, slotMinutes, specialtyId } = parsed.data;
 
-  const slug = slugify(`${firstName} ${lastName}`);
+  // La dirección usa el nombre corto, igual que el sitio: "rosa-heredia".
+  const slug = slugify(shortName(firstName, lastName));
 
   if (!slug || RESERVED_SLUGS.has(slug)) {
     return {
