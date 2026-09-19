@@ -11,7 +11,8 @@ import {
 } from "@/components/booking/counter";
 import { Notice } from "@/components/notice";
 import { getClinicSettings } from "@/lib/availability";
-import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
+import { listActivePractitioners, practitionerFullName } from "@/lib/db/practitioners";
+import { isLongName } from "@/lib/person-name";
 import type { PractitionerWithSpecialty } from "@/lib/db/types";
 
 export const metadata: Metadata = {
@@ -110,8 +111,23 @@ export default async function TurnosPage() {
                       className="group flex flex-wrap items-center justify-between gap-x-6 gap-y-4 py-6 transition-colors hover:text-accent"
                     >
                       <span className="min-w-0">
-                        <span className="block font-wide text-[length:clamp(1.4rem,5vw,1.9rem)] font-extrabold leading-tight tracking-[-0.02em]">
-                          {practitionerName(practitioner)}
+                        {/*
+                          El nombre completo, que es lo que se elige. Los largos
+                          bajan un escalón: "Rosa Beatriz Heredia Montaño" mide
+                          17 veces su cuerpo y, al tamaño de los cortos, llegaba
+                          pegado al botón. Achicarlo hasta que entre en una línea
+                          en el teléfono lo dejaría del tamaño del renglón de
+                          abajo, así que ahí se parte en dos, y `balance` corta
+                          entre los nombres y los apellidos.
+                        */}
+                        <span
+                          className={`block font-wide font-extrabold leading-tight tracking-[-0.02em] [text-wrap:balance] ${
+                            isLongName(practitioner)
+                              ? "text-[length:clamp(1.3rem,4.4vw,1.6rem)]"
+                              : "text-[length:clamp(1.4rem,5vw,1.9rem)]"
+                          }`}
+                        >
+                          {practitionerFullName(practitioner)}
                         </span>
                         <span className="mt-1 block text-muted">
                           {practitioner.title && `${practitioner.title} · `}

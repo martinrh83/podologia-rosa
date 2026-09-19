@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       { source: "/servicios", destination: "/#treatments", permanent: true },
       { source: "/equipo", destination: "/#team", permanent: true },
       { source: "/como-llegar", destination: "/#directions", permanent: true },
+
+      // El perfil de Rosa, que hasta septiembre de 2026 vivía en /turnos/rosa.
+      { source: "/turnos/rosa", destination: "/turnos/rosa-heredia", permanent: true },
     ];
   },
 };

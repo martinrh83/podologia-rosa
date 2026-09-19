@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Practitioner, PractitionerWithSpecialty, Specialty } from "@/lib/db/types";
+import { firstWord, fullName, shortName } from "@/lib/person-name";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -111,7 +112,17 @@ export async function listActiveSpecialties(): Promise<Specialty[]> {
   return (await listSpecialties()).filter((specialty) => specialty.active);
 }
 
-/** "Ana Gómez" — como se lo nombra al paciente. */
+/** "Rosa Heredia" — como se la nombra en el sitio. Ver `lib/person-name.ts`. */
 export function practitionerName(practitioner: Pick<Practitioner, "first_name" | "last_name">) {
-  return `${practitioner.first_name} ${practitioner.last_name}`.trim();
+  return shortName(practitioner.first_name, practitioner.last_name);
+}
+
+/** "Rosa Beatriz Heredia Montaño" — donde se elige con quién atenderse. */
+export function practitionerFullName(practitioner: Pick<Practitioner, "first_name" | "last_name">) {
+  return fullName(practitioner.first_name, practitioner.last_name);
+}
+
+/** "Rosa" — de a una, cuando el apellido sobra: la tarjeta, una confirmación. */
+export function practitionerFirstName(practitioner: Pick<Practitioner, "first_name">) {
+  return firstWord(practitioner.first_name);
 }

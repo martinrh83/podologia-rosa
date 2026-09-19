@@ -5,6 +5,7 @@ import { CopyLink } from "@/components/copy-link";
 import { COVERAGES } from "@/lib/booking-schema";
 import type { Appointment, AppointmentWithPractitioner } from "@/lib/db/types";
 import { formatDay, formatTime, whatsappLink } from "@/lib/format";
+import { shortName } from "@/lib/person-name";
 
 /**
  * El estado, dicho sólo cuando no es el de siempre. Casi todos los turnos del
@@ -65,7 +66,7 @@ export function AppointmentCard({
         </p>
         {showPractitioner && appointment.practitioner && (
           <p className="font-bold text-accent">
-            {appointment.practitioner.first_name} {appointment.practitioner.last_name}
+            {shortName(appointment.practitioner.first_name, appointment.practitioner.last_name)}
           </p>
         )}
         {showLocation && appointment.location && (

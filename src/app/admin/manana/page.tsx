@@ -9,7 +9,7 @@ import { requireStaff } from "@/lib/auth";
 import { siteUrl } from "@/lib/env";
 import { getAppointmentsForLocalDay } from "@/lib/db/appointments";
 import { listActiveLocations } from "@/lib/db/locations";
-import { listActivePractitioners } from "@/lib/db/practitioners";
+import { listActivePractitioners, practitionerName } from "@/lib/db/practitioners";
 import { capitalizeFirst, formatDay, formatTime } from "@/lib/format";
 import { localDayRange } from "@/lib/slots";
 
@@ -72,7 +72,7 @@ export default async function AdminTomorrowPage({ searchParams }: PageProps<"/ad
                 // Con dos agendas, saber con quién es el turno importa tanto como
                 // la hora: el paciente eligió a una de las dos.
                 (appointment.practitioner
-                  ? ` con ${appointment.practitioner.first_name} ${appointment.practitioner.last_name}`
+                  ? ` con ${practitionerName(appointment.practitioner)}`
                   : "") +
                 ` en ${settings.clinic_name}` +
                 (locations.length > 1 && appointment.location

@@ -5,6 +5,7 @@ import { Address } from "@/components/home/address";
 import { Stamp } from "@/components/stamp";
 import { Logo } from "@/components/logo";
 import type { ClinicSettings, Location, PractitionerWithSpecialty } from "@/lib/db/types";
+import { practitionerFirstName } from "@/lib/db/practitioners";
 import { whatsappLink } from "@/lib/format";
 import { summarizeWeek } from "@/lib/week-summary";
 
@@ -227,7 +228,7 @@ function CardLine({ label, children }: { label: string; children: React.ReactNod
  * la línea no entra en el renglón, y se dice sin nombres.
  */
 function whoAttends(practitioners: PractitionerWithSpecialty[]): string | null {
-  const names = practitioners.map((practitioner) => practitioner.first_name);
+  const names = practitioners.map(practitionerFirstName);
   if (names.length === 0) return null;
   if (names.length > 3) return "la que elijas";
   if (names.length === 1) return names[0];
