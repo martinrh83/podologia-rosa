@@ -21,8 +21,8 @@ import { summarizeWeek } from "@/lib/week-summary";
  *   "Sacar turno".
  *
  *   Es una lista de definición de verdad: los rótulos impresos son `dt` y lo
- *   escrito a mano es `dd`. El sello es decorativo; lo que dice ya está en la
- *   bajada.
+ *   escrito a mano es `dd`. El sello se lee: es el único lugar del hero que
+ *   dice que el turno se saca online, sin llamar y sin cuenta.
  *
  * Dónde y obras sociales van en el talón, del otro lado del troquel: son los
  * datos que uno se guarda. Las obras sociales van fijas y con nombre porque no
@@ -55,20 +55,25 @@ export function Hero({
     <section className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-10 sm:px-6 sm:pt-16 lg:grid-cols-[minmax(0,1fr)_25rem] lg:items-center lg:gap-10 xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-16 lg:pb-24 lg:pt-20">
       <div>
         {/*
-          Impreso lo primero, escrito a mano lo segundo: "sin vueltas." es lo
-          que alguien le agregó en birome a la tarjeta. Dos líneas siempre, así
-          la mano no queda colgando en una línea sola con media frase impresa.
+          Impreso lo primero, escrito a mano lo segundo: "en cada paso." es lo
+          que alguien le agregó en birome a la tarjeta.
+
+          Lo impreso va en dos renglones fijos, cortados donde se lee la
+          frase. El tamaño sale del más largo, «Salud y cuidado», que mide
+          8,75 veces el cuerpo: tiene que entrar en la columna, que es el
+          ancho de la pantalla en el teléfono y la mitad desde lg.
         */}
-        <h1 className="font-wide text-[length:clamp(2.35rem,10.5vw,5.5rem)] lg:text-[length:clamp(3.5rem,6.2vw,5.5rem)] font-extrabold leading-[0.95] tracking-[-0.03em] [text-wrap:balance]">
-          <span className="block">Cuidamos tus pies,</span>
+        <h1 className="font-wide text-[length:clamp(1.9rem,9.8vw,5.5rem)] lg:text-[length:clamp(3.25rem,5.5vw,4.2rem)] font-extrabold leading-[0.95] tracking-[-0.03em]">
+          <span className="block">Salud y cuidado</span>{" "}
+          <span className="block">para tus pies</span>{" "}
           <span className="mt-1 block -rotate-2 font-hand text-[1.12em] font-bold leading-[1] tracking-normal text-birome [font-variation-settings:normal] sm:mt-2">
-            sin vueltas.
+            en cada paso.
           </span>
         </h1>
 
         <p className="mt-7 max-w-[40ch] text-[1.15rem] leading-relaxed sm:text-[1.3rem]">
-          Consultorio de podología en Salta. Sacá tu turno online en menos de un minuto: sin
-          llamar, sin esperar y sin crear ninguna cuenta.
+          Brindamos atención podológica integral y profesional, orientada al cuidado, prevención
+          y tratamiento de las diferentes afecciones de los pies.
         </p>
 
         {/*
@@ -193,10 +198,10 @@ function TurnoCard({
         tilt={-9}
         className="pointer-events-none absolute bottom-5 right-4 sm:bottom-7 sm:right-3"
       >
-        <span aria-hidden className="block text-[1.35rem] font-black tracking-[0.04em]">
+        <span className="block text-[1.35rem] font-black tracking-[0.04em]">
           Turno online
         </span>
-        <span aria-hidden className="block text-[0.72rem] font-bold tracking-[0.14em]">
+        <span className="block text-[0.72rem] font-bold tracking-[0.14em]">
           Sin llamar · sin cuenta
         </span>
       </Stamp>

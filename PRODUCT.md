@@ -92,8 +92,8 @@ Profesionales, pero no se confirmó como diferencial.
 - Nombre público: **Podología Mitre** ("Podología Mitre Salta" en el título).
 - Isotipo propio (`public/logo.svg`, `src/components/logo.tsx`), un solo trazado
   que toma el color del texto.
-- Voz directa y cercana, sin vueltas, en voseo. Ejemplo vigente: "Cuidamos tus
-  pies, sin vueltas."
+- Voz directa y cercana, sin vueltas, en voseo. Titular vigente: "Salud y cuidado
+  para tus pies en cada paso."
 
 ## Evidence on Hand
 
