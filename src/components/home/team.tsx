@@ -3,8 +3,9 @@ import Link from "next/link";
 
 import { SectionHeading } from "@/components/home/section-heading";
 import { Stamp } from "@/components/stamp";
-import { practitionerName } from "@/lib/db/practitioners";
+import { practitionerFirstName, practitionerName } from "@/lib/db/practitioners";
 import type { PractitionerWithSpecialty } from "@/lib/db/types";
+import { isLongName } from "@/lib/person-name";
 import { photoForPractitioner } from "@/lib/team-photos";
 
 /**
@@ -19,28 +20,36 @@ import { photoForPractitioner } from "@/lib/team-photos";
  *
  * LA FOTO CARNET Y EL SELLO
  *
- *   Cada profesional es su ficha: la foto carnet abrochada, sin sombra, y al lado su sello
- *   con nombre y título, que es como firma cualquier profesional de salud. El
- *   mismo módulo para todas, repetido igual, así ninguna pesa más que otra.
+ *   Cada profesional es su ficha: la foto carnet abrochada, sin sombra, y al
+ *   lado su sello con nombre y título, que es como firma cualquier profesional
+ *   de salud. El mismo módulo para todas, repetido igual, así ninguna pesa más
+ *   que otra.
  *
  *   El sello es HTML: el nombre adentro es el h3 de la ficha, no un dibujo.
  *
  *   Dos columnas desde `sm`, como Tratamientos y Cómo llegar: el texto arranca
  *   en los mismos dos bordes en todo el home.
  *
- * Las biografías salen de `practitioners.bio`, que cada una edita desde el
- * panel. Las fotos, de `src/lib/team-photos.ts`.
+ * Sin biografías: la ficha es la foto, el nombre y el título. `practitioners.bio`
+ * queda en la base sin usarse —tampoco se edita desde el panel—, porque con una
+ * sola escrita la sección quedaba despareja, una columna con párrafo y la otra
+ * con un hueco. Las fotos salen de `src/lib/team-photos.ts`.
  */
 export function Team({ practitioners }: { practitioners: PractitionerWithSpecialty[] }) {
   if (practitioners.length === 0) return null;
+
+  // El cuerpo lo decide la lista, no cada una: si el nombre de alguna es largo,
+  // bajan todas. Dos sellos del mismo ancho con distinto cuerpo terminan con
+  // distinto alto, y la fila vuelve a quedar despareja.
+  const nameSize = practitioners.some(isLongName)
+    ? "text-[length:clamp(0.95rem,3.9vw,1.1rem)] lg:text-[1.2rem]"
+    : "text-[length:clamp(1.05rem,4.6vw,1.3rem)] sm:text-[1.1rem] lg:text-[1.45rem]";
 
   return (
     <section id="team" className="scroll-mt-7">
       <div aria-hidden className="perforado h-1.5" />
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-        <SectionHeading lead="Atendemos de a una persona por vez, sin apuro y con el tiempo suficiente para explicarte qué está pasando.">
-          Profesionales
-        </SectionHeading>
+        <SectionHeading>Profesionales</SectionHeading>
 
         <ul className="mt-12 grid gap-14 sm:grid-cols-2 sm:gap-x-10 lg:gap-x-12">
           {practitioners.map((practitioner) => {
@@ -67,22 +76,31 @@ export function Team({ practitioners }: { practitioners: PractitionerWithSpecial
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <Stamp tilt={-4}>
-                      <h3 className="text-[length:clamp(1.05rem,4.6vw,1.3rem)] font-black tracking-[0.03em] sm:text-[1.1rem] lg:text-[1.45rem]">
-                        {name}
+                    <Stamp tilt={-4} className="block w-full">
+                      {/*
+                        El sello es la ficha: va el nombre completo, y va siempre
+                        en dos renglones —nombres arriba, apellidos abajo— que es
+                        como ya están guardados. Un sello de goma no cambia de
+                        tamaño según a quién nombre: todos miden lo mismo y
+                        cortan en el mismo lugar, tenga la persona un nombre o
+                        cuatro. Lo único que cede es el cuerpo de la letra,
+                        cuando algún renglón de la sección es largo.
+                      */}
+                      <h3 className={`font-black tracking-[0.03em] ${nameSize}`}>
+                        <span className="block">{practitioner.first_name}</span>
+                        <span className="block">{practitioner.last_name}</span>
                       </h3>
                       {title && <p className="mt-0.5 text-[0.8rem] font-bold tracking-[0.16em]">{title}</p>}
                     </Stamp>
                   </div>
                 </div>
 
-                {practitioner.bio && <p className="mt-6 max-w-[52ch] leading-relaxed">{practitioner.bio}</p>}
                 <div className="mt-auto pt-6">
                   <Link
                     href={`/turnos/${practitioner.slug}`}
                     className="inline-block border-2 border-accent px-5 py-3 font-bold text-accent transition-[background-color,color,transform] duration-100 hover:bg-accent hover:text-white active:translate-y-0.5 active:scale-[0.985]"
                   >
-                    Sacar turno con {practitioner.first_name}
+                    Sacar turno con {practitionerFirstName(practitioner)}
                   </Link>
                 </div>
               </li>
