@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { togglePractitioner } from "@/app/actions/practitioners";
+import { movePractitioner, togglePractitioner } from "@/app/actions/practitioners";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { EditPractitionerForm } from "@/components/admin/edit-forms";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
@@ -51,20 +51,55 @@ export default async function AdminProfesionalesPage() {
         </div>
       ) : (
         <RecordList>
-          {active.map((practitioner) => (
+          {active.map((practitioner, index) => (
             <RecordRow
               key={practitioner.id}
               title={practitionerName(practitioner)}
               meta={practitioner.specialty?.name}
               action={
-                <ConfirmAction
-                  action={togglePractitioner}
-                  fields={{ id: practitioner.id, active: "true" }}
-                  label="Dar de baja"
-                  question={`¿Sacar a ${practitionerFirstName(practitioner)} del sitio?`}
-                  confirmLabel="Sí, dar de baja"
-                  success={`${practitionerName(practitioner)}, de baja.`}
-                />
+                <div className="flex flex-col items-end gap-y-1">
+                  {/*
+                    El orden de esta lista es el que se ve en el sitio y en toda
+                    la agenda. Se mueve de a un lugar: son dos o tres personas,
+                    y un renglón que sube o baja se sigue con la vista. La
+                    primera no tiene "Subir" ni la última "Bajar", así el botón
+                    que está nunca no hace nada.
+                  */}
+                  {active.length > 1 && (
+                    <div className="flex items-center gap-x-4">
+                      {index > 0 && (
+                        <InlineAction
+                          action={movePractitioner}
+                          fields={{ id: practitioner.id, direction: "up" }}
+                          success={
+                            index === 1
+                              ? `${practitionerName(practitioner)} va primera.`
+                              : `${practitionerName(practitioner)} sube al lugar ${index}.`
+                          }
+                        >
+                          Subir
+                        </InlineAction>
+                      )}
+                      {index < active.length - 1 && (
+                        <InlineAction
+                          action={movePractitioner}
+                          fields={{ id: practitioner.id, direction: "down" }}
+                          success={`${practitionerName(practitioner)} baja al lugar ${index + 2}.`}
+                        >
+                          Bajar
+                        </InlineAction>
+                      )}
+                    </div>
+                  )}
+                  <ConfirmAction
+                    action={togglePractitioner}
+                    fields={{ id: practitioner.id, active: "true" }}
+                    label="Dar de baja"
+                    question={`¿Sacar a ${practitionerFirstName(practitioner)} del sitio?`}
+                    confirmLabel="Sí, dar de baja"
+                    success={`${practitionerName(practitioner)}, de baja.`}
+                  />
+                </div>
               }
             >
               <EditPractitionerForm practitioner={practitioner} />
