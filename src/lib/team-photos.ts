@@ -14,7 +14,10 @@
 
 export const PLACEHOLDER_PHOTO = "/team/team-placeholder.webp";
 
-export const PHOTOS: Record<string, string> = {};
+export const PHOTOS: Record<string, string> = {
+  "rosa-heredia": "/team/rosa-heredia.webp",
+  "patricia-diaz": "/team/patricia-diaz.webp",
+};
 
 export function photoForPractitioner(slug: string): { src: string; isPlaceholder: boolean } {
   const src = PHOTOS[slug];
