@@ -68,6 +68,19 @@ export const locationSchema = z.object({
 
 // ————— Precios —————
 
+/** El alta: además del nombre y el precio, a qué especialidad pertenece. */
+export const newServiceSchema = z.object({
+  name: z.string().trim().min(2, "Ingresá el nombre").max(80, "Es demasiado largo"),
+  price: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value === "" || /^\d+(\.\d{1,2})?$/.test(value),
+      "Ingresá el precio en números, sin puntos ni signos",
+    ),
+  specialtyId: z.uuid("Elegí una especialidad"),
+});
+
 export const serviceSchema = z.object({
   name: z.string().trim().min(2, "Ingresá el nombre").max(80, "Es demasiado largo"),
   // Vacío es «sin precio cargado». Si hay algo, un número positivo con hasta

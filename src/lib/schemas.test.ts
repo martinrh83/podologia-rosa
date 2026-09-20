@@ -7,6 +7,7 @@ import {
   locationSchema,
   loginSchema,
   newPractitionerSchema,
+  newServiceSchema,
   serviceSchema,
   settingsSchema,
   shiftSchema,
@@ -96,6 +97,19 @@ describe("precios", () => {
         "Ingresá el precio en números, sin puntos ni signos",
       );
     }
+  });
+});
+
+describe("alta de un tratamiento", () => {
+  it("pide el nombre y la especialidad, y deja el precio vacío", () => {
+    const base = { name: "Consulta general", price: "", specialtyId: ID };
+    expect(parseForm(newServiceSchema, base).ok).toBe(true);
+    expect(errorOf(parseForm(newServiceSchema, { ...base, name: "" }), "name")).toBe(
+      "Ingresá el nombre",
+    );
+    expect(errorOf(parseForm(newServiceSchema, { ...base, specialtyId: "" }), "specialtyId")).toBe(
+      "Elegí una especialidad",
+    );
   });
 });
 
