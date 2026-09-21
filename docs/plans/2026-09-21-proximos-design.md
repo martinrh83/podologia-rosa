@@ -42,8 +42,9 @@ Descartadas:
   o No vino.
 - Sin cancelados, como en Hoy.
 - Sin fecha tope. Si el volumen crece, un `limit` es una línea.
-- Con `search`: `.or()` con `ilike` sobre `patient_first_name`,
-  `patient_last_name` y `patient_phone`.
+- Con `search`: por cada palabra, un `.or()` con `imatch` sobre
+  `patient_first_name`, `patient_last_name` y `patient_phone`. Cada palabra
+  tiene que aparecer en alguno, así «maria gomez» encuentra a «Gómez, María».
 
 ## Pantalla
 
@@ -63,24 +64,29 @@ Mañana: `requireStaff()`, `dynamic = "force-dynamic"`, `robots` noindex.
 - Cada turno es el `AppointmentCard` de siempre.
 - Con búsqueda: «N turnos para «maria»» y un link «Limpiar».
 - Vacío: `Notice tone="muted"` «No hay turnos próximos», o «No hay turnos
-  próximos para «maria»» con la sugerencia «Probá sin tildes o con el
-  teléfono».
+  próximos para «maria»» con la sugerencia «Probá sólo con el apellido, o
+  con el teléfono».
 
 ### Búsqueda
 
-`sanitizeSearch(q)`: recorta espacios y saca `%`, `,`, `(` y `)`, que romperían
-el filtro de PostgREST. Una cadena vacía es «sin búsqueda».
+`sanitizeSearch(q)`: recorta espacios y saca lo que rompería el filtro de
+PostgREST (`,`, `(`, `)`, `"`) y los comodines de `like` y de una expresión
+regular. Una cadena vacía es «sin búsqueda».
 
-`ilike` no ignora tildes: «maria» no encuentra «María». Resolverlo pide
-`unaccent` en la base, o sea una migración. Queda fuera de esta versión; el
-mensaje de vacío lo avisa.
+Tildes: la primera idea era `ilike` y dejar las tildes para después, porque
+`unaccent` pide una migración. Probándolo, «maria» encontraba a «Mariana» y no
+a «María», sin ningún aviso. `searchPattern(word)` lo resuelve sin tocar la
+base: abre cada vocal y la ñ en sus variantes (`mar[aáÁ][iíïÍÏ][aáÁ]`) y va a
+`imatch`. Las mayúsculas acentuadas van a mano porque, según la intercalación,
+`imatch` puede no plegar Á/á.
 
 ## Menú
 
 En `admin-nav.tsx`, `DAY` suma `{ href: "/admin/proximos", label: "Próximos" }`
 entre Mañana y Nuevo turno, y la grilla pasa de `grid-cols-3` a `grid-cols-4`.
-En un teléfono de 360 px «Nuevo turno» se parte en dos renglones; la pestaña
-tiene `min-h-12` y `leading-tight`, así que entra.
+Las pestañas pierden `whitespace-nowrap`: en un teléfono de 360 px «Nuevo
+turno» se parte en dos renglones dentro de su `min-h-12`. Por debajo de 360 px
+la letra baja un poco para que «Próximos» entre.
 
 ## Pruebas
 
@@ -89,6 +95,8 @@ Vitest, sólo lógica pura, como los `src/lib/*.test.ts`:
 - `groupByLocalDay`: agrupa, respeta el orden, y un turno de la noche que
   cruza la medianoche UTC queda en su día local.
 - `sanitizeSearch`: recorte, caracteres sacados, vacío como «sin búsqueda».
+- `searchPattern`: «maria» encuentra «María», «alvarez» a «Álvarez», «munoz»
+  a «Muñoz», y «maria» no encuentra «Mario».
 
 A mano en la app: las cuatro pestañas en un ancho de teléfono, y la búsqueda
 combinada con el filtro por profesional.

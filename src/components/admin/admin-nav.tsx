@@ -10,6 +10,7 @@ import { REMOVE_ACTION } from "@/components/admin/button-styles";
 const DAY = [
   { href: "/admin", label: "Hoy" },
   { href: "/admin/manana", label: "Mañana" },
+  { href: "/admin/proximos", label: "Próximos" },
   { href: "/admin/nuevo", label: "Nuevo turno" },
 ];
 
@@ -28,9 +29,13 @@ const SETTINGS = [
  *
  * Eran ocho botones iguales que en el teléfono se envolvían en tres filas, sin
  * marcar en cuál estabas. Ahora se separa lo de todos los días —hoy, mañana,
- * cargar un turno— de la configuración, que se toca una vez por semana.
+ * los próximos, cargar un turno— de la configuración, que se toca una vez por
+ * semana.
  *
- * La primera fila son tres pestañas del mismo ancho; la activa, llena en tinta
+ * En el teléfono las cuatro no entran en una línea cada una: «Nuevo turno» se
+ * parte en dos renglones, y por eso la fila no lleva `whitespace-nowrap`.
+ *
+ * La primera fila son cuatro pestañas del mismo ancho; la activa, llena en tinta
  * de sello. La segunda es una línea de enlaces, con el activo en sello y
  * subrayado, como el menú del sitio. Especialidades antes no estaba: sólo se llegaba desde un enlace
  * en Profesionales.
@@ -42,7 +47,7 @@ export function AdminNav() {
 
   return (
     <nav aria-label="Panel" className="mb-8">
-      <ul className="grid grid-cols-3 gap-2">
+      <ul className="grid grid-cols-4 gap-1.5 sm:gap-2">
         {DAY.map((item) => {
           const active = isActive(item.href);
           return (
@@ -50,7 +55,7 @@ export function AdminNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-12 items-center justify-center whitespace-nowrap border-2 px-1.5 text-center text-[0.9rem] font-bold leading-tight transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 active:scale-[0.985] sm:text-[1.05rem] ${
+                className={`flex min-h-12 items-center justify-center border-2 px-1 text-center text-[0.85rem] max-[359px]:px-0.5 max-[359px]:text-[0.78rem] font-bold leading-tight transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 active:scale-[0.985] sm:text-[1.05rem] ${
                   active
                     ? "border-accent bg-accent text-white"
                     : "border-foreground hover:bg-surface"
