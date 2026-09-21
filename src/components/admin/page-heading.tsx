@@ -21,12 +21,14 @@ export function PageHeading({ title }: { title: string }) {
 export function SectionHeading({
   children,
   as: Tag = "h2",
+  id,
 }: {
   children: React.ReactNode;
   as?: "h2" | "h3";
+  id?: string;
 }) {
   return (
-    <Tag className="font-wide text-[1.3rem] font-extrabold leading-tight tracking-[-0.01em]">
+    <Tag id={id} className="font-wide text-[1.3rem] font-extrabold leading-tight tracking-[-0.01em]">
       {children}
     </Tag>
   );

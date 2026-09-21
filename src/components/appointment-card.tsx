@@ -31,6 +31,18 @@ type Props = {
   reminderMessage?: string;
   /** Absolute base URL, so the cancel link Rosa sends works outside localhost. */
   siteUrl: string;
+  /**
+   * Nombrar el día, y no sólo la hora, al pedir confirmación y al confirmar.
+   * En Hoy el día se sobreentiende; en una lista de varias semanas «el turno
+   * de las 11:30» puede ser cualquiera.
+   */
+  withDay?: boolean;
+  /**
+   * «Marcar atendido» y «No vino». Se apagan para los días que todavía no
+   * llegaron: marcar como atendido un turno del jueves que viene es un error de
+   * un toque.
+   */
+  showOutcome?: boolean;
 };
 
 /**
@@ -46,9 +58,12 @@ export function AppointmentCard({
   siteUrl,
   showPractitioner = true,
   showLocation = false,
+  withDay = false,
+  showOutcome = true,
 }: Props) {
   const isCancelled = appointment.status === "cancelled";
   const time = formatTime(appointment.starts_at);
+  const which = withDay ? `del ${formatDay(appointment.starts_at)} a las ${time}` : `de las ${time}`;
   const status = STATUS[appointment.status];
   const cancelUrl = `${siteUrl}/turnos/cancelar/${appointment.cancel_token}`;
   const fullName = `${appointment.patient_last_name}, ${appointment.patient_first_name}`;
@@ -141,7 +156,7 @@ export function AppointmentCard({
             </a>
           )}
 
-          {appointment.status !== "completed" && (
+          {showOutcome && appointment.status !== "completed" && (
             <StatusForm
               id={appointment.id}
               status="completed"
@@ -149,7 +164,7 @@ export function AppointmentCard({
               success={`Turno de las ${time}: atendido.`}
             />
           )}
-          {appointment.status !== "no_show" && (
+          {showOutcome && appointment.status !== "no_show" && (
             <StatusForm
               id={appointment.id}
               status="no_show"
@@ -162,9 +177,9 @@ export function AppointmentCard({
             action={updateStatus}
             fields={{ id: appointment.id, status: "cancelled" }}
             label="Cancelar turno"
-            question={`¿Cancelar el turno de las ${time}?`}
+            question={`¿Cancelar el turno ${which}?`}
             confirmLabel="Sí, cancelar"
-            success={`Turno de las ${time} cancelado.`}
+            success={`Turno ${which} cancelado.`}
           />
         </div>
       )}
@@ -187,7 +202,7 @@ export function AppointmentCard({
               href={whatsappLink(
                 appointment.patient_phone,
                 `Hola ${appointment.patient_first_name}! Si necesitás cancelar tu turno del ` +
-                  `${time}, entrá acá: ${cancelUrl}`,
+                  `${formatDay(appointment.starts_at)} a las ${time}, entrá acá: ${cancelUrl}`,
               )}
               target="_blank"
               rel="noopener noreferrer"

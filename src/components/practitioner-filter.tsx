@@ -14,6 +14,8 @@ type Props = {
    * editar "los de todas a la vez" no significa nada.
    */
   allowAll?: boolean;
+  /** Otros parámetros de la URL que el filtro no tiene que perder, como la búsqueda. */
+  keep?: Record<string, string>;
 };
 
 /**
@@ -30,6 +32,7 @@ export function PractitionerFilter({
   selected,
   basePath,
   allowAll = true,
+  keep = {},
 }: Props) {
   if (practitioners.length < 2) return null;
 
@@ -45,7 +48,7 @@ export function PractitionerFilter({
         return (
           <Link
             key={option.id ?? "todas"}
-            href={option.id ? `${basePath}?profesional=${option.id}` : basePath}
+            href={hrefFor(basePath, { ...keep, ...(option.id ? { profesional: option.id } : {}) })}
             aria-current={isSelected ? "page" : undefined}
             // Las mismas fichas que los días y horarios de la reserva.
             className={`flex min-h-11 items-center border-2 px-4 text-[0.95rem] font-bold transition-[background-color,border-color,transform] duration-100 active:translate-y-0.5 ${
@@ -60,4 +63,9 @@ export function PractitionerFilter({
       })}
     </div>
   );
+}
+
+function hrefFor(basePath: string, params: Record<string, string>) {
+  const query = new URLSearchParams(params).toString();
+  return query ? `${basePath}?${query}` : basePath;
 }
