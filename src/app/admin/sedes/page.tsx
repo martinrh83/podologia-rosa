@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
-import { toggleLocation } from "@/app/actions/locations";
+import { moveLocation, toggleLocation } from "@/app/actions/locations";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { EditLocationForm } from "@/components/admin/edit-forms";
+import { MoveButtons } from "@/components/admin/move-buttons";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
 import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
 import { Notice } from "@/components/notice";
@@ -43,19 +44,29 @@ export default async function AdminSedesPage() {
         </div>
       ) : (
         <RecordList>
-          {active.map((location) => (
+          {active.map((location, index) => (
             <RecordRow
               key={location.id}
               title={location.name}
               action={
-                <ConfirmAction
-                  action={toggleLocation}
-                  fields={{ id: location.id, active: "true" }}
-                  label="Dar de baja"
-                  question={`¿Sacar la sede ${location.name} del sitio?`}
-                  confirmLabel="Sí, dar de baja"
-                  success={`Sede ${location.name}, de baja.`}
-                />
+                <div className="flex flex-col items-end gap-y-1">
+                  {/* La primera es la que se lee primero en Cómo llegar, en la tarjeta y en la agenda. */}
+                  <MoveButtons
+                    action={moveLocation}
+                    id={location.id}
+                    name={`Sede ${location.name}`}
+                    index={index}
+                    count={active.length}
+                  />
+                  <ConfirmAction
+                    action={toggleLocation}
+                    fields={{ id: location.id, active: "true" }}
+                    label="Dar de baja"
+                    question={`¿Sacar la sede ${location.name} del sitio?`}
+                    confirmLabel="Sí, dar de baja"
+                    success={`Sede ${location.name}, de baja.`}
+                  />
+                </div>
               }
             >
               <EditLocationForm location={location} />
