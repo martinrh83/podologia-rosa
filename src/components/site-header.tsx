@@ -94,6 +94,28 @@ export function SiteHeader({ nav: siteNav }: { nav: NavItem[] }) {
    * Sólo corre donde hay secciones. En /turnos o /privacidad no encuentra
    * ninguna y no resalta nada, que es lo correcto.
    */
+  // Encima del contenido, el menú tapa lo que hay abajo: Escape y un toque
+  // afuera lo cierran, que es lo que espera quien lo abrió sin querer.
+  useEffect(() => {
+    if (!open) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest("header")) setOpen(false);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [open]);
+
   useEffect(() => {
     const ids = nav.map((item) => item.href.split("#")[1]).filter(Boolean);
     const sections = ids
@@ -266,14 +288,31 @@ export function SiteHeader({ nav: siteNav }: { nav: NavItem[] }) {
         )}
       </div>
 
+      {/*
+        Cae sobre la página y no la empuja: el menú está dentro de un
+        encabezado pegajoso, así que en el flujo lo hacía más alto y corría
+        todo el contenido para abajo —y lo devolvía de un salto al cerrarlo—.
+        Apoyado justo debajo del encabezado, lo que se estaba leyendo queda
+        donde estaba.
+
+        Fondo opaco, porque el encabezado es traslúcido: si no, se leería el
+        texto de la página a través de los enlaces.
+      */}
       {open && nav.length > 0 && (
-        <nav id="mobile-menu" aria-label="Principal" className="border-t border-border lg:hidden">
+        <nav
+          id="mobile-menu"
+          aria-label="Principal"
+          className="absolute inset-x-0 top-full border-b-2 border-foreground bg-background lg:hidden"
+        >
           <ul className="mx-auto max-w-6xl px-4 py-1 sm:px-6">
             {nav.map((item) => {
               const id = item.href.split("#")[1];
               const isActive = Boolean(id) && id === activeId;
               return (
-                <li key={item.href}>
+                // El renglón va en el `li`: en el `a`, `last:` lo agarraba
+                // siempre —cada enlace es el único hijo de su `li`— y los
+                // separadores no salían nunca.
+                <li key={item.href} className="border-b border-border last:border-0">
                   <Link
                     href={item.href}
                     onClick={() => {
@@ -281,7 +320,7 @@ export function SiteHeader({ nav: siteNav }: { nav: NavItem[] }) {
                       pinSection(item.href);
                     }}
                     aria-current={isActive ? "true" : undefined}
-                    className={`block border-b border-border py-3.5 text-[1.05rem] font-medium underline-offset-[6px] last:border-0 hover:text-accent hover:underline hover:decoration-2 ${
+                    className={`block py-3.5 text-[1.05rem] font-medium underline-offset-[6px] hover:text-accent hover:underline hover:decoration-2 ${
                       isActive ? "text-accent underline decoration-2" : "text-foreground"
                     }`}
                   >

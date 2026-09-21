@@ -18,11 +18,10 @@
  * Se da vuelta si algún día Rosa pide cambios seguido, o si cada especialidad
  * necesita el suyo. Eso se sabe por la frecuencia real, no adivinando.
  *
- * LOS MONTOS DE IPS SON LA EXCEPCIÓN, y son deuda. Los descartables ($25.000 /
- * $27.200) están escritos acá porque Rosa los dictó como parte de la respuesta,
- * pero son precios: la inflación los vence y actualizarlos pide un PR, cuando
- * todos los demás precios del sitio se editan en /admin/servicios. Si quedan,
- * hay que revisarlos cada vez que cambian los de la lista.
+ * SIN MONTOS. La respuesta de IPS llegó a decir cuánto salían los descartables;
+ * se sacó. Un precio escrito acá lo vence la inflación y actualizarlo pide un
+ * PR, cuando todos los demás precios del sitio se editan en /admin/servicios.
+ * El monto se dice en el consultorio, igual que el valor de la orden.
  *
  * NADA DE HORARIOS ACÁ. Los horarios salen de `weekly_schedule`: el hero los
  * resume y el detalle se ve al sacar turno. Un texto fijo sobre datos que
@@ -58,8 +57,7 @@ export const FAQ: FaqItem[] = [
       "Puede traer la derivación de su médico o, si no la tiene, le hacemos la validación " +
       "de la orden online acá en el consultorio: en ese momento se sabe el valor de la " +
       "orden. Todo se autoriza acá, no necesita hacer trámites antes. Usted abona los " +
-      "descartables: $25.000 si tiene coseguro y $27.200 si no lo tiene. Según lo que " +
-      "determine la obra social, puede pedirse además la orden médica.",
+      "descartables.",
   },
   {
     question: "¿Cómo trabajan con OSUNSa?",
