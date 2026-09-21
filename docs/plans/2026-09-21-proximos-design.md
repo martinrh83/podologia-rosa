@@ -59,9 +59,15 @@ Mañana: `requireStaff()`, `dynamic = "force-dynamic"`, `robots` noindex.
   conservar `q` en sus links.
 - Los turnos se agrupan con `groupByLocalDay()`, que usa `toLocalDateKey` para
   que un turno de las 20 h no caiga en el día UTC siguiente. Cada grupo lleva
-  un `SectionHeading` con `capitalizeFirst(formatDay(...))`; los de hoy y
-  mañana, una marca «Hoy» / «Mañana».
-- Cada turno es el `AppointmentCard` de siempre.
+  un `SectionHeading` con una raya de 2px arriba (menos el primero); hoy y
+  mañana se dicen en la frase: «Hoy lunes, 21 de septiembre».
+- Arriba de la lista, sin búsqueda, un índice «Ir al día» con las fichas de
+  día de la reserva («Jue 24», «2 turnos»), que llevan a cada día. Con 40
+  turnos la lista pasa los 15.000 px en el teléfono: el índice es lo que
+  responde «¿cómo viene la semana?» sin bajar.
+- Cada turno es el `AppointmentCard` de siempre, con `withDay` (la
+  confirmación nombra el día) y `showOutcome` sólo para hoy: marcar atendido
+  un turno del jueves que viene es un error de un toque.
 - Con búsqueda: «N turnos para «maria»» y un link «Limpiar».
 - Vacío: `Notice tone="muted"` «No hay turnos próximos», o «No hay turnos
   próximos para «maria»» con la sugerencia «Probá sólo con el apellido, o
