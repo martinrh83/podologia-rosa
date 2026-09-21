@@ -40,12 +40,22 @@ export type BookingDay = {
   cardLabel: string;
   /**
    * La sede, cuando todo el día se atiende en una sola — que es lo normal.
-   * En null el día está partido entre dos, y entonces la sede va en cada
-   * horario: nadie tiene que adivinar adónde ir.
+   * En null el día está partido: la ficha dice cuántas son y la sede va en
+   * cada horario, así nadie tiene que adivinar adónde ir.
    */
   locationName: string | null;
   slots: BookingSlot[];
 };
+
+/**
+ * Cuántas sedes toca un día partido. El renglón de la sede está en todos los
+ * días o en ninguno: si en el día partido no dice nada, esa ficha queda más
+ * baja que las de al lado y se lee como un dato que falta. Dice cuántas son, y
+ * cuál es cada una se ve en el horario.
+ */
+function countLocations(day: BookingDay): number {
+  return new Set(day.slots.map((slot) => slot.locationId)).size;
+}
 
 /** Las sedes, para resolver el nombre y la dirección del horario elegido. */
 export type BookingLocation = { id: string; name: string; address: string };
@@ -464,13 +474,13 @@ export function BookingFlow({
                     <span className={`block text-[0.8rem] ${isSelected ? "text-white/85" : "text-muted"}`}>
                       {day.slots.length} {day.slots.length === 1 ? "horario" : "horarios"}
                     </span>
-                    {showLocationName && day.locationName && (
+                    {showLocationName && (
                       <span
                         className={`mt-0.5 block font-narrow text-[0.75rem] font-bold uppercase tracking-[0.1em] ${
                           isSelected ? "text-white/85" : "text-accent"
                         }`}
                       >
-                        {day.locationName}
+                        {day.locationName ?? `${countLocations(day)} sedes`}
                       </span>
                     )}
                   </button>
