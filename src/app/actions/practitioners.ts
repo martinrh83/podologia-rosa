@@ -35,6 +35,23 @@ function revalidatePractitioners() {
 
 const PRACTITIONER_FIELDS = ["firstName", "lastName", "title", "slotMinutes"] as const;
 
+/**
+ * El lugar siguiente al último. Quien se suma, o vuelve de la baja, va al
+ * final de la lista.
+ *
+ * Sin esto quedaba en 0, el valor por defecto de la columna, y aparecía
+ * adelante de todas en el home, en /turnos y en la agenda.
+ */
+async function nextPractitionerOrder(supabase: ReturnType<typeof createSupabaseAdminClient>) {
+  const { data } = await supabase
+    .from("practitioners")
+    .select("display_order")
+    .order("display_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data?.display_order ?? 0) + 1;
+}
+
 export async function createPractitioner(
   _previous: ActionState,
   formData: FormData,
@@ -66,6 +83,7 @@ export async function createPractitioner(
     title: title || null,
     slot_minutes: slotMinutes,
     slug,
+    display_order: await nextPractitionerOrder(supabase),
   });
 
   if (error) {
@@ -137,7 +155,10 @@ export async function togglePractitioner(
   if (!id) return formError(MESSAGES.notFound("al profesional"));
 
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase.from("practitioners").update({ active: !active }).eq("id", id);
+  const { error } = await supabase
+    .from("practitioners")
+    .update(active ? { active: false } : { active: true, display_order: await nextPractitionerOrder(supabase) })
+    .eq("id", id);
   if (error) return formError(MESSAGES.saveFailed("el cambio"));
 
   revalidatePractitioners();

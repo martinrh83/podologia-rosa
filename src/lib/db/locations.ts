@@ -33,7 +33,10 @@ export async function listAllLocations(): Promise<Location[]> {
     .from("locations")
     .select("*")
     .order("active", { ascending: false })
-    .order("display_order");
+    .order("display_order")
+    // El mismo desempate que la lista pública, así el panel muestra el orden
+    // que se ve en el sitio y «Subir» mueve sobre ese.
+    .order("name");
 
   if (error) throw new Error(`No se pudieron leer las sedes: ${error.message}`);
 
