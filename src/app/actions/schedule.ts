@@ -11,7 +11,7 @@ import {
   SAVED,
   type ActionState,
 } from "@/lib/forms";
-import { blockSchema, serviceSchema, shiftSchema } from "@/lib/schemas";
+import { blockSchema, newServiceSchema, serviceSchema, shiftSchema } from "@/lib/schemas";
 import { shiftsOverlap } from "@/lib/shifts";
 import { localDayRangeFromKey } from "@/lib/slots";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -178,6 +178,52 @@ export async function removeBlock(
   return SAVED;
 }
 
+/**
+ * Sumar un tratamiento a la lista.
+ *
+ * El precio es de referencia interna y no se publica: el sitio muestra sólo el
+ * nombre. Va último, y desde ahí se lo puede ocultar como a cualquier otro.
+ */
+export async function createService(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireStaff();
+
+  const parsed = parseForm(
+    newServiceSchema,
+    formValues(formData, ["name", "price", "specialtyId", "description"]),
+  );
+  if (!parsed.ok) return parsed.state;
+  const { name, specialtyId, description } = parsed.data;
+  const price = parsed.data.price === "" ? null : Number(parsed.data.price);
+
+  const supabase = createSupabaseAdminClient();
+
+  // Último de la lista: el orden lo fija quien carga, agregando en el orden en
+  // que quiere que se lean.
+  const { data: last } = await supabase
+    .from("services")
+    .select("display_order")
+    .order("display_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("services").insert({
+    name,
+    price,
+    description: description || null,
+    specialty_id: specialtyId,
+    display_order: (last?.display_order ?? 0) + 1,
+  });
+
+  if (error) return formError(MESSAGES.saveFailed("el tratamiento"));
+
+  revalidatePath("/admin/servicios");
+  revalidatePath("/");
+  return SAVED;
+}
+
 /** Update a service's name and price. Prices live in the DB because of inflation. */
 export async function updateService(
   _previous: ActionState,
@@ -188,13 +234,16 @@ export async function updateService(
   const id = String(formData.get("id") ?? "");
   if (!id) return formError(MESSAGES.notFound("el servicio"));
 
-  const parsed = parseForm(serviceSchema, formValues(formData, ["name", "price"]));
+  const parsed = parseForm(serviceSchema, formValues(formData, ["name", "price", "description"]));
   if (!parsed.ok) return parsed.state;
-  const { name } = parsed.data;
+  const { name, description } = parsed.data;
   const price = parsed.data.price === "" ? null : Number(parsed.data.price);
 
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase.from("services").update({ name, price }).eq("id", id);
+  const { error } = await supabase
+    .from("services")
+    .update({ name, price, description: description || null })
+    .eq("id", id);
 
   if (error) return formError(MESSAGES.saveFailed("los cambios"));
 

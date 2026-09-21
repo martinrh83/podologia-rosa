@@ -8,7 +8,7 @@ import { updatePractitioner } from "@/app/actions/practitioners";
 import { updateService } from "@/app/actions/schedule";
 import { SubmitButton } from "@/components/admin/buttons";
 import { sent, withToast } from "@/components/admin/with-toast";
-import { MoneyField, TextField } from "@/components/fields";
+import { MoneyField, TextArea, TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
 import { IDLE, type ActionState } from "@/lib/forms";
@@ -153,7 +153,7 @@ export function EditLocationForm({
 export function EditServiceForm({
   service,
 }: {
-  service: { id: string; name: string; price: number | null };
+  service: { id: string; name: string; price: number | null; description: string | null };
 }) {
   const id = service.id;
   const { state, form, formProps } = useEditForm(
@@ -162,6 +162,7 @@ export function EditServiceForm({
     {
       name: service.name,
       price: service.price === null ? "" : String(service.price),
+      description: service.description ?? "",
     },
     (data) => `${sent(data, "name")}: cambios guardados.`,
   );
@@ -173,6 +174,16 @@ export function EditServiceForm({
       <div className="grid gap-4 sm:grid-cols-[1fr_11rem]">
         <TextField id={`name-${id}`} label="Nombre" required {...form.field("name")} />
         <MoneyField id={`price-${id}`} label="Precio" step="100" {...form.field("price")} />
+      </div>
+
+      <div className="mt-4">
+        <TextArea
+          id={`description-${id}`}
+          label="Qué es"
+          optional
+          rows={2}
+          {...form.field("description")}
+        />
       </div>
 
       <Footer state={state} />

@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import { toggleService } from "@/app/actions/schedule";
 import { ConfirmAction, InlineAction } from "@/components/admin/buttons";
 import { EditServiceForm } from "@/components/admin/edit-forms";
+import { NewServiceForm } from "@/components/admin/service-form";
 import { PageHeading, SectionHeading } from "@/components/admin/page-heading";
 import { InactiveList, InactiveRow, RecordList, RecordRow } from "@/components/admin/record-row";
 import { Notice } from "@/components/notice";
 import { requireStaff } from "@/lib/auth";
+import { listActiveSpecialties } from "@/lib/db/practitioners";
 import type { ServiceWithSpecialty } from "@/lib/db/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -31,6 +33,8 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminServiciosPage() {
   await requireStaff();
+
+  const specialties = await listActiveSpecialties();
 
   const supabase = createSupabaseAdminClient();
   const { data } = await supabase
@@ -57,9 +61,15 @@ export default async function AdminServiciosPage() {
 
       {groups.size === 0 && (
         <div className="mb-6">
-          <Notice tone="muted" title="No hay tratamientos a la vista">
-            Todos están ocultos. Mostrá los que se hacen desde la lista de ocultos.
-          </Notice>
+          {services.length === 0 ? (
+            <Notice tone="muted" title="Todavía no hay tratamientos">
+              Cargá los que se hacen acá abajo. Van a aparecer en Tratamientos, en la página.
+            </Notice>
+          ) : (
+            <Notice tone="muted" title="No hay tratamientos a la vista">
+              Todos están ocultos. Mostrá los que se hacen desde la lista de ocultos.
+            </Notice>
+          )}
         </div>
       )}
 
@@ -115,6 +125,13 @@ export default async function AdminServiciosPage() {
           />
         ))}
       </InactiveList>
+
+      <section className="mt-14 border-t-2 border-foreground pt-6">
+        <SectionHeading>Agregar tratamiento</SectionHeading>
+        <div className="mt-5">
+          <NewServiceForm specialties={specialties} />
+        </div>
+      </section>
     </div>
   );
 }
