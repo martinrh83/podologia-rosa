@@ -192,10 +192,10 @@ export async function createService(
 
   const parsed = parseForm(
     newServiceSchema,
-    formValues(formData, ["name", "price", "specialtyId"]),
+    formValues(formData, ["name", "price", "specialtyId", "description"]),
   );
   if (!parsed.ok) return parsed.state;
-  const { name, specialtyId } = parsed.data;
+  const { name, specialtyId, description } = parsed.data;
   const price = parsed.data.price === "" ? null : Number(parsed.data.price);
 
   const supabase = createSupabaseAdminClient();
@@ -212,6 +212,7 @@ export async function createService(
   const { error } = await supabase.from("services").insert({
     name,
     price,
+    description: description || null,
     specialty_id: specialtyId,
     display_order: (last?.display_order ?? 0) + 1,
   });
@@ -233,13 +234,16 @@ export async function updateService(
   const id = String(formData.get("id") ?? "");
   if (!id) return formError(MESSAGES.notFound("el servicio"));
 
-  const parsed = parseForm(serviceSchema, formValues(formData, ["name", "price"]));
+  const parsed = parseForm(serviceSchema, formValues(formData, ["name", "price", "description"]));
   if (!parsed.ok) return parsed.state;
-  const { name } = parsed.data;
+  const { name, description } = parsed.data;
   const price = parsed.data.price === "" ? null : Number(parsed.data.price);
 
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase.from("services").update({ name, price }).eq("id", id);
+  const { error } = await supabase
+    .from("services")
+    .update({ name, price, description: description || null })
+    .eq("id", id);
 
   if (error) return formError(MESSAGES.saveFailed("los cambios"));
 

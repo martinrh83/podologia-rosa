@@ -79,10 +79,17 @@ export const newServiceSchema = z.object({
       "Ingresá el precio en números, sin puntos ni signos",
     ),
   specialtyId: z.uuid("Elegí una especialidad"),
+  // Lo que se lee abajo del nombre en Tratamientos. Dos renglones: explica de
+  // qué se trata, no lo vende.
+  description: optionalText(240),
 });
 
 export const serviceSchema = z.object({
   name: z.string().trim().min(2, "Ingresá el nombre").max(80, "Es demasiado largo"),
+  // Lo que se lee abajo del nombre en Tratamientos. Dos renglones: explica de
+  // qué se trata, no lo vende.
+  description: optionalText(240),
+
   // Vacío es «sin precio cargado». Si hay algo, un número positivo con hasta
   // dos decimales, que es lo que guarda la columna (numeric(12, 2)) y lo que
   // manda el campo numérico: «$ 12.000» tipeado a mano no es un número.

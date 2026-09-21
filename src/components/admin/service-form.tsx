@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { createService } from "@/app/actions/schedule";
 import { SubmitButton } from "@/components/admin/buttons";
 import { sent, withToast } from "@/components/admin/with-toast";
-import { MoneyField, SelectField, TextField } from "@/components/fields";
+import { MoneyField, SelectField, TextArea, TextField } from "@/components/fields";
 import { FormAlert } from "@/components/form-alert";
 import { useForm } from "@/components/use-form";
 import { IDLE } from "@/lib/forms";
@@ -34,7 +34,7 @@ export function NewServiceForm({ specialties }: { specialties: ServiceFormSpecia
   );
   const form = useForm(
     newServiceSchema,
-    { name: "", price: "", specialtyId: specialties[0]?.id ?? "" },
+    { name: "", price: "", description: "", specialtyId: specialties[0]?.id ?? "" },
     state,
   );
 
@@ -43,7 +43,7 @@ export function NewServiceForm({ specialties }: { specialties: ServiceFormSpecia
   const [lastResult, setLastResult] = useState(state);
   if (state !== lastResult) {
     setLastResult(state);
-    if (state.status === "saved") form.reset({ ...form.values, name: "", price: "" });
+    if (state.status === "saved") form.reset({ ...form.values, name: "", price: "", description: "" });
   }
 
   return (
@@ -52,6 +52,15 @@ export function NewServiceForm({ specialties }: { specialties: ServiceFormSpecia
         <TextField id="name" label="Nombre" required {...form.field("name")} />
         <MoneyField id="price" label="Precio" step="100" {...form.field("price")} />
       </div>
+
+      <TextArea
+        id="description"
+        label="Qué es"
+        optional
+        rows={2}
+        hint="Se lee abajo del nombre en Tratamientos. Ej: «Uña encarnada: alivio del dolor y seguimiento hasta que crezca bien.»"
+        {...form.field("description")}
+      />
 
       {specialties.length > 1 ? (
         <SelectField id="specialtyId" label="Especialidad" {...form.field("specialtyId")}>

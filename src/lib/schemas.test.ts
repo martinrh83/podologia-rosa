@@ -87,13 +87,13 @@ describe("sedes", () => {
 describe("precios", () => {
   it("acepta vacío, enteros y hasta dos decimales", () => {
     for (const price of ["", "12000", "12000.5", "12000.50"]) {
-      expect(parseForm(serviceSchema, { name: "Consulta", price }).ok).toBe(true);
+      expect(parseForm(serviceSchema, { name: "Consulta", price, description: "" }).ok).toBe(true);
     }
   });
 
   it("rechaza lo tipeado con signos o separadores", () => {
     for (const price of ["$12000", "12.000,00", "-5"]) {
-      expect(errorOf(parseForm(serviceSchema, { name: "Consulta", price }), "price")).toBe(
+      expect(errorOf(parseForm(serviceSchema, { name: "Consulta", price, description: "" }), "price")).toBe(
         "Ingresá el precio en números, sin puntos ni signos",
       );
     }
@@ -101,8 +101,15 @@ describe("precios", () => {
 });
 
 describe("alta de un tratamiento", () => {
-  it("pide el nombre y la especialidad, y deja el precio vacío", () => {
+  it("limita el texto de «qué es»", () => {
     const base = { name: "Consulta general", price: "", specialtyId: ID };
+    expect(errorOf(parseForm(newServiceSchema, { ...base, description: "x".repeat(241) }), "description")).toBe(
+      "No puede superar los 240 caracteres",
+    );
+  });
+
+  it("pide el nombre y la especialidad, y deja el precio vacío", () => {
+    const base = { name: "Consulta general", price: "", description: "", specialtyId: ID };
     expect(parseForm(newServiceSchema, base).ok).toBe(true);
     expect(errorOf(parseForm(newServiceSchema, { ...base, name: "" }), "name")).toBe(
       "Ingresá el nombre",
