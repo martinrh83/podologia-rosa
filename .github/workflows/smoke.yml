@@ -37,7 +37,9 @@ jobs:
         run: |
           case "$AMBIENTE" in
             Production*staging) U=https://podologia-mitre-staging.vercel.app ;;
-            Production*salta)   U=https://podologia-mitre-salta.vercel.app ;;
+            # Producción se verifica en su dominio: el alias de vercel.app
+            # redirige ahí, y el sitemap nombra el dominio, no el alias.
+            Production*salta)   U=https://www.podologiasalta.com.ar ;;
             *)
               echo "«$AMBIENTE» no es un ambiente estable (preview, o uno nuevo)."
               echo "No hay alias fijo que verificar."
